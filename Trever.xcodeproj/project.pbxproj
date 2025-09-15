@@ -10,9 +10,24 @@
 		534B0A6E2E77F48700998136 /* Trever.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trever.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		84F44AD92E782FE5008A2BCE /* Exceptions for "Trever" folder in "Trever" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/.gitkeep,
+				Services/.gitkeep,
+				ViewModels/.gitkeep,
+			);
+			target = 534B0A6D2E77F48700998136 /* Trever */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		534B0A702E77F48700998136 /* Trever */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				84F44AD92E782FE5008A2BCE /* Exceptions for "Trever" folder in "Trever" target */,
+			);
 			path = Trever;
 			sourceTree = "<group>";
 		};

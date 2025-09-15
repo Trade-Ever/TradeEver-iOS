@@ -13,7 +13,8 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("가격: 20,000,000원")
+                .foregroundColor(.purple400)
         }
         .padding()
     }
