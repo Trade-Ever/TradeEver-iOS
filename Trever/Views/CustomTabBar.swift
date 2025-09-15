@@ -11,8 +11,8 @@ private struct TabItem: Identifiable {
 struct CustomTabBar: View {
     @Binding var selection: MainTab
 
-    private let brand = Color(red: 101/255, green: 40/255, blue: 247/255)
-    private let unselected = Color(red: 160/255, green: 160/255, blue: 160/255) // light gray
+    private let brand = Color.purple400
+    private let unselected = Color.grey300 // light gray
 
     private var items: [TabItem] {
         [
