@@ -7,15 +7,26 @@
 
 import SwiftUI
 
+enum MainTab: Hashable {
+    case buy, sell, auction, mypage
+}
+
 struct ContentView: View {
+    @State private var selection: MainTab = .buy
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selection) {
+            BuyCarView().tag(MainTab.buy)
+            SellCarView().tag(MainTab.sell)
+            AuctionView().tag(MainTab.auction)
+            MyPageView().tag(MainTab.mypage)
         }
-        .padding()
+        .toolbar(.hidden, for: .tabBar)
+        // Add small breathing room under content so it doesn't feel clipped
+        .safeAreaPadding(.bottom, 8)
+        .safeAreaInset(edge: .bottom) {
+            CustomTabBar(selection: $selection)
+        }
     }
 }
 

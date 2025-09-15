@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "auction_fill.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
