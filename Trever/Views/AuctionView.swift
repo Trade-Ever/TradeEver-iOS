@@ -3,20 +3,29 @@ import SwiftUI
 struct AuctionView: View {
     var body: some View {
         NavigationStack {
-            VStack(spacing: 12) {
-                Image(systemName: "hammer")
-                    .font(.system(size: 48, weight: .regular))
-                Text("진행 중인 경매가 없습니다")
-                    .font(.headline)
-                Text("추가되면 여기에서 확인할 수 있어요.")
-                    .foregroundStyle(.secondary)
+            List {
+                ForEach(0..<5) { idx in
+                    CarListItemView(
+                        imageName: "Car Item1",
+                        title: "Taycan",
+                        year: "2024식",
+                        mileage: "1.6만km",
+                        tags: ["비흡연자", "무사고", "정비이력"],
+                        priceText: "1억 4,190만원",
+                        isAuction: true,
+                        timerText: "4분"
+                    )
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
+            .padding(.bottom, 19)
+            .listStyle(.plain)
             .navigationTitle("경매")
         }
     }
 }
 
 #Preview { AuctionView() }
-

@@ -10,6 +10,7 @@ import SwiftUI
 
 extension Color {
     // Purple
+
     static let purple700 = Color(hex: "#2B1073")
     static let purple600 = Color(hex: "#39189A") 
     static let purple500 = Color(hex: "#4B1ECF")
