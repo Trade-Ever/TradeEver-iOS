@@ -1,15 +1,8 @@
 import SwiftUI
 
 struct CarListItemView: View {
-    // Data
-    var imageName: String? = nil
-    var title: String
-    var year: String
-    var mileage: String
-    var tags: [String] = []
-    var priceText: String // formatted price text
-    var isAuction: Bool = false
-    var timerText: String? = nil
+    // Model
+    let model: CarListItem
 
     // State
     @State private var isLiked: Bool = false
@@ -22,7 +15,7 @@ struct CarListItemView: View {
             ZStack(alignment: .topLeading) {
                 // Vehicle image
                 Group {
-                    if let name = imageName, UIImage(named: name) != nil {
+                    if let name = model.thumbnailName, UIImage(named: name) != nil {
                         Image(name)
                             .resizable()
                             .scaledToFill()
@@ -40,7 +33,7 @@ struct CarListItemView: View {
                 .clipped()
 
                 // Auction badge
-                if isAuction {
+                if model.isAuction {
                     Text("경매")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.white)
@@ -72,28 +65,28 @@ struct CarListItemView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .center) {
                     // Title
-                    Text(title)
+                    Text(model.title)
                         .font(.headline)
                         .foregroundStyle(.black)
                     Spacer()
-                    if isAuction, let timerText {
+                    if model.isAuction, let endsAt = model.auctionEndsAt {
                         HStack(spacing: 4) {
                             Image(systemName: "timer")
-                            Text(timerText)
+                            Text(Formatters.timerText(until: endsAt))
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)
                     }
                 }
                 
-                Text("\(year) · \(mileage)")
+                Text("\(Formatters.yearText(model.year)) · \(Formatters.mileageText(km: model.mileageKm))")
                     .foregroundStyle(.black.opacity(0.7))
                     .font(.subheadline)
 
                 // Tags
-                if !tags.isEmpty {
+                if !model.tags.isEmpty {
                     HStack(spacing: 5) {
-                        ForEach(tags, id: \.self) { tag in
+                        ForEach(model.tags, id: \.self) { tag in
                             Text(tag)
                                 .font(.caption2)
                                 .foregroundStyle(.black.opacity(0.7))
@@ -108,20 +101,20 @@ struct CarListItemView: View {
                 }
 
                 // Price row
-                if isAuction {
+                if model.isAuction {
                     HStack {
                         Spacer()
                         Text("최고 입찰가 ")
                             .foregroundStyle(.black)
                             .font(.subheadline)
-                        Text(priceText)
+                        Text(Formatters.priceText(won: model.priceWon))
                             .foregroundStyle(Color.priceGreen)
                             .font(.title2).bold()
                     }
                 } else {
                     HStack {
                         Spacer()
-                        Text(priceText)
+                        Text(Formatters.priceText(won: model.priceWon))
                             .foregroundStyle(Color.priceGreen)
                             .font(.title2).bold()
                     }
@@ -140,26 +133,9 @@ struct CarListItemView: View {
 
 #Preview {
     VStack(spacing: 16) {
-        CarListItemView(
-            imageName: nil,
-            title: "Torress EVX E7",
-            year: "2024식",
-            mileage: "3.8만km",
-            tags: ["비흡연자", "무사고", "정비이력"],
-            priceText: "3,300만원",
-            isAuction: false
-        )
+        CarListItemView(model: CarRepository.sampleBuyList[0])
 
-        CarListItemView(
-            imageName: nil,
-            title: "Taycan",
-            year: "2024식",
-            mileage: "1.6만km",
-            tags: ["비흡연자", "무사고", "정비이력"],
-            priceText: "1억 4,190만원",
-            isAuction: true,
-            timerText: "4분"
-        )
+        CarListItemView(model: CarRepository.sampleAuctionList[0])
     }
     .padding()
 }
