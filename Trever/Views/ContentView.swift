@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 enum MainTab: Hashable {
     case buy, sell, auction, mypage
 }
