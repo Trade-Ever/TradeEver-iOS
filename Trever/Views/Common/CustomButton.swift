@@ -23,41 +23,55 @@ struct CustomButton: View {
     var height: CGFloat = 54
     var horizontalPadding: CGFloat = 16
     
+    var isOutline: Bool = false // 새로운 옵션 추가
+    
     // 버튼 눌림 상태
     @State private var isPressed: Bool = false
     
     var body: some View {
-            Button(action: action) {
-                Text(title)
-                    .font(.system(size: fontSize, weight: fontWeight))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, minHeight: height)
-                    .background(isPressed ? Color.purple700 : Color.purple400)
-                    .cornerRadius(cornerRadius)
-            }
-            .buttonStyle(.plain) // 기본 버튼 애니메이션 제거 (iOS 15+)
-            .scaleEffect(isPressed ? 0.95 : 1.0)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-            .padding(.horizontal, horizontalPadding)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged({ _ in
-                        withAnimation(.easeIn(duration: 0.1)) { isPressed = true }
-                    })
-                    .onEnded({ _ in
-                        withAnimation(.easeOut(duration: 0.1)) { isPressed = false }
-                    })
-            )
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: fontSize, weight: fontWeight))
+                .foregroundColor(isOutline ? Color.purple400 : .white)
+                .frame(maxWidth: .infinity, minHeight: height)
+                .background(
+                    isOutline ?
+                        Color.white :
+                        (isPressed ? Color.purple700 : Color.purple400)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(isOutline ? Color.purple400 : Color.clear, lineWidth: 2)
+                )
+                .cornerRadius(cornerRadius)
         }
+        .buttonStyle(.plain)
+        .scaleEffect(isPressed ? 0.95 : 1.0)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged({ _ in
+                    withAnimation(.easeIn(duration: 0.1)) { isPressed = true }
+                })
+                .onEnded({ _ in
+                    withAnimation(.easeOut(duration: 0.1)) { isPressed = false }
+                })
+        )
+    }
 }
 
-#Preview {
-    VStack(spacing: 16) {
-        CustomButton(title: "확인") {
-            print("확인 버튼 클릭")
-        }
-        CustomButton(title: "취소") {
-            print("취소 버튼 클릭")
+// Preview
+struct CustomButton_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack(spacing: 16) {
+            CustomButton(title: "확인") {
+                print("확인 클릭")
+            }
+            CustomButton(
+                title: "취소",
+                action: { print("취소 클릭") },
+                isOutline: true
+            )
         }
     }
 }
