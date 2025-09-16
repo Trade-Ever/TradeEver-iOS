@@ -33,12 +33,13 @@ struct InputSection<Content: View>: View {
                 .font(.system(size: 23))
                 .fontWeight(.black)       // 굵은 글씨
                 .foregroundStyle(Color.grey400)
-                .padding(.leading, 12)
+                .padding(.leading, 24)
             
             // 커스텀 콘텐츠 (InputBox, Button, Toggle 등)
             content()
+                .padding(.horizontal, 16) // 좌우 여백
+
         }
-        .padding(.horizontal, 16) // 좌우 여백
         .padding(.vertical, 8)   // 상하 여백
     }
 }

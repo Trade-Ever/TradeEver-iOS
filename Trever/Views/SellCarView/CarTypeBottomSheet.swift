@@ -25,32 +25,22 @@ struct CarTypeBottomSheet: View {
             let rows = [Array(carTypes[0...3]), Array(carTypes[4...7])]
             
             ForEach(rows, id: \.self) { row in
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     ForEach(row, id: \.self) { type in
-                        Button(action: {
-                            if selectedCarTypes.contains(type) {
-                                selectedCarTypes.removeAll { $0 == type }
-                            } else {
-                                selectedCarTypes.append(type)
+                        SelectableButton(
+                            title: type,
+                            isSelected: selectedCarTypes.contains(type),
+                            action: {
+                                if selectedCarTypes.contains(type) {
+                                    selectedCarTypes.removeAll { $0 == type }
+                                } else {
+                                    selectedCarTypes.append(type)
+                                }
                             }
-                        }) {
-                            Text(type)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(selectedCarTypes.contains(type) ? Color.purple300 : .white)
-                                .foregroundColor(selectedCarTypes.contains(type) ?
-                                    .white : .grey200)
-                                .font(.system(size: 16))
-                                .fontWeight(.black)
-                                .cornerRadius(50)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 50)
-                                        .stroke(Color.grey200, lineWidth: selectedCarTypes.contains(type) ? 0 : 1.5)
-                                )
-                        }
+                        )
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 36)
                 .padding(.vertical, 4)
             }
             

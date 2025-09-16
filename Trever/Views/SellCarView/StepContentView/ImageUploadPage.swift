@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PriceImagePage: View {
+struct ImageUploadPage: View {
     @State private var selectedYear = 2025
     
     // 연도 배열 생성
@@ -34,5 +34,5 @@ struct PriceImagePage: View {
 }
 
 #Preview {
-    PriceImagePage()
+    ImageUploadPage()
 }

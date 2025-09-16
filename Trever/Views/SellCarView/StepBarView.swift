@@ -14,7 +14,7 @@ struct StepBarView: View {
     var body: some View {
         
         HStack {
-            Spacer(minLength: 52)
+            Spacer(minLength: 48)
             HStack(spacing: 8) {
                 ForEach(0..<totalSteps, id: \.self) { step in
                     Rectangle()
@@ -23,7 +23,7 @@ struct StepBarView: View {
                         .cornerRadius(20)
                 }
             }
-            Spacer(minLength: 52)
+            Spacer(minLength: 48)
 
         }
 

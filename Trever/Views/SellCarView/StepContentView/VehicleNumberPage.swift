@@ -13,6 +13,7 @@ struct VehicleNumberPage: View {
     var body: some View {
         InputSection(title: "등록할 차량 번호를 입력해주세요") {
             VehicleNumberInput(text: $number)
+                .padding(.horizontal, 8)
         }
     }
 }
@@ -25,8 +26,9 @@ struct VehicleNumberInput: View {
         HStack {
             // 왼쪽 동그라미
             Circle()
-                .stroke(Color.grey200, lineWidth: 1)
+                .stroke(Color.grey300, lineWidth: 1)
                 .frame(width: 12, height: 12)
+                .padding(.leading, 4)
             
             // 입력창
             TextField("23가 4821", text: $text)
@@ -38,10 +40,13 @@ struct VehicleNumberInput: View {
             
             // 오른쪽 동그라미
             Circle()
-                .stroke(Color.grey200, lineWidth: 1)
+                .stroke(Color.grey300, lineWidth: 1)
                 .frame(width: 12, height: 12)
+                .padding(.trailing, 4)
+
         }
         .padding(12)
+        .frame(maxWidth: .infinity)
         .overlay(
             // 바깥 테두리
             RoundedRectangle(cornerRadius: 6)

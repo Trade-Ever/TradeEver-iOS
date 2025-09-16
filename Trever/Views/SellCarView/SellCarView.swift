@@ -10,7 +10,7 @@ import SwiftUI
 struct SellCarView: View {
     @State private var currentStep: Int = 0
     
-    let totalSteps = 6
+    let totalSteps = 7
     
     var body: some View {
         NavigationStack {
@@ -26,10 +26,11 @@ struct SellCarView: View {
                     switch currentStep {
                         case 0: VehicleNumberPage()
                         case 1: VehicleInfoPage()
-                        case 2: PriceImagePage()
-                        case 3: EngineInfoPage()
-                        case 4: ColorInfoPage()
+                        case 2: EngineInfoPage()
+                        case 3: ImageUploadPage()
+                        case 4: VehicleOptionPage()
                         case 5: AccidentInfoPage()
+                        case 6: TradeInfoPage()
                         default: Text("Unknown Page")
                     }
                 }

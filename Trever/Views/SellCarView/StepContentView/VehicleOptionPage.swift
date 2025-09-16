@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct VehicleOptionPage: View {
+struct VehicleInfoPage: View {
     @State private var vehicleModel: String = ""
     @State private var year: String = ""
     @State private var carType: String = ""
@@ -117,5 +117,5 @@ struct VehicleOptionPage: View {
 }
 
 #Preview {
-    VehicleOptionPage()
+    VehicleInfoPage()
 }
