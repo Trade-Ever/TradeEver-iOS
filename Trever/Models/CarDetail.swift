@@ -37,4 +37,15 @@ struct CarDetail: Identifiable, Hashable {
     let isAuction: Bool
     let auctionEndsAt: Date?
     let bids: [BidEntry]
+
+    // Ownership
+    let isMine: Bool
+
+    // Potential buyers for direct sale completion (non-auction)
+    let potentialBuyers: [PotentialBuyer]?
+}
+
+struct PotentialBuyer: Identifiable, Hashable {
+    let id: String
+    let name: String
 }

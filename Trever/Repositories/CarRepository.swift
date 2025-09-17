@@ -9,7 +9,7 @@ enum CarRepository {
                 subTitle: nil,
                 year: 2024,
                 mileageKm: 38000,
-                thumbnailName: "Car Item",
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
                 tags: ["비흡연자", "무사고", "정비이력"],
                 priceWon: 33_000_000,
                 startPrice: 33_000_000,
@@ -23,13 +23,41 @@ enum CarRepository {
                 subTitle: nil,
                 year: 2023,
                 mileageKm: 16000,
-                thumbnailName: "Car Item1",
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
                 tags: ["1인신조", "완전무사고"],
                 priceWon: 41_900_000,
                 startPrice: 33_000_000,
                 isAuction: false,
                 auctionEndsAt: nil,
                 likes: 8
+            ),
+            CarListItem(
+                id: UUID(),
+                title: "K5 1.6T",
+                subTitle: "Prestige",
+                year: 2022,
+                mileageKm: 24000,
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
+                tags: ["무사고"],
+                priceWon: 23_500_000,
+                startPrice: 23_000_000,
+                isAuction: false,
+                auctionEndsAt: nil,
+                likes: 5
+            ),
+            CarListItem(
+                id: UUID(),
+                title: "GV70 2.5T",
+                subTitle: "AWD",
+                year: 2021,
+                mileageKm: 32000,
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
+                tags: ["비흡연자", "정비이력"],
+                priceWon: 45_900_000,
+                startPrice: 45_000_000,
+                isAuction: false,
+                auctionEndsAt: nil,
+                likes: 18
             )
         ]
     }
@@ -42,10 +70,10 @@ enum CarRepository {
                 subTitle: "AWD",
                 year: 2024,
                 mileageKm: 16000,
-                thumbnailName: "Car Item1",
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
                 tags: ["비흡연자", "무사고", "정비이력"],
                 priceWon: 141_900_000,
-                startPrice: 33_000_000,
+                startPrice: 130_000_000,
                 isAuction: true,
                 auctionEndsAt: Date().addingTimeInterval(60*4),
                 likes: 32
@@ -56,13 +84,27 @@ enum CarRepository {
                 subTitle: "AWD",
                 year: 2024,
                 mileageKm: 38000,
-                thumbnailName: "Car Item",
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
                 tags: ["비흡연자", "정비이력"],
                 priceWon: 125_000_000,
-                startPrice: 33_000_000,
+                startPrice: 105_000_000,
                 isAuction: true,
                 auctionEndsAt: Date().addingTimeInterval(60*75),
                 likes: 20
+            ),
+            CarListItem(
+                id: UUID(),
+                title: "G80",
+                subTitle: "3.3T",
+                year: 2020,
+                mileageKm: 54000,
+                thumbnailName: "https://image.heydealer.com/unsafe/1400x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/liveview/2025/09/11/9fc75878-f0e4-4d69-b9a0-36f6f131aa13.png",
+                tags: ["정비이력"],
+                priceWon: 39_500_000,
+                startPrice: 35_000_000,
+                isAuction: true,
+                auctionEndsAt: Date().addingTimeInterval(60*180),
+                likes: 9
             )
         ]
     }
@@ -101,7 +143,9 @@ enum CarRepository {
             ),
             isAuction: true,
             auctionEndsAt: Date().addingTimeInterval(60 * 75),
-            bids: mockBids(for: id)
+            bids: mockBids(for: id),
+            isMine: false,
+            potentialBuyers: nil
         )
     }
 
@@ -138,7 +182,36 @@ enum CarRepository {
             ),
             isAuction: item.isAuction,
             auctionEndsAt: item.auctionEndsAt,
-            bids: item.isAuction ? mockBids(for: item.id) : []
+            bids: item.isAuction ? mockBids(for: item.id) : [],
+            isMine: item.isAuction ? (item.title == "Model X") : (item.title == "Torress EVX E7"),
+            potentialBuyers: item.isAuction ? nil : [
+                PotentialBuyer(id: "u-1001", name: "홍길동"),
+                PotentialBuyer(id: "u-2001", name: "오창운"),
+                PotentialBuyer(id: "u-2002", name: "오창운"),
+                PotentialBuyer(id: "u-2003", name: "오창운"),
+                PotentialBuyer(id: "u-2004", name: "오창운"),
+                PotentialBuyer(id: "u-2005", name: "오창운"),
+                PotentialBuyer(id: "u-2006", name: "오창운"),
+                PotentialBuyer(id: "u-2007", name: "오창운"),
+                PotentialBuyer(id: "u-2008", name: "오창운"),
+                PotentialBuyer(id: "u-2009", name: "오창운"),
+                PotentialBuyer(id: "u-20010", name: "오창운"),
+                PotentialBuyer(id: "u-20011", name: "오창운"),
+                PotentialBuyer(id: "u-20012", name: "오창운"),
+                PotentialBuyer(id: "u-20013", name: "오창운"),
+                PotentialBuyer(id: "u-20014", name: "오창운"),
+                PotentialBuyer(id: "u-20015", name: "오창운"),
+                PotentialBuyer(id: "u-20016", name: "오창운"),
+                PotentialBuyer(id: "u-20017", name: "오창운"),
+                PotentialBuyer(id: "u-20018", name: "오창운"),
+                PotentialBuyer(id: "u-20019", name: "오창운"),
+                PotentialBuyer(id: "u-20020", name: "오창운"),
+                PotentialBuyer(id: "u-20021", name: "오창운"),
+                PotentialBuyer(id: "u-20022", name: "오창운"),
+                PotentialBuyer(id: "u-20023", name: "오창운"),
+                PotentialBuyer(id: "u-20024", name: "오창운"),
+                PotentialBuyer(id: "u-20025", name: "오창운")
+            ]
         )
     }
 

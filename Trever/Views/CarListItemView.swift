@@ -15,7 +15,22 @@ struct CarListItemView: View {
             ZStack(alignment: .topLeading) {
                 // Vehicle image
                 Group {
-                    if let name = model.thumbnailName, UIImage(named: name) != nil {
+                    if let name = model.thumbnailName,
+                       let url = URL(string: name), url.scheme?.hasPrefix("http") == true {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ZStack { Color.secondary.opacity(0.08); ProgressView() }
+                            case .success(let image):
+                                image.resizable().scaledToFill()
+                            case .failure:
+                                Rectangle().fill(Color.secondary.opacity(0.15))
+                                    .overlay(Image(systemName: "car.fill").font(.system(size: 40)).foregroundStyle(.secondary))
+                            @unknown default:
+                                Rectangle().fill(Color.secondary.opacity(0.15))
+                            }
+                        }
+                    } else if let name = model.thumbnailName, UIImage(named: name) != nil {
                         Image(name)
                             .resizable()
                             .scaledToFill()

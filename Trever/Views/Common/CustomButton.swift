@@ -29,25 +29,40 @@ struct CustomButton: View {
     var borderColor: Color? = nil
     var shadowColor: Color? = Color.black.opacity(0.1)
     
+    // Optional leading icon
+    var prefixImage: Image? = nil
+    var prefixImageSize: CGFloat = 20
+    var contentSpacing: CGFloat = 8
+    var prefixImageTint: Color? = nil
+    
     // 버튼 눌림 상태
     @State private var isPressed: Bool = false
     
     var body: some View {
             Button(action: action) {
-                Text(title)
-                    .font(.system(size: fontSize, weight: fontWeight))
-                    .foregroundColor(foregroundColor)
-                    .frame(maxWidth: maxWidth ?? .infinity, minHeight: height)
-                    .background(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .fill(isPressed ? (pressedBackgroundColor ?? backgroundColor) : backgroundColor)
-                    )
-                    .overlay {
-                        if let borderColor {
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .stroke(borderColor, lineWidth: 1)
-                        }
+                HStack(spacing: contentSpacing) {
+                    if let img = prefixImage {
+                        img
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: prefixImageSize, height: prefixImageSize)
+                            .foregroundStyle(prefixImageTint ?? foregroundColor)
                     }
+                    Text(title)
+                        .font(.system(size: fontSize, weight: fontWeight))
+                        .foregroundColor(foregroundColor)
+                }
+                .frame(maxWidth: maxWidth ?? .infinity, minHeight: height, alignment: .center)
+                .background(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(isPressed ? (pressedBackgroundColor ?? backgroundColor) : backgroundColor)
+                )
+                .overlay {
+                    if let borderColor {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(borderColor, lineWidth: 1)
+                    }
+                }
             }
             .buttonStyle(.plain) // 기본 버튼 애니메이션 제거 (iOS 15+)
             .scaleEffect(isPressed ? 0.95 : 1.0)
@@ -73,5 +88,10 @@ struct CustomButton: View {
         CustomButton(title: "취소") {
             print("취소 버튼 클릭")
         }
+        CustomButton(
+            title: "아이콘 포함",
+            action: { print("아이콘 버튼 클릭") },
+            prefixImage: Image("arrow_down")
+        )
     }
 }
