@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SellCarView: View {
     @State private var currentStep: Int = 0
+    private let tabBarHeight: CGFloat = 66 // CustomTabBar height to avoid overlap
+    @StateObject private var keyboard = KeyboardState()
     
     let totalSteps = 7
     
@@ -43,7 +45,7 @@ struct SellCarView: View {
                 // 다음 버튼
                 StepButton(currentStep: $currentStep, totalSteps: totalSteps, userInput: .constant(""))
                     .padding(.horizontal)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, keyboard.isVisible ? 0 : (20 + tabBarHeight))
             }
             .navigationTitle("") // 타이틀 숨기기
             .navigationBarTitleDisplayMode(.inline)
