@@ -13,9 +13,9 @@ struct PasswordInputBox: View {
     // 커스텀 가능한 속성
     var cornerRadius: CGFloat = 12
     var height: CGFloat = 54
-    var horizontalPadding: CGFloat = 16
+    var horizontalPadding: CGFloat = 4
     
-    @State private var text: String = ""
+    @Binding var text: String
     @FocusState private var isFocused: Bool
     @State private var isSecure: Bool = true // 기본은 비밀번호 모드
     
@@ -50,9 +50,9 @@ struct PasswordInputBox: View {
     
     private func borderColor() -> Color {
         if isFocused {
-            return Color.purple400
+            return Color.purple300
         } else if !text.isEmpty {
-            return Color.purple400
+            return Color.purple300
         } else {
             return Color.grey200
         }
@@ -67,10 +67,23 @@ struct PasswordInputBox: View {
     }
 }
 
-#Preview {
-    VStack(spacing: 16) {
-        CustomInputBox(placeholder: "아이디 입력")
-        PasswordInputBox(placeholder: "비밀번호 입력")
+//#Preview {
+//    VStack(spacing: 16) {
+//        CustomInputBox(placeholder: "아이디 입력")
+//        PasswordInputBox(placeholder: "비밀번호 입력")
+//    }
+//    .padding()
+//}
+
+struct PasswordInputBox_Previews: PreviewProvider {
+    @State static var idText: String = ""
+    @State static var pwdText: String = ""
+
+    static var previews: some View {
+        VStack(spacing: 16) {
+            CustomInputBox(placeholder: "아이디 입력", text: $idText)
+            PasswordInputBox(placeholder: "비밀번호 입력", text: $pwdText)
+        }
+        .padding()
     }
-    .padding()
 }

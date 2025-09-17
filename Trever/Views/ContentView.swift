@@ -16,11 +16,13 @@ struct ContentView: View {
     @State private var tabBarHidden: Bool = false
     private let tabBarPadding: CGFloat = 0 // space for custom tab bar when visible
 
+    private let tabBarHeight: CGFloat = 66 // CustomTabBar 실제 높이
+
     @State private var buyPath = NavigationPath()
     @State private var sellPath = NavigationPath()
     @State private var auctionPath = NavigationPath()
     @State private var myPagePath = NavigationPath()
-
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             activeContent
@@ -64,6 +66,7 @@ struct ContentView: View {
                 tabBarHidden = hidden
             }
         }
+        .padding(.bottom, tabBarHidden ? 0 : tabBarHeight)
     }
 }
 

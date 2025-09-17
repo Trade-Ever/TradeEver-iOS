@@ -20,9 +20,11 @@ struct CustomInputBox: View {
     // 커스텀 가능한 속성
     var cornerRadius: CGFloat = 12
     var height: CGFloat = 54
-    var horizontalPadding: CGFloat = 16
+    var horizontalPadding: CGFloat = 4
+    var isEditable: Bool = true
     
-    @State private var text: String = ""
+    // 외부와 바인딩
+    @Binding var text: String
     @FocusState private var isFocused: Bool
     
     var body: some View {
@@ -36,6 +38,7 @@ struct CustomInputBox: View {
                         .background(RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white))
                 )
                 .focused($isFocused)
+                .disabled(!isEditable)
         }
         .padding(.horizontal, horizontalPadding)
         .animation(.easeInOut(duration: 0.2), value: isFocused)
@@ -43,9 +46,9 @@ struct CustomInputBox: View {
     
     private func borderColor() -> Color {
         if isFocused {
-            return Color.purple400
+            return Color.purple300
         } else if !text.isEmpty {
-            return Color.purple400
+            return Color.purple300
         } else {
             return Color.grey200
         }
@@ -60,10 +63,23 @@ struct CustomInputBox: View {
     }
 }
 
-#Preview {
-    VStack(spacing: 16) {
-        CustomInputBox(placeholder: "아이디 입력")
-        CustomInputBox(placeholder: "이름 입력")
+//#Preview {
+//    VStack(spacing: 16) {
+//        CustomInputBox(placeholder: "아이디 입력")
+//        CustomInputBox(placeholder: "이름 입력")
+//    }
+//    .padding()
+//}
+
+struct CustomInputBox_Previews: PreviewProvider {
+    @State static var idText: String = ""
+    @State static var nameText: String = ""
+
+    static var previews: some View {
+        VStack(spacing: 16) {
+            CustomInputBox(placeholder: "아이디 입력", text: $idText)
+            CustomInputBox(placeholder: "이름 입력", text: $nameText)
+        }
+        .padding()
     }
-    .padding()
 }
