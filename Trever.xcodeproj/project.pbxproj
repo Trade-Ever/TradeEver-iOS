@@ -14,7 +14,6 @@
 		84F44AD92E782FE5008A2BCE /* Exceptions for "Trever" folder in "Trever" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Models/.gitkeep,
 				Services/.gitkeep,
 				ViewModels/.gitkeep,
 			);
