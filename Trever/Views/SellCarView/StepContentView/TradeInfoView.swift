@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TradeInfoPage: View {
+struct TradeInfoView: View {
     var body: some View {
         Text("5페이지: 색상 입력, 기타 정보 입력")
             .font(.title2)
@@ -16,5 +16,5 @@ struct TradeInfoPage: View {
 }
 
 #Preview {
-    TradeInfoPage()
+    TradeInfoView()
 }

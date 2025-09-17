@@ -13,7 +13,7 @@ struct StepButton: View {
     @Binding var userInput: String
     
     var body: some View {
-        CustomButton(
+        PrimaryButton(
             title: currentStep == totalSteps - 1 ? "완료" : "다음",
             action: {
                 if currentStep < totalSteps - 1 {

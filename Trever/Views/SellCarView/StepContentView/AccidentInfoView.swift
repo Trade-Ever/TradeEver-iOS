@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AccidentInfoPage: View {
+struct AccidentInfoView: View {
     var body: some View {
         Text("6페이지: 사고 이력, 사고 정보 입력")
             .font(.title2)
@@ -16,5 +16,5 @@ struct AccidentInfoPage: View {
 }
 
 #Preview {
-    AccidentInfoPage()
+    AccidentInfoView()
 }

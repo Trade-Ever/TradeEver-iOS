@@ -24,13 +24,13 @@ struct SellCarView: View {
                 // 현재 페이지 내용
                 Group {
                     switch currentStep {
-                        case 0: VehicleNumberPage()
-                        case 1: VehicleInfoPage()
-                        case 2: EngineInfoPage()
-                        case 3: ImageUploadPage()
-                        case 4: VehicleOptionPage()
-                        case 5: AccidentInfoPage()
-                        case 6: TradeInfoPage()
+                        case 0: VehicleNumberView()
+                        case 1: VehicleInfoView()
+                        case 2: EngineInfoView()
+                        case 3: ImageUploadView()
+                        case 4: VehicleOptionView()
+                        case 5: AccidentInfoView()
+                        case 6: TradeInfoView()
                         default: Text("Unknown Page")
                     }
                 }

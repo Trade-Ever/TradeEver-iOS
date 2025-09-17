@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct VehicleOptionPage: View {
+struct VehicleOptionView: View {
     @State private var vehicleModel: String = ""
     @State private var year: String = ""
     @State private var carType: String = ""
@@ -39,9 +39,7 @@ struct VehicleOptionPage: View {
                             focusedField = .year
                         }
                 }
-                .transition(.opacity) // 투명도
-                .offset(y: step >= 0 ? 0 : 30) // 30pt 아래에서 시작
-                .animation(.easeInOut, value: step) // step이 바뀔 때 애니메이션
+                .stepTransition(step: step, target: 0)
             }
             
             // 2. 연식
@@ -54,9 +52,7 @@ struct VehicleOptionPage: View {
                             focusedField = .carType
                         }
                 }
-                .transition(.opacity) // 투명도
-                .offset(y: step >= 0 ? 0 : 30) // 30pt 아래에서 시작
-                .animation(.easeInOut, value: step) // step이 바뀔 때 애니메이션
+                .stepTransition(step: step, target: 1)
             }
             
             // 3. 차종
@@ -71,9 +67,7 @@ struct VehicleOptionPage: View {
                         showCarTypeSheet = true
                     }
                 }
-                .transition(.opacity) // 투명도
-                .offset(y: step >= 0 ? 0 : 30) // 30pt 아래에서 시작
-                .animation(.easeInOut, value: step) // step이 바뀔 때 애니메이션
+                .stepTransition(step: step, target: 2)
             }
             
             // 4. 주행거리
@@ -86,9 +80,7 @@ struct VehicleOptionPage: View {
                             focusedField = nil
                         }
                 }
-                .transition(.opacity) // 투명도
-                .offset(y: step >= 0 ? 0 : 30) // 30pt 아래에서 시작
-                .animation(.easeInOut, value: step) // step이 바뀔 때 애니메이션
+                .stepTransition(step: step, target: 3)
             }
         }
         .onAppear {
@@ -117,5 +109,5 @@ struct VehicleOptionPage: View {
 }
 
 #Preview {
-    VehicleOptionPage()
+    VehicleOptionView()
 }

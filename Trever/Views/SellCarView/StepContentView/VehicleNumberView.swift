@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct VehicleNumberPage: View {
+struct VehicleNumberView: View {
     @State private var number: String = "" // 차량 번호 상태 저장
     
     var body: some View {
@@ -57,5 +57,5 @@ struct VehicleNumberInput: View {
 }
 
 #Preview {
-    VehicleNumberPage()
+    VehicleNumberView()
 }

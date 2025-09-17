@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EngineInfoPage: View {
+struct EngineInfoView: View {
     @State private var fuelType: String = ""
     @State private var transmission: String = ""
     @State private var displacement: String = ""
@@ -50,9 +50,7 @@ struct EngineInfoPage: View {
                     .padding(.horizontal, 8)
 
                 }
-                .transition(.opacity)
-                .offset(y: step >= 0 ? 0 : 30)
-                .animation(.easeInOut, value: step)
+                .stepTransition(step: step, target: 0)
             }
 
             // 2. 변속기
@@ -74,9 +72,7 @@ struct EngineInfoPage: View {
                     }
                     .padding(.horizontal, 8)
                 }
-                .transition(.opacity)
-                .offset(y: step >= 0 ? 0 : 30)
-                .animation(.easeInOut, value: step)
+                .stepTransition(step: step, target: 1)
             }
 
             
@@ -94,9 +90,7 @@ struct EngineInfoPage: View {
                         focusedField = .horsepower
                     }
                 }
-                .transition(.opacity)
-                .offset(y: step >= 0 ? 0 : 30)
-                .animation(.easeInOut, value: step)
+                .stepTransition(step: step, target: 2)
             }
             
             // 4. 마력
@@ -112,9 +106,7 @@ struct EngineInfoPage: View {
                         focusedField = nil
                     }
                 }
-                .transition(.opacity)
-                .offset(y: step >= 0 ? 0 : 30)
-                .animation(.easeInOut, value: step)
+                .stepTransition(step: step, target: 3)
             }
         }
         .onAppear {
@@ -124,5 +116,5 @@ struct EngineInfoPage: View {
 }
 
 #Preview {
-    EngineInfoPage()
+    EngineInfoView()
 }

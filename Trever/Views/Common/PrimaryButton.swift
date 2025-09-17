@@ -3,7 +3,7 @@ import SwiftUI
 /***
  아래와 같이 사용
  
-    CustomButton(
+    PrimaryButton(
          title: "로그인",
          action: { print("로그인") },
          fontSize: 22,
@@ -12,7 +12,7 @@ import SwiftUI
      )
  */
 
-struct CustomButton: View {
+struct PrimaryButton: View {
     var title: String
     var action: () -> Void
     
@@ -61,13 +61,13 @@ struct CustomButton: View {
 }
 
 // Preview
-struct CustomButton_Previews: PreviewProvider {
+struct PrimaryButton_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 16) {
-            CustomButton(title: "확인") {
+            PrimaryButton(title: "확인") {
                 print("확인 클릭")
             }
-            CustomButton(
+            PrimaryButton(
                 title: "취소",
                 action: { print("취소 클릭") },
                 isOutline: true

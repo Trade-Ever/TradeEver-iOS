@@ -14,7 +14,7 @@ struct BottomSheetButtons: View {
     var body: some View {
         HStack (spacing: 16) {
             // 초기화 버튼
-            CustomButton(
+            PrimaryButton(
                 title: "초기화",
                 action: onReset,
                 fontSize: 20,
@@ -24,7 +24,7 @@ struct BottomSheetButtons: View {
             )
             
             // 확인 버튼
-            CustomButton(
+            PrimaryButton(
                 title: "확인",
                 action: onConfirm,
                 fontSize: 20,
