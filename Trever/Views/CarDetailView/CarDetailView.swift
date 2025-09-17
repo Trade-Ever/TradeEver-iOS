@@ -286,8 +286,12 @@ struct CarDetailView: View {
                         Spacer()
                         HStack(spacing: 4) {
                             Image("gavel")
-                            Text(detail.auctionEndsAt.map { Formatters.timerText(until: $0) } ?? "-")
-                                .font(.title2)
+                            if let endDay = detail.auctionEndsAt {
+                                CountdownText(endDate: normalizedAuctionEnd(endDay))
+                                    .font(.title2)
+                            } else {
+                                Text("-").font(.title2)
+                            }
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)

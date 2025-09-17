@@ -87,7 +87,7 @@ struct CarListItemView: View {
                     if model.isAuction, let endsAt = model.auctionEndsAt {
                         HStack(spacing: 4) {
                             Image(systemName: "timer")
-                            Text(Formatters.timerText(until: endsAt))
+                            CountdownText(endDate: normalizedAuctionEnd(endsAt))
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)
