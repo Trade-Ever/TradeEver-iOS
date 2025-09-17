@@ -75,7 +75,7 @@ enum CarRepository {
                 priceWon: 141_900_000,
                 startPrice: 130_000_000,
                 isAuction: true,
-                auctionEndsAt: Date().addingTimeInterval(60*4),
+                auctionEndsAt: Date().addingTimeInterval(60*8 + 5), // ~8분5초 남은 샘플(초단위 갱신)
                 likes: 32
             ),
             CarListItem(
@@ -89,7 +89,7 @@ enum CarRepository {
                 priceWon: 125_000_000,
                 startPrice: 105_000_000,
                 isAuction: true,
-                auctionEndsAt: Date().addingTimeInterval(60*75),
+                auctionEndsAt: Date().addingTimeInterval(60*25), // 25분 남은 샘플(분단위 갱신)
                 likes: 20
             ),
             CarListItem(
@@ -103,7 +103,7 @@ enum CarRepository {
                 priceWon: 39_500_000,
                 startPrice: 35_000_000,
                 isAuction: true,
-                auctionEndsAt: Date().addingTimeInterval(60*180),
+                auctionEndsAt: Date().addingTimeInterval(60*180), // 3시간 남은 샘플
                 likes: 9
             )
         ]
