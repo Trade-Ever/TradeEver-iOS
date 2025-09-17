@@ -57,6 +57,7 @@ struct CustomTabBar: View {
             .background(Color(.systemBackground))
         }
         .background(Color(.systemBackground)) // 화면 끝까지 채움
+        .ignoresSafeArea(edges: .bottom)
     }
 
     private func tabImage(named base: String, selected: Bool) -> Image {

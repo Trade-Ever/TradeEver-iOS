@@ -22,6 +22,12 @@ struct CustomButton: View {
     var cornerRadius: CGFloat = 12
     var height: CGFloat = 54
     var horizontalPadding: CGFloat = 16
+    var maxWidth: CGFloat? = nil
+    var foregroundColor: Color = .white
+    var backgroundColor: Color = .purple400
+    var pressedBackgroundColor: Color? = nil
+    var borderColor: Color? = nil
+    var shadowColor: Color? = Color.black.opacity(0.1)
     
     // 버튼 눌림 상태
     @State private var isPressed: Bool = false
@@ -30,14 +36,22 @@ struct CustomButton: View {
             Button(action: action) {
                 Text(title)
                     .font(.system(size: fontSize, weight: fontWeight))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, minHeight: height)
-                    .background(isPressed ? Color.purple700 : Color.purple400)
-                    .cornerRadius(cornerRadius)
+                    .foregroundColor(foregroundColor)
+                    .frame(maxWidth: maxWidth ?? .infinity, minHeight: height)
+                    .background(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .fill(isPressed ? (pressedBackgroundColor ?? backgroundColor) : backgroundColor)
+                    )
+                    .overlay {
+                        if let borderColor {
+                            RoundedRectangle(cornerRadius: cornerRadius)
+                                .stroke(borderColor, lineWidth: 1)
+                        }
+                    }
             }
             .buttonStyle(.plain) // 기본 버튼 애니메이션 제거 (iOS 15+)
             .scaleEffect(isPressed ? 0.95 : 1.0)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .shadow(color: shadowColor ?? .clear, radius: shadowColor == nil ? 0 : 4, x: 0, y: shadowColor == nil ? 0 : 2)
             .padding(.horizontal, horizontalPadding)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)

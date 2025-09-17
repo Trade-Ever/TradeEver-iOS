@@ -1,30 +1,23 @@
 import SwiftUI
 
 struct BuyCarView: View {
+    private let items = CarRepository.sampleBuyList
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(0..<8) { _ in
-                    CarListItemView(
-                        imageName: "Car Item",
-                        title: "Torress EVX E7",
-                        year: "2024식",
-                        mileage: "3.8만km",
-                        tags: ["비흡연자", "무사고", "정비이력"],
-                        priceText: "3,300만원",
-                        isAuction: false
-                    )
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(items) { item in
+                    NavigationLink {
+                        CarDetailView(detail: CarRepository.mockDetail(from: item))
+                    } label: {
+                        CarListItemView(model: item)
+                    }
+                    .buttonStyle(.plain)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
                 }
             }
-            .padding(.bottom, 19)
-            .listStyle(.plain)
-            .navigationTitle("내차사기")
-            .toolbar { ToolbarItem(placement: .topBarLeading) { Text("") } }
         }
+        .navigationTitle("내차사기")
     }
 }
 
