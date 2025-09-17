@@ -1,7 +1,7 @@
 import Foundation
 
 enum Formatters {
-    static func yearText(_ year: Int) -> String { "\(year)식" }
+    static func yearText(_ year: Int) -> String { "\(year)년식" }
     static func mileageText(km: Int) -> String {
         // 1만 km 단위 반올림 표기
         if km >= 10_000 {

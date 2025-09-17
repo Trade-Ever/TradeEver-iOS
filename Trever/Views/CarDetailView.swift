@@ -11,19 +11,24 @@ struct CarDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                // 이미지 페이저
                 imagePager
 
+                // 경매 매물 기본 정보 섹션
                 headerSection
 
-                Divider().padding(.horizontal, 16)
-
+                // 차량 스펙 옵션 섹션
                 specSection
 
+                // 차량 상세 설명 섹션
                 descriptionSection
 
+                // 차량 입찰 내역 섹션
                 if detail.isAuction { bidHistorySection }
 
+                // 판매자 정보 섹션
                 sellerSection
+                
                 Spacer(minLength: 40)
             }
         }
@@ -35,6 +40,7 @@ struct CarDetailView: View {
         .tabBarHidden(true)
     }
 
+    // MARK: - 이미지 페이저
     private var imagePager: some View {
         TabView(selection: $viewerIndex) {
             ForEach(Array(detail.imageNames.enumerated()), id: \.offset) { idx, name in
@@ -91,53 +97,66 @@ struct CarDetailView: View {
         }
     }
 
-    // Local viewer removed; remote-only flow
-    // No need for URL helper when binding a String for ImageViewerRemote
-
+    // MARK: - 경매 매물 기본 정보 섹션
     private var headerSection: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(detail.title)
-                    .font(.title3).bold()
-                if let sub = detail.subTitle {
-                    Text(sub).font(.title3).bold()
-                }
-                Text("\(Formatters.yearText(detail.year)) · \(Formatters.mileageText(km: detail.mileageKm))")
-                    .foregroundStyle(.secondary)
-
-                // Price and status badge
-                HStack(alignment: .center, spacing: 8) {
-                    Text(Formatters.priceText(won: detail.priceWon))
-                        .font(.title3).bold()
-                        .foregroundStyle(Color.priceGreen)
-                    if detail.isAuction {
-                        badge(text: "경매", color: Color.likeRed)
-                    } else {
-                        badge(text: "예약 중", color: brand)
+                HStack {
+                    VStack(alignment: .leading) {
+                        // 차량 이름
+                        Text(detail.title)
+                            .font(.title3)
+                            .bold()
+                        
+                        // 차량 세부 옵션 명
+                        if let sub = detail.subTitle {
+                            Text(sub).font(.title3).bold()
+                        }
+                    }
+                    Spacer()
+                    // 찜 하기
+                    HStack(spacing: 8) {
+                        Text("\(detail.likes)")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "heart")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(.secondary)
                     }
                 }
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                HStack(spacing: 4) {
-                    Text("\(detail.likes)")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
-                    Image(systemName: "heart")
-                        .foregroundStyle(.secondary)
+                
+                // 차량 연식 / 주행 거리
+                Text("\(Formatters.yearText(detail.year)) · \(Formatters.mileageText(km: detail.mileageKm))")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+
+                // 차량 가격 및 경매 뱃지
+                HStack(alignment: .center, spacing: 8) {
+                    Text(Formatters.priceText(won: detail.priceWon))
+                        .font(.title2).bold()
+                        .foregroundStyle(Color.priceGreen)
+                    Spacer()
+                    if detail.isAuction {
+                        Badge(text: "경매", color: Color.likeRed)
+                    }
                 }
             }
         }
         .padding(.horizontal, 16)
+        .padding(.bottom, 24)
     }
 
+    // MARK: - 차량 스펙 옵션 섹션
     private var specSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             ForEach(detail.specs.sorted(by: { $0.key < $1.key }), id: \.key) { kv in
                 HStack(alignment: .top) {
-                    Text(kv.key).frame(width: 80, alignment: .leading)
+                    Text(kv.key)
+                        .frame(width: 120, alignment: .leading)
                         .foregroundStyle(.secondary)
-                    Text(kv.value).frame(maxWidth: .infinity, alignment: .leading)
+                    Text(kv.value)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(.subheadline)
             }
@@ -145,61 +164,63 @@ struct CarDetailView: View {
         .padding(.horizontal, 16)
     }
 
+    // MARK: - 차량 상세 설명 섹션
     private var descriptionSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.purple50.opacity(0.5))
-                .overlay(
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(detail.description)
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
-                            .padding(16)
-                    }
-                )
-                .frame(maxWidth: .infinity)
+        VStack(alignment: .center) {
+            Text(detail.description)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+                .padding(16)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.purple50))
+
         }
         .padding(.horizontal, 16)
     }
 
+    // MARK: - 차량 입찰 내역 섹션
     private var bidHistorySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("입찰 내역").font(.headline)
+                Text("입찰 내역")
+                    .font(.title3)
+                    .bold()
                 Spacer()
                 NavigationLink {
                     AuctionBidHistoryView(carId: detail.id)
                 } label: {
                     Text("더보기")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
+                    Image("arrow_right")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.secondary)
                 }
             }
-            ForEach(detail.bids) { bid in
-                bidRow(name: bid.bidderName, price: Formatters.priceText(won: bid.priceWon))
+            .padding(.bottom, 8)
+            // 상위 5개 입찰 내역만 노출
+            ForEach(detail.bids.prefix(5)) { bid in
+                BidListItem(bid: bid)
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.grey50)
+        .background(Color(.systemGroupedBackground))
     }
 
-    private func bidRow(name: String, price: String) -> some View {
-        HStack {
-            Circle().fill(Color.grey100).frame(width: 32, height: 32)
-                .overlay(Image(systemName: "person").foregroundStyle(.secondary))
-            Text(name)
-            Spacer()
-            Text(price).bold().foregroundStyle(Color.priceGreen)
-        }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(color: .black.opacity(0.04), radius: 4, y: 2))
-    }
-
+    // MARK: - 판매자 정보 섹션
     private var sellerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("판매자 정보").font(.headline)
+            HStack(alignment: .top) {
+                Text("판매자 정보")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Circle().fill(Color.grey100).frame(width: 48, height: 48)
+                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+
+            }
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
                     row(label: "판매자 ID", value: detail.seller.name)
@@ -207,72 +228,83 @@ struct CarDetailView: View {
                     row(label: "등록일", value: Formatters.dateText(detail.seller.createdAt))
                     row(label: "수정일", value: Formatters.dateText(detail.seller.updatedAt))
                 }
-                Spacer()
-                Circle().fill(Color.grey100).frame(width: 48, height: 48)
-                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                
             }
         }
         .padding(.horizontal, 16)
-        .padding(.bottom, 80)
+        .padding(.vertical, 24)
     }
 
     private func row(label: String, value: String) -> some View {
         HStack(alignment: .top) {
-            Text(label).foregroundStyle(.secondary).frame(width: 80, alignment: .leading)
+            Text(label).foregroundStyle(.secondary).frame(width: 120, alignment: .leading)
             Text(value)
         }
         .font(.subheadline)
     }
 
-    private func badge(text: String, color: Color) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(.white)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .background(Capsule().fill(color))
-    }
-
+    // MARK: - 하단 액션 바 섹션
     private var bottomActionBar: some View {
         HStack(spacing: 12) {
-            if detail.isAuction {
-                VStack(alignment: .leading, spacing: 4) {
+            if detail.isAuction {   // 경매 매물인 경우
+                VStack(alignment: .center, spacing: 12) {
                     HStack(spacing: 8) {
-                        badge(text: "상위 입찰자", color: Color.purple100)
+                        VStack(spacing: 0) {
+                            Text("상위 입찰자")
+                                .font(.caption2)
+                                .foregroundStyle(Color.grey300)
+                            HStack {
+                                Circle().fill(Color.grey100).frame(width: 25, height: 25)
+                                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                                Text("홍길동")
+                                    .font(.subheadline)
+                            }
+                        }
+                        Spacer()
                         HStack(spacing: 4) {
-                            Image(systemName: "timer")
+                            Image("gavel")
                             Text(detail.auctionEndsAt.map { Formatters.timerText(until: $0) } ?? "-")
+                                .font(.title2)
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)
                     }
-                    Text(Formatters.priceText(won: detail.priceWon))
-                        .foregroundStyle(Color.priceGreen)
-                        .font(.title3).bold()
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 12)
+                    .background(Capsule().fill(Color.likeRed).opacity(0.07))
+                    
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(Formatters.priceText(won: detail.priceWon))
+                                .foregroundStyle(Color.priceGreen)
+                                .font(.title2).bold()
+                            Text("시작가 \(Formatters.priceText(won: detail.startPrice))")
+                                .foregroundStyle(Color.grey300)
+                                .font(.subheadline).bold()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        CustomButton(
+                            title: "상위 입찰",
+                            action: {},
+                            fontSize: 16,
+                            fontWeight: .semibold,
+                            cornerRadius: 12,
+                            horizontalPadding: 0,
+                            foregroundColor: .white,
+                            backgroundColor: brand,
+                            pressedBackgroundColor: brand.opacity(0.85),
+                            shadowColor: Color.black.opacity(0.1)
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
                 }
-                Spacer()
+            } else {    // 일반 매물인 경우
                 CustomButton(
-                    title: "상위 입찰",
+                    title: "문의하기",
                     action: {},
                     fontSize: 16,
                     fontWeight: .semibold,
                     cornerRadius: 12,
-                    height: 48,
-                    horizontalPadding: 0,
-                    maxWidth: 140,
-                    foregroundColor: .white,
-                    backgroundColor: brand,
-                    pressedBackgroundColor: brand.opacity(0.85),
-                    shadowColor: Color.black.opacity(0.1)
-                )
-            } else {
-                CustomButton(
-                    title: "문자 문의",
-                    action: {},
-                    fontSize: 16,
-                    fontWeight: .semibold,
-                    cornerRadius: 12,
-                    height: 48,
                     horizontalPadding: 0,
                     foregroundColor: brand,
                     backgroundColor: Color(.systemBackground),
@@ -281,12 +313,11 @@ struct CarDetailView: View {
                     shadowColor: nil
                 )
                 CustomButton(
-                    title: "전화 문의",
+                    title: "구매하기",
                     action: {},
                     fontSize: 16,
                     fontWeight: .semibold,
                     cornerRadius: 12,
-                    height: 48,
                     horizontalPadding: 0,
                     foregroundColor: .white,
                     backgroundColor: brand,
@@ -297,7 +328,16 @@ struct CarDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
+        .background(Color.white)
+        .background(
+            Color.white
+                .shadow(
+                    color: Color.black.opacity(0.1),
+                    radius: 8,
+                    x: 0,
+                    y: -2
+                )
+        )
     }
 }
 

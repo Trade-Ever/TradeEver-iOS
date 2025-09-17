@@ -23,6 +23,7 @@ struct CarDetail: Identifiable, Hashable {
     let imageNames: [String] // placeholder for URLs later
     let tags: [String]
     let priceWon: Int
+    let startPrice: Int
     let likes: Int
 
     // Specs and description

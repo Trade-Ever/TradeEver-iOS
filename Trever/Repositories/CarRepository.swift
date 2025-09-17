@@ -12,6 +12,7 @@ enum CarRepository {
                 thumbnailName: "Car Item",
                 tags: ["비흡연자", "무사고", "정비이력"],
                 priceWon: 33_000_000,
+                startPrice: 33_000_000,
                 isAuction: false,
                 auctionEndsAt: nil,
                 likes: 12
@@ -25,6 +26,7 @@ enum CarRepository {
                 thumbnailName: "Car Item1",
                 tags: ["1인신조", "완전무사고"],
                 priceWon: 41_900_000,
+                startPrice: 33_000_000,
                 isAuction: false,
                 auctionEndsAt: nil,
                 likes: 8
@@ -43,6 +45,7 @@ enum CarRepository {
                 thumbnailName: "Car Item1",
                 tags: ["비흡연자", "무사고", "정비이력"],
                 priceWon: 141_900_000,
+                startPrice: 33_000_000,
                 isAuction: true,
                 auctionEndsAt: Date().addingTimeInterval(60*4),
                 likes: 32
@@ -56,6 +59,7 @@ enum CarRepository {
                 thumbnailName: "Car Item",
                 tags: ["비흡연자", "정비이력"],
                 priceWon: 125_000_000,
+                startPrice: 33_000_000,
                 isAuction: true,
                 auctionEndsAt: Date().addingTimeInterval(60*75),
                 likes: 20
@@ -78,6 +82,7 @@ enum CarRepository {
             imageNames: imageNames,
             tags: ["비흡연자", "무사고", "정비이력"],
             priceWon: 125_000_000,
+            startPrice: 120_000_000,
             likes: 32,
             specs: [
                 "연료": "전기",
@@ -114,6 +119,7 @@ enum CarRepository {
             imageNames: imageNames,
             tags: item.tags,
             priceWon: item.priceWon,
+            startPrice: item.startPrice,
             likes: item.likes,
             specs: [
                 "연료": "전기",

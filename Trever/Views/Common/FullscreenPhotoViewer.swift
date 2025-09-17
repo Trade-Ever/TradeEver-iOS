@@ -151,16 +151,16 @@ struct FullscreenPhotoViewer: View {
     }
 }
 
-#Preview {
-    @Previewable @State var shown = true
-    @Previewable @State var idx = 0
-    @Previewable @State var imgs = [
+private struct FullscreenPhotoViewer_PreviewHarness: View {
+    @State var shown: Bool = true
+    @State var idx: Int = 0
+    @State var imgs: [String] = [
         "https://picsum.photos/id/1011/1200/800",
         "https://picsum.photos/id/1024/1200/800"
     ]
-    return FullscreenPhotoViewer(
-        isPresented: $shown,
-        currentIndex: $idx,
-        sources: $imgs
-    )
+    var body: some View {
+        FullscreenPhotoViewer(isPresented: $shown, currentIndex: $idx, sources: $imgs)
+    }
 }
+
+#Preview { FullscreenPhotoViewer_PreviewHarness() }

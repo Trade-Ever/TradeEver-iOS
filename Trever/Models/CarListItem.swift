@@ -9,6 +9,7 @@ struct CarListItem: Identifiable, Hashable {
     let thumbnailName: String? // placeholder for image URL later
     let tags: [String]
     let priceWon: Int
+    let startPrice: Int
     let isAuction: Bool
     let auctionEndsAt: Date?
     let likes: Int
