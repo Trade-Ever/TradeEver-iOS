@@ -2,6 +2,7 @@ import Foundation
 
 struct CarListItem: Identifiable, Hashable {
     let id: UUID
+    let backendId: Int64?
     let title: String
     let subTitle: String?
     let year: Int
@@ -14,4 +15,3 @@ struct CarListItem: Identifiable, Hashable {
     let auctionEndsAt: Date?
     let likes: Int
 }
-

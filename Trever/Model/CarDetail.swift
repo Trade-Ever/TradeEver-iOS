@@ -16,8 +16,13 @@ struct BidEntry: Identifiable, Hashable {
 
 struct CarDetail: Identifiable, Hashable {
     let id: UUID
+    let backendId: Int64?
     let title: String
     let subTitle: String?
+    // ERD 기반 명칭
+    let manufacturer: String?
+    let modelName: String?
+    let optionName: String?
     let year: Int
     let mileageKm: Int
     let imageNames: [String] // placeholder for URLs later

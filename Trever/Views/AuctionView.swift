@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct AuctionView: View {
-    private let items = CarRepository.sampleAuctionList
+    @StateObject private var vm = AuctionListViewModel()
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(items) { item in
+                ForEach(vm.items) { item in
                     NavigationLink {
-                        CarDetailView(detail: CarRepository.mockDetail(from: item))
+                        CarDetailScreen(vehicleId: item.backendId ?? 0)
                     } label: {
                         CarListItemView(model: item)
                     }
@@ -19,6 +19,7 @@ struct AuctionView: View {
             .padding(.bottom, 60)
         }
         .navigationTitle("경매")
+        .task { await vm.load() }
     }
 }
 
