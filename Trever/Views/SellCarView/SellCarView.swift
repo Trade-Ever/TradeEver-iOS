@@ -9,10 +9,12 @@ import SwiftUI
 
 struct SellCarView: View {
     @State private var currentStep: Int = 0
+    @StateObject private var viewModel = SellCarViewModel()
     private let tabBarHeight: CGFloat = 66 // CustomTabBar height to avoid overlap
     @StateObject private var keyboard = KeyboardState()
     
     let totalSteps = 7
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
@@ -26,14 +28,54 @@ struct SellCarView: View {
                 // 현재 페이지 내용
                 Group {
                     switch currentStep {
-                        case 0: VehicleNumberView()
-                        case 1: VehicleInfoView()
-                        case 2: EngineInfoView()
-                        case 3: ImageUploadView()
-                        case 4: VehicleOptionView()
-                        case 5: AccidentInfoView()
-                        case 6: TradeInfoView()
-                        default: Text("Unknown Page")
+                    case 0:
+                        VehicleNumberView(
+                            vehicleNumber: $viewModel.model.vehicleNumber,
+                        )
+                    case 1:
+                        VehicleInfoView(
+                            vehicleModel: $viewModel.model.vehicleModel,
+                            vehicleYear: $viewModel.model.vehicleYear,
+                            vehicleType: $viewModel.model.vehicleType,
+                            vehicleMileage: $viewModel.model.vehicleMileage,
+                            step: $viewModel.vehicleInfoStep
+                        )
+                    case 2:
+                        EngineInfoView(
+                            fuelType: $viewModel.model.fuelType,
+                            transmission: $viewModel.model.transmission,
+                            displacement: $viewModel.model.displacement,
+                            horsepower: $viewModel.model.horsepower,
+                            step: $viewModel.engineInfoStep
+                        )
+                    case 3:
+                        ImageUploadView(
+                            vehicleColor: $viewModel.model.vehicleColor,
+                            selectedImagesData: $viewModel.model.selectedImagesData,
+                            step: $viewModel.imageUploadStep
+                        )
+                    case 4:
+                        VehicleOptionView(
+                            vehicleOptions: $viewModel.model.vehicleOptions,
+                            detailedDescription: $viewModel.model.detailedDescription,
+                            step: $viewModel.vehicleOptionStep
+                        )
+                    case 5:
+                        AccidentInfoView(
+                            accidentHistory: $viewModel.model.accidentHistory,
+                            accidentDescription: $viewModel.model.accidentDescription,
+                            step: $viewModel.accidentInfoStep
+                        )
+                    case 6:
+                        TradeInfoView(
+                            tradeMethod: $viewModel.model.tradeMethod,
+                            startDate: $viewModel.model.startDate,
+                            endDate: $viewModel.model.endDate,
+                            price: $viewModel.model.price,
+                            step: $viewModel.tradeInfoStep
+                        )
+                        
+                    default: Text("Unknown Page")
                     }
                 }
                 .animation(.easeInOut, value: currentStep)
@@ -42,32 +84,32 @@ struct SellCarView: View {
                 
                 Spacer()
                 
-                // 다음 버튼
-                StepButton(currentStep: $currentStep, totalSteps: totalSteps, userInput: .constant(""))
-                    .padding(.horizontal)
-                    .padding(.bottom, keyboard.isVisible ? 0 : (20 + tabBarHeight))
-            }
-            .navigationTitle("") // 타이틀 숨기기
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+
+                // 다음 버튼 - 입력을 모두 마쳤을 때
+                HStack(spacing: 16) {
                     if currentStep > 0 {
-                        Button(action: {
-                            currentStep -= 1
-                        }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                Text("뒤로")
-                            }
-                            .foregroundColor(.purple400)
-                        }
-                    } else {
-                        // 첫 페이지에는 보이지 않지만 공간을 차지하는 빈 뷰
-                        Color.clear.frame(width: 60, height: 44)
+                        PrimaryButton(
+                            title: "이전",
+                            action: { currentStep = max(currentStep - 1, 0) },
+                            isOutline: true
+                        )
+                        .frame(width: 120)
                     }
+                    
+                    PrimaryButton(
+                        title: currentStep == totalSteps - 1 ? "등록하기" : "다음",
+                        action: { currentStep = min(currentStep + 1, totalSteps - 1) }
+                    )
+                    .frame(maxWidth: .infinity)
+                    .opacity(viewModel.isStepCompleted(currentStep: currentStep) ? 1.0 : 0.5) // 완료 안되면 반투명
+                    .disabled(!viewModel.isStepCompleted(currentStep: currentStep)) // 완료 안되면 클릭 불가
                 }
+                .padding()
+                .padding(.bottom, 16)
             }
         }
+        .navigationTitle("") // 타이틀 숨기기
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

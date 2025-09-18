@@ -14,6 +14,8 @@ enum MainTab: Hashable {
 struct ContentView: View {
     @State private var selection: MainTab = .buy
     @State private var tabBarHidden: Bool = false
+    private let tabBarPadding: CGFloat = 0 // space for custom tab bar when visible
+
     private let tabBarHeight: CGFloat = 66 // CustomTabBar 실제 높이
     @StateObject private var keyboard = KeyboardState()
 
@@ -52,7 +54,7 @@ struct ContentView: View {
                 }
             case .sell:
                 NavigationStack(path: $sellPath) {
-                    SellCarView()
+                    SellCarMainView()
                         .tabBarHidden(false)
                 }
             case .auction:

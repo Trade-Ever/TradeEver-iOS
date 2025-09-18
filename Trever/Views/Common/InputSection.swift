@@ -13,6 +13,7 @@ import SwiftUI
 struct InputSection<Content: View>: View {
     /// 제목 텍스트
     var title: String
+    var subTitle: String?
     
     /// 뷰 빌더: 섹션 안에 원하는 뷰를 삽입할 수 있도록 지원
     let content: () -> Content
@@ -20,20 +21,32 @@ struct InputSection<Content: View>: View {
     /// 초기화 메서드
     /// - Parameters:
     ///   - title: 섹션 상단에 표시할 제목
+    ///   - subTitle: 제목 우측에 조건(km, 원 등)
     ///   - content: 섹션 본문에 들어갈 커스텀 뷰
-    init(title: String, @ViewBuilder content: @escaping () -> Content) {
+    init(title: String, subTitle: String? = nil, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.content = content
+        self.subTitle = subTitle
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 제목 (Label)
-            Text(title)
-                .font(.system(size: 23))
-                .fontWeight(.black)       // 굵은 글씨
-                .foregroundStyle(Color.grey400)
-                .padding(.leading, 24)
+            // 제목 - 부제(조건)
+            HStack (spacing: 4) {
+                Text(title)
+                    .font(.system(size: 23))
+                    .fontWeight(.black)
+                    .foregroundStyle(Color.grey400)
+                    .padding(.leading, 24)
+                if let subTitle = subTitle {
+                    Text(subTitle)
+                        .font(.system(size: 18))
+                        .bold()
+                        .foregroundStyle(Color.grey400.opacity(0.4))
+                        .padding(.top, 2)
+                }
+                Spacer()
+            }
             
             // 커스텀 콘텐츠 (InputBox, Button, Toggle 등)
             content()
@@ -45,7 +58,7 @@ struct InputSection<Content: View>: View {
 }
 
 #Preview {
-    InputSection(title: "차량 번호") {
+    InputSection(title: "차량 번호", subTitle: "(km)") {
         TextField("예: 12가 3456", text: .constant(""))
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }

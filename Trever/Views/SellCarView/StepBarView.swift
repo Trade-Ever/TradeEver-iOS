@@ -12,7 +12,6 @@ struct StepBarView: View {
     let totalSteps: Int
     
     var body: some View {
-        
         HStack {
             Spacer(minLength: 48)
             HStack(spacing: 8) {

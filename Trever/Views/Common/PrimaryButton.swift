@@ -47,7 +47,7 @@ struct PrimaryButton: View {
         }
         .buttonStyle(.plain)
         .scaleEffect(isPressed ? 0.95 : 1.0)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 1)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged({ _ in

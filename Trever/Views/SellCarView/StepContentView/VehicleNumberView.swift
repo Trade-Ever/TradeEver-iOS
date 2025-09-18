@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct VehicleNumberView: View {
-    @State private var number: String = "" // 차량 번호 상태 저장
+    @Binding var vehicleNumber: String
     
     var body: some View {
         InputSection(title: "등록할 차량 번호를 입력해주세요") {
-            VehicleNumberInput(text: $number)
+            VehicleNumberInput(text: $vehicleNumber)
                 .padding(.horizontal, 8)
         }
     }
@@ -56,6 +56,12 @@ struct VehicleNumberInput: View {
     
 }
 
-#Preview {
-    VehicleNumberView()
+struct VehicleNumberView_Previews: PreviewProvider {
+    @State static var vehicleNumber: String = ""
+
+    static var previews: some View {
+        VehicleNumberView(vehicleNumber: $vehicleNumber)
+            .previewLayout(.sizeThatFits)
+    }
 }
+

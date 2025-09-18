@@ -8,24 +8,22 @@
 import SwiftUI
 
 struct EngineInfoView: View {
-    @State private var fuelType: String = ""
-    @State private var transmission: String = ""
-    @State private var displacement: String = ""
-    @State private var horsepower: String = ""
+    @Binding var fuelType: String
+    @Binding var transmission: String
+    @Binding var displacement: String
+    @Binding var horsepower: String
     
-    @State private var step: Int = 0
-    
+    @Binding var step: Int
+
     // FocusState
     enum Field: Hashable {
         case fuelType, transmission, displacement, horsepower
     }
     @FocusState private var focusedField: Field?
     
-    // 연료 버튼 배열
-    let fuelOptions = ["경유", "휘발유", "전기", "LPG"]
-    
-    // 변속기 버튼 배열
-    let transmissionOptions = ["자동", "수동"]
+    let fuelOptions = ["경유", "휘발유", "전기", "LPG"] // 연료 버튼 배열
+    let transmissionOptions = ["자동", "수동"] // 변속기 버튼 배열
+
     
     var body: some View {
         VStack(spacing: 12) {
@@ -41,7 +39,7 @@ struct EngineInfoView: View {
                                 action: {
                                     fuelType = type
                                     // 선택하면 다음 step으로
-                                    withAnimation(.easeInOut) { step = 1 }
+                                    withAnimation(.easeInOut) { step = max(step, 1) }
                                     focusedField = .transmission
                                 }
                             )
@@ -64,7 +62,7 @@ struct EngineInfoView: View {
                                 action: {
                                     transmission = type
                                     // 선택하면 다음 step으로
-                                    withAnimation(.easeInOut) { step = 2 }
+                                    withAnimation(.easeInOut) { step = max(step, 2) }
                                     focusedField = .displacement
                                 }
                             )
@@ -78,15 +76,15 @@ struct EngineInfoView: View {
             
             // 3. 배기량(cc)
             if step >= 2 {
-                InputSection(title: "배기량(CC)을 입력해주세요") {
+                InputSection(title: "배기량을 입력해주세요", subTitle: "(cc)") {
                     CustomInputBox(
+                        inputType: .number,
                         placeholder: "1998",
                         text: $displacement
                     )
-                    .keyboardType(.numberPad)
                     .focused($focusedField, equals: .displacement)
                     .onSubmit {
-                        withAnimation(.easeInOut) { step = 3 }
+                        withAnimation(.easeInOut) { step = max(step, 3) }
                         focusedField = .horsepower
                     }
                 }
@@ -95,12 +93,12 @@ struct EngineInfoView: View {
             
             // 4. 마력
             if step >= 3 {
-                InputSection(title: "마력을 입력해주세요") {
+                InputSection(title: "마력을 입력해주세요", subTitle: "(hp)") {
                     CustomInputBox(
+                        inputType: .number,
                         placeholder: "150",
                         text: $horsepower
                     )
-                    .keyboardType(.numberPad)
                     .focused($focusedField, equals: .horsepower)
                     .onSubmit {
                         focusedField = nil
@@ -115,6 +113,21 @@ struct EngineInfoView: View {
     }
 }
 
-#Preview {
-    EngineInfoView()
+struct EngineInfoView_Previews: PreviewProvider {
+    @State static var fuelType = ""
+    @State static var transmission = ""
+    @State static var displacement = ""
+    @State static var horsepower = ""
+    @State static var step = 0
+    
+    static var previews: some View {
+        EngineInfoView(
+            fuelType: $fuelType,
+            transmission: $transmission,
+            displacement: $displacement,
+            horsepower: $horsepower,
+            step: $step
+        )
+        .previewLayout(.sizeThatFits)
+    }
 }
