@@ -29,13 +29,39 @@ final class MockVehicleService: VehicleService {
     private func mockVehicles(isAuction: Bool) async -> [VehicleDTO] {
         let now = Date()
 
-        func photos(for vehicleId: Int64) -> [VehiclePhotoDTO] {
+        func photos1(for vehicleId: Int64) -> [VehiclePhotoDTO] {
             let urls = [
                 "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/07/24/dd095b49-f2a5-45af-83ee-179e90a3ea25.jpeg",
                 "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/07/24/1e082ccf-096d-4b7e-b6b1-4fd0112b55e2.jpeg",
                 "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/07/24/28326b8b-a951-44c6-90b8-bed12f092e7d.jpeg",
                 "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/07/24/1aa27482-50d8-4e1b-bc61-c40c685473ef.jpeg",
                 "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/07/24/17a53b68-a08f-4913-a3d2-25acc3b0a04f.jpeg"
+            ]
+            return urls.enumerated().map { idx, u in
+                VehiclePhotoDTO(id: Int64(vehicleId * 100 + Int64(idx)), photo_url: u, order_index: idx, created_at: now, vehicle_id: vehicleId)
+            }
+        }
+        
+        func photos2(for vehicleId: Int64) -> [VehiclePhotoDTO] {
+            let urls = [
+                "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2024/11/29/097ad1f4-807a-45aa-ba98-535471ab7bec.JPEG",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2024/11/29/b2ecebfc-a80e-45c7-8096-9adfbc2a81dd.JPEG",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2024/11/29/4bbc2294-c14e-45ca-89e2-103d73bd22e7.JPEG",
+                "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2024/11/29/fdf82706-8b2e-43fd-82a3-de87638d7500.JPEG",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2024/11/29/b8f30d56-3498-4048-9501-3c5028eefa04.JPEG"
+            ]
+            return urls.enumerated().map { idx, u in
+                VehiclePhotoDTO(id: Int64(vehicleId * 100 + Int64(idx)), photo_url: u, order_index: idx, created_at: now, vehicle_id: vehicleId)
+            }
+        }
+        
+        func photos3(for vehicleId: Int64) -> [VehiclePhotoDTO] {
+            let urls = [
+                "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/09/11/09dced50-6f1e-4cee-873a-d6db30268ca1.jpeg",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/09/11/b0666165-dfed-4a6a-9838-3e4ca9d29748.jpeg",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/09/11/87eef3f0-6afa-403f-81ba-5ed9e057f7b6.jpeg",
+                "https://image.heydealer.com/unsafe/2250x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/09/11/cc942bfd-6820-4056-a5a5-4e2c12fd1f34.jpeg",
+                "https://image.heydealer.com/unsafe/1150x0/https://prnd-car-purchase.s3.ap-northeast-2.amazonaws.com/media/cars/carmediafile/2025/09/11/a27aa5ed-1614-4035-ab1c-4325567cc364.jpeg"
             ]
             return urls.enumerated().map { idx, u in
                 VehiclePhotoDTO(id: Int64(vehicleId * 100 + Int64(idx)), photo_url: u, order_index: idx, created_at: now, vehicle_id: vehicleId)
@@ -62,9 +88,9 @@ final class MockVehicleService: VehicleService {
         let vehicles: [VehicleDTO] = [
             VehicleDTO(
                 id: isAuction ? 101 : 1,
-                title: "Torress EVX E7",
+                title: "Porsche Taycan GTS",
                 description: "가성비 전기 SUV",
-                manufacturer: "포르쉐",
+                manufacturer: "Porsche",
                 model: "Taycan",
                 option_name: "GTS",
                 year: 2024,
@@ -84,18 +110,18 @@ final class MockVehicleService: VehicleService {
                 location_address: "서울",
                 favorite_count: 12,
                 created_at: now, updated_at: now, seller_id: 5001,
-                photos: photos(for: isAuction ? 101 : 1),
+                photos: photos1(for: isAuction ? 101 : 1),
                 auction: isAuction ? auction(isAuction ? 101 : 1, minutesFromNow: 8, secondsExtra: 5, startOffsetMins: -120, startPrice: 140_000_000) : nil
             ),
             VehicleDTO(
                 id: isAuction ? 102 : 2,
-                title: "IONIQ 6",
+                title: "Tesla Cybertruck All-Wheel Drive 파운데이션",
                 description: "효율적인 세단",
-                manufacturer: "Hyundai",
-                model: "IONIQ 6",
-                option_name: "Long Range",
-                year: 2023,
-                mileage: 16000,
+                manufacturer: "Tesla",
+                model: "Cybertruck",
+                option_name: "All-Wheel Drive 파운데이션",
+                year: 2024,
+                mileage: 109,
                 fuel_type: "전기",
                 transmission: "자동",
                 accident_history: nil,
@@ -105,25 +131,25 @@ final class MockVehicleService: VehicleService {
                 horsepower: 228,
                 color: "화이트",
                 additional_info: nil,
-                price: 41_900_000,
+                price: 140_000_000,
                 is_auction: isAuction,
                 auction_id: isAuction ? 12 : nil,
                 location_address: "수원",
                 favorite_count: 8,
                 created_at: now, updated_at: now, seller_id: 5002,
-                photos: photos(for: isAuction ? 102 : 2),
+                photos: photos2(for: isAuction ? 102 : 2),
                 auction: isAuction ? auction(isAuction ? 102 : 2, minutesFromNow: 25, startOffsetMins: -120, startPrice: 38_000_000) : nil
             ),
             VehicleDTO(
                 id: isAuction ? 103 : 3,
-                title: "G80",
+                title: "Tesla Model X AWD",
                 description: "고급 세단",
-                manufacturer: "Genesis",
-                model: "G80",
-                option_name: "3.3T Sport",
+                manufacturer: "Tesla",
+                model: "Model X",
+                option_name: "AWD",
                 year: 2020,
                 mileage: 54000,
-                fuel_type: "가솔린",
+                fuel_type: "전기",
                 transmission: "자동",
                 accident_history: nil,
                 accident_description: nil,
@@ -132,13 +158,13 @@ final class MockVehicleService: VehicleService {
                 horsepower: 370,
                 color: "블랙",
                 additional_info: nil,
-                price: 39_500_000,
+                price: 133_000_000,
                 is_auction: isAuction,
                 auction_id: isAuction ? 13 : nil,
                 location_address: "부산",
                 favorite_count: 9,
                 created_at: now, updated_at: now, seller_id: 5003,
-                photos: photos(for: isAuction ? 103 : 3),
+                photos: photos3(for: isAuction ? 103 : 3),
                 auction: isAuction ? auction(isAuction ? 103 : 3, minutesFromNow: 180, startOffsetMins: -120, startPrice: 35_000_000) : nil
             )
         ]
