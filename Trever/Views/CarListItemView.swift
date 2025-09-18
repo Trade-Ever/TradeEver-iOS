@@ -15,7 +15,22 @@ struct CarListItemView: View {
             ZStack(alignment: .topLeading) {
                 // Vehicle image
                 Group {
-                    if let name = model.thumbnailName, UIImage(named: name) != nil {
+                    if let name = model.thumbnailName,
+                       let url = URL(string: name), url.scheme?.hasPrefix("http") == true {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ZStack { Color.secondary.opacity(0.08); ProgressView() }
+                            case .success(let image):
+                                image.resizable().scaledToFill()
+                            case .failure:
+                                Rectangle().fill(Color.secondary.opacity(0.15))
+                                    .overlay(Image(systemName: "car.fill").font(.system(size: 40)).foregroundStyle(.secondary))
+                            @unknown default:
+                                Rectangle().fill(Color.secondary.opacity(0.15))
+                            }
+                        }
+                    } else if let name = model.thumbnailName, UIImage(named: name) != nil {
                         Image(name)
                             .resizable()
                             .scaledToFill()
@@ -72,7 +87,7 @@ struct CarListItemView: View {
                     if model.isAuction, let endsAt = model.auctionEndsAt {
                         HStack(spacing: 4) {
                             Image(systemName: "timer")
-                            Text(Formatters.timerText(until: endsAt))
+                            CountdownText(endDate: normalizedAuctionEnd(endsAt))
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)
@@ -132,10 +147,24 @@ struct CarListItemView: View {
 }
 
 #Preview {
-    VStack(spacing: 16) {
-        CarListItemView(model: CarRepository.sampleBuyList[0])
-
-        CarListItemView(model: CarRepository.sampleAuctionList[0])
+    let sample = CarListItem(
+        id: UUID(),
+        backendId: 1,
+        title: "Torress EVX E7",
+        subTitle: "EVX",
+        year: 2024,
+        mileageKm: 38000,
+        thumbnailName: "https://picsum.photos/seed/1/1200/800",
+        tags: ["무사고", "전기"],
+        priceWon: 3_300_0000,
+        startPrice: 3_300_0000,
+        isAuction: false,
+        auctionEndsAt: nil,
+        likes: 12
+    )
+    return VStack(spacing: 16) {
+        CarListItemView(model: sample)
+        CarListItemView(model: sample)
     }
     .padding()
 }

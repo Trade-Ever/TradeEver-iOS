@@ -16,8 +16,13 @@ struct BidEntry: Identifiable, Hashable {
 
 struct CarDetail: Identifiable, Hashable {
     let id: UUID
+    let backendId: Int64?
     let title: String
     let subTitle: String?
+    // ERD 기반 명칭
+    let manufacturer: String?
+    let modelName: String?
+    let optionName: String?
     let year: Int
     let mileageKm: Int
     let imageNames: [String] // placeholder for URLs later
@@ -37,4 +42,15 @@ struct CarDetail: Identifiable, Hashable {
     let isAuction: Bool
     let auctionEndsAt: Date?
     let bids: [BidEntry]
+
+    // Ownership
+    let isMine: Bool
+
+    // Potential buyers for direct sale completion (non-auction)
+    let potentialBuyers: [PotentialBuyer]?
+}
+
+struct PotentialBuyer: Identifiable, Hashable {
+    let id: String
+    let name: String
 }

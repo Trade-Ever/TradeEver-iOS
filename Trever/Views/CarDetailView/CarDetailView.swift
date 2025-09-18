@@ -7,6 +7,9 @@ struct CarDetailView: View {
     @State private var showImageViewer = false
     @State private var viewerIndex = 0
     @State private var fullscreenSources: [String] = []
+    @State private var showBidSheet: Bool = false
+    @State private var showMarkSoldSheet: Bool = false
+//    @State private var soldCompleted: Bool = false
 
     var body: some View {
         ScrollView {
@@ -38,6 +41,26 @@ struct CarDetailView: View {
         .safeAreaInset(edge: .bottom) { bottomActionBar }
         .background(Color(.systemBackground))
         .tabBarHidden(true)
+        .sheet(isPresented: $showMarkSoldSheet) {
+            MarkSoldSheet(buyers: detail.potentialBuyers ?? []) { buyerId in
+                // TODO: API call with buyerId
+//                soldCompleted = true
+                showMarkSoldSheet = false
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
+        }
+        .sheet(isPresented: $showBidSheet) {
+            AuctionBidSheet(
+                currentPriceWon: detail.priceWon,
+                startPriceWon: detail.startPrice,
+                onConfirm: { _, _ in
+                    showBidSheet = false
+                }
+            )
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.hidden)
+        }
     }
 
     // MARK: - 이미지 페이저
@@ -103,14 +126,13 @@ struct CarDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     VStack(alignment: .leading) {
-                        // 차량 이름
-                        Text(detail.title)
+                        // 메인 차량명: (제조사 + 모델) 없으면 기존 title
+                        Text(mainVehicleName)
                             .font(.title3)
                             .bold()
-                        
-                        // 차량 세부 옵션 명
-                        if let sub = detail.subTitle {
-                            Text(sub).font(.title3).bold()
+                        // 차량 세부 옵션 명: optionName(=title) or subTitle
+                        if let opt = optionDisplayName {
+                            Text(opt).font(.title3).bold()
                         }
                     }
                     Spacer()
@@ -145,6 +167,17 @@ struct CarDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 24)
+    }
+
+    private var mainVehicleName: String {
+        let parts = [detail.manufacturer, detail.modelName].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        if parts.isEmpty { return detail.title }
+        return parts.joined(separator: " ")
+    }
+
+    private var optionDisplayName: String? {
+        if let opt = detail.optionName, !opt.isEmpty { return opt }
+        return detail.subTitle
     }
 
     // MARK: - 차량 스펙 옵션 섹션
@@ -186,7 +219,7 @@ struct CarDetailView: View {
                     .bold()
                 Spacer()
                 NavigationLink {
-                    AuctionBidHistoryView(carId: detail.id)
+                    AuctionBidHistoryView(vehicleId: detail.backendId ?? 0)
                 } label: {
                     Text("더보기")
                         .font(.subheadline)
@@ -263,8 +296,12 @@ struct CarDetailView: View {
                         Spacer()
                         HStack(spacing: 4) {
                             Image("gavel")
-                            Text(detail.auctionEndsAt.map { Formatters.timerText(until: $0) } ?? "-")
-                                .font(.title2)
+                            if let endDay = detail.auctionEndsAt {
+                                CountdownText(endDate: normalizedAuctionEnd(endDay))
+                                    .font(.title2)
+                            } else {
+                                Text("-").font(.title2)
+                            }
                         }
                         .foregroundStyle(Color.likeRed)
                         .font(.subheadline)
@@ -283,47 +320,114 @@ struct CarDetailView: View {
                                 .font(.subheadline).bold()
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        CustomButton(
-                            title: "상위 입찰",
-                            action: {},
-                            fontSize: 16,
-                            fontWeight: .semibold,
-                            cornerRadius: 12,
-                            horizontalPadding: 0,
-                            foregroundColor: .white,
-                            backgroundColor: brand,
-                            pressedBackgroundColor: brand.opacity(0.85),
-                            shadowColor: Color.black.opacity(0.1)
-                        )
-                        .frame(maxWidth: .infinity)
+                        if detail.isMine {
+                            CustomButton(
+                                title: "상위 입찰",
+                                action: {},
+                                fontSize: 16,
+                                fontWeight: .semibold,
+                                cornerRadius: 12,
+                                horizontalPadding: 0,
+                                foregroundColor: .white,
+                                backgroundColor: Color.grey300,
+                                pressedBackgroundColor: Color.grey300,
+                                shadowColor: nil
+                            )
+                            .frame(maxWidth: .infinity)
+                            .disabled(true)
+                        } else {
+                            CustomButton(
+                                title: "상위 입찰",
+                                action: { showBidSheet = true },
+                                fontSize: 16,
+                                fontWeight: .semibold,
+                                cornerRadius: 12,
+                                horizontalPadding: 0,
+                                foregroundColor: .white,
+                                backgroundColor: brand,
+                                pressedBackgroundColor: brand.opacity(0.85),
+                                shadowColor: Color.black.opacity(0.1)
+                            )
+                            .frame(maxWidth: .infinity)
+                        }
                     }
                 }
             } else {    // 일반 매물인 경우
-                CustomButton(
-                    title: "문의하기",
-                    action: {},
-                    fontSize: 16,
-                    fontWeight: .semibold,
-                    cornerRadius: 12,
-                    horizontalPadding: 0,
-                    foregroundColor: brand,
-                    backgroundColor: Color(.systemBackground),
-                    pressedBackgroundColor: Color.purple50.opacity(0.5),
-                    borderColor: brand,
-                    shadowColor: nil
-                )
-                CustomButton(
-                    title: "구매하기",
-                    action: {},
-                    fontSize: 16,
-                    fontWeight: .semibold,
-                    cornerRadius: 12,
-                    horizontalPadding: 0,
-                    foregroundColor: .white,
-                    backgroundColor: brand,
-                    pressedBackgroundColor: brand.opacity(0.85),
-                    shadowColor: Color.black.opacity(0.1)
-                )
+                if detail.isMine {
+//                    if soldCompleted {
+//                        CustomButton(
+//                            title: "판매 완료",
+//                            action: {},
+//                            fontSize: 16,
+//                            fontWeight: .semibold,
+//                            cornerRadius: 16,
+//                            height: 54,
+//                            horizontalPadding: 0,
+//                            foregroundColor: brand,
+//                            backgroundColor: Color(.systemBackground),
+//                            pressedBackgroundColor: Color(.systemBackground),
+//                            borderColor: brand,
+//                            shadowColor: nil,
+//                            prefixImage: Image(systemName: "checkmark").renderingMode(.template),
+//                            prefixImageTint: brand
+//                        )
+//                        .disabled(true)
+//                    } else {
+//                        CustomButton(
+//                            title: "판매완료로 변경하기",
+//                            action: { showMarkSoldSheet = true },
+//                            fontSize: 16,
+//                            fontWeight: .semibold,
+//                            cornerRadius: 16,
+//                            height: 54,
+//                            horizontalPadding: 0,
+//                            foregroundColor: .white,
+//                            backgroundColor: brand,
+//                            pressedBackgroundColor: brand.opacity(0.85),
+//                            shadowColor: Color.black.opacity(0.1)
+//                        )
+//                    }
+                    
+                    CustomButton(
+                        title: "판매완료로 변경하기",
+                        action: { showMarkSoldSheet = true },
+                        fontSize: 16,
+                        fontWeight: .semibold,
+                        cornerRadius: 16,
+                        height: 54,
+                        horizontalPadding: 0,
+                        foregroundColor: .white,
+                        backgroundColor: brand,
+                        pressedBackgroundColor: brand.opacity(0.85),
+                        shadowColor: Color.black.opacity(0.1)
+                    )
+                } else {
+                    CustomButton(
+                        title: "문의하기",
+                        action: {},
+                        fontSize: 16,
+                        fontWeight: .semibold,
+                        cornerRadius: 12,
+                        horizontalPadding: 0,
+                        foregroundColor: brand,
+                        backgroundColor: Color(.systemBackground),
+                        pressedBackgroundColor: Color.purple50.opacity(0.5),
+                        borderColor: brand,
+                        shadowColor: nil
+                    )
+                    CustomButton(
+                        title: "구매하기",
+                        action: {},
+                        fontSize: 16,
+                        fontWeight: .semibold,
+                        cornerRadius: 12,
+                        horizontalPadding: 0,
+                        foregroundColor: .white,
+                        backgroundColor: brand,
+                        pressedBackgroundColor: brand.opacity(0.85),
+                        shadowColor: Color.black.opacity(0.1)
+                    )
+                }
             }
         }
         .padding(.horizontal, 16)
@@ -342,8 +446,5 @@ struct CarDetailView: View {
 }
 
 #Preview {
-    NavigationStack {
-        let item = CarRepository.sampleAuctionList[0]
-        CarDetailView(detail: CarRepository.mockDetail(from: item))
-    }
+    NavigationStack { CarDetailScreen(vehicleId: 1) }
 }

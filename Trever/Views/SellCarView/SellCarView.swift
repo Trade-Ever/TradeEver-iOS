@@ -10,6 +10,8 @@ import SwiftUI
 struct SellCarView: View {
     @State private var currentStep: Int = 0
     @StateObject private var viewModel = SellCarViewModel()
+    private let tabBarHeight: CGFloat = 66 // CustomTabBar height to avoid overlap
+    @StateObject private var keyboard = KeyboardState()
     
     let totalSteps = 7
     @Environment(\.dismiss) private var dismiss
@@ -82,8 +84,7 @@ struct SellCarView: View {
                 
                 Spacer()
                 
-                //                if viewModel.isStepCompleted(currentStep: currentStep) {
-                //                }
+
                 // 다음 버튼 - 입력을 모두 마쳤을 때
                 HStack(spacing: 16) {
                     if currentStep > 0 {

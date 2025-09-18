@@ -16,7 +16,8 @@ struct ContentView: View {
     @State private var tabBarHidden: Bool = false
     private let tabBarPadding: CGFloat = 0 // space for custom tab bar when visible
 
-    private let tabBarHeight: CGFloat = 56 // CustomTabBar 실제 높이
+    private let tabBarHeight: CGFloat = 66 // CustomTabBar 실제 높이
+    @StateObject private var keyboard = KeyboardState()
 
     @State private var buyPath = NavigationPath()
     @State private var sellPath = NavigationPath()
@@ -24,15 +25,22 @@ struct ContentView: View {
     @State private var myPagePath = NavigationPath()
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            activeContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            CustomTabBar(selection: $selection)
-                .opacity(tabBarHidden ? 0 : 1)
-                .allowsHitTesting(!tabBarHidden)
-        }
-        .safeAreaPadding(.bottom, tabBarHidden ? 0 : tabBarPadding)
+        activeContent
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Reserve space for the bar, independently of keyboard
+            .safeAreaInset(edge: .bottom) {
+                if showTabBar {
+                    // Spacer only; prevents content being obscured
+                    Color.clear.frame(height: tabBarHeight)
+                }
+            }
+            // Render the bar pinned to bottom; it won't ride with keyboard
+            .overlay(alignment: .bottom) {
+                if showTabBar {
+                    CustomTabBar(selection: $selection)
+                        .ignoresSafeArea(.keyboard, edges: .bottom)
+                }
+            }
     }
 
     @ViewBuilder
@@ -66,8 +74,9 @@ struct ContentView: View {
                 tabBarHidden = hidden
             }
         }
-        .padding(.bottom, tabBarHidden ? 0 : tabBarHeight)
     }
+
+    private var showTabBar: Bool { !tabBarHidden && !keyboard.isVisible }
 }
 
 #Preview {
