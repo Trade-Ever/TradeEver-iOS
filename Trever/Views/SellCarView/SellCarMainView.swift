@@ -22,6 +22,7 @@ struct SellCarMainView: View {
             }
             .navigationDestination(isPresented: $showSellCarView) {
                 SellCarView()
+                    .tabBarHidden(true)
             }
         }
     }
@@ -32,4 +33,3 @@ struct SellCarMainView_Previews: PreviewProvider {
         SellCarMainView()
     }
 }
-
