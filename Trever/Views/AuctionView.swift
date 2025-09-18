@@ -1,22 +1,26 @@
 import SwiftUI
 
 struct AuctionView: View {
+    @StateObject private var vm = AuctionListViewModel()
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                Image(systemName: "hammer")
-                    .font(.system(size: 48, weight: .regular))
-                Text("진행 중인 경매가 없습니다")
-                    .font(.headline)
-                Text("추가되면 여기에서 확인할 수 있어요.")
-                    .foregroundStyle(.secondary)
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(vm.items) { item in
+                    NavigationLink {
+                        CarDetailScreen(vehicleId: item.backendId ?? 0)
+                    } label: {
+                        CarListItemView(model: item)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("경매")
+            .padding(.bottom, 60)
         }
+        .navigationTitle("경매")
+        .task { await vm.load() }
     }
 }
 
 #Preview { AuctionView() }
-

@@ -1,36 +1,42 @@
 import SwiftUI
 
 struct BuyCarView: View {
+    @StateObject private var vm = BuyCarListViewModel()
+    private let searchBarHeight: CGFloat = 48
     var body: some View {
-        NavigationStack {
-            List {
-                Section(footer: Text("목업 데이터")) {
-                    ForEach(0..<5) { _ in
-                        VStack(alignment: .leading, spacing: 8) {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.secondary.opacity(0.15))
-                                .frame(height: 160)
-                            Text("Torress EVX E7")
-                                .font(.headline)
-                            HStack {
-                                Text("2024식 · 3.8만km")
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text("3,300만원")
-                                    .foregroundStyle(.green)
-                                    .fontWeight(.semibold)
-                            }
+        ZStack(alignment: .top) {
+            // Scrollable list with top padding to avoid overlap with floating search
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(vm.items) { item in
+                        NavigationLink {
+                            CarDetailScreen(vehicleId: item.backendId ?? 0)
+                        } label: {
+                            CarListItemView(model: item)
                         }
-                        .padding(.vertical, 8)
+                        .buttonStyle(.plain)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
                     }
                 }
+                .padding(.top, searchBarHeight + 16)
             }
-            .listStyle(.plain)
-            .navigationTitle("내차사기")
-            .toolbar { ToolbarItem(placement: .topBarLeading) { Text("") } }
+            .padding(.bottom, 60)
+
+            // Floating search button
+            NavigationLink {
+                SearchView().tabBarHidden(true)
+            } label: {
+                SearchBarButton(title: "차량 검색") {}
+                    .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await vm.load() }
     }
 }
 
 #Preview { BuyCarView() }
-
