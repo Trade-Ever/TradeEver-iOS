@@ -86,10 +86,15 @@ struct SellCarView: View {
                     Spacer(minLength: 80) // 하단 바 영역 여유
                 }
             }
+            // 키보드가 있을 때, 입력 필드를 조금 더 띄우기 위한 추가 여백
+            .safeAreaInset(edge: .bottom) {
+                if keyboard.isVisible { Color.clear.frame(height: 28) }
+            }
             // 하단 버튼을 키보드 위로 고정
             .safeAreaInset(edge: .bottom) { bottomActionBar }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 
