@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SellCarMainView: View {
+struct SellCarView: View {
     @State private var showSellCarView = false
     
     var body: some View {
@@ -21,7 +21,7 @@ struct SellCarMainView: View {
                 }
             }
             .navigationDestination(isPresented: $showSellCarView) {
-                SellCarView()
+                SellCarRegisterView()
                     .tabBarHidden(true)
             }
         }
@@ -30,6 +30,6 @@ struct SellCarMainView: View {
 
 struct SellCarMainView_Previews: PreviewProvider {
     static var previews: some View {
-        SellCarMainView()
+        SellCarView()
     }
 }
