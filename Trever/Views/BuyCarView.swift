@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct BuyCarView: View {
-    private let items = CarRepository.sampleBuyList
+    @StateObject private var vm = BuyCarListViewModel()
     private let searchBarHeight: CGFloat = 48
     var body: some View {
         ZStack(alignment: .top) {
             // Scrollable list with top padding to avoid overlap with floating search
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(items) { item in
+                    ForEach(vm.items) { item in
                         NavigationLink {
-                            CarDetailView(detail: CarRepository.mockDetail(from: item))
+                            CarDetailScreen(vehicleId: item.backendId ?? 0)
                         } label: {
                             CarListItemView(model: item)
                         }
@@ -34,7 +34,7 @@ struct BuyCarView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .padding(.bottom, 60)
+        .task { await vm.load() }
     }
 }
 

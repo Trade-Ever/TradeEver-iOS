@@ -147,10 +147,24 @@ struct CarListItemView: View {
 }
 
 #Preview {
-    VStack(spacing: 16) {
-        CarListItemView(model: CarRepository.sampleBuyList[0])
-
-        CarListItemView(model: CarRepository.sampleAuctionList[0])
+    let sample = CarListItem(
+        id: UUID(),
+        backendId: 1,
+        title: "Torress EVX E7",
+        subTitle: "EVX",
+        year: 2024,
+        mileageKm: 38000,
+        thumbnailName: "https://picsum.photos/seed/1/1200/800",
+        tags: ["무사고", "전기"],
+        priceWon: 3_300_0000,
+        startPrice: 3_300_0000,
+        isAuction: false,
+        auctionEndsAt: nil,
+        likes: 12
+    )
+    return VStack(spacing: 16) {
+        CarListItemView(model: sample)
+        CarListItemView(model: sample)
     }
     .padding()
 }

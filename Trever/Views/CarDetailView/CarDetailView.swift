@@ -126,14 +126,13 @@ struct CarDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     VStack(alignment: .leading) {
-                        // 차량 이름
-                        Text(detail.title)
+                        // 메인 차량명: (제조사 + 모델) 없으면 기존 title
+                        Text(mainVehicleName)
                             .font(.title3)
                             .bold()
-                        
-                        // 차량 세부 옵션 명
-                        if let sub = detail.subTitle {
-                            Text(sub).font(.title3).bold()
+                        // 차량 세부 옵션 명: optionName(=title) or subTitle
+                        if let opt = optionDisplayName {
+                            Text(opt).font(.title3).bold()
                         }
                     }
                     Spacer()
@@ -168,6 +167,17 @@ struct CarDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 24)
+    }
+
+    private var mainVehicleName: String {
+        let parts = [detail.manufacturer, detail.modelName].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        if parts.isEmpty { return detail.title }
+        return parts.joined(separator: " ")
+    }
+
+    private var optionDisplayName: String? {
+        if let opt = detail.optionName, !opt.isEmpty { return opt }
+        return detail.subTitle
     }
 
     // MARK: - 차량 스펙 옵션 섹션
@@ -209,7 +219,7 @@ struct CarDetailView: View {
                     .bold()
                 Spacer()
                 NavigationLink {
-                    AuctionBidHistoryView(carId: detail.id)
+                    AuctionBidHistoryView(vehicleId: detail.backendId ?? 0)
                 } label: {
                     Text("더보기")
                         .font(.subheadline)
@@ -436,8 +446,5 @@ struct CarDetailView: View {
 }
 
 #Preview {
-    NavigationStack {
-        let item = CarRepository.sampleAuctionList[0]
-        CarDetailView(detail: CarRepository.mockDetail(from: item))
-    }
+    NavigationStack { CarDetailScreen(vehicleId: 1) }
 }
