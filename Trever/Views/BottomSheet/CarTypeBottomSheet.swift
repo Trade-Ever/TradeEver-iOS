@@ -16,14 +16,16 @@ struct CarTypeBottomSheet: View {
     var body: some View {
         VStack(spacing: 8) {
             Text("차종 선택")
-                .font(.title)
+                .font(.title2)
                 .bold()
                 .padding(.top, 24)
-                .padding(.bottom, 12)
+                .foregroundColor(.grey400)
             
             // 2행 4열 버튼
             let rows = [Array(carTypes[0...3]), Array(carTypes[4...7])]
             
+            Spacer()
+
             ForEach(rows, id: \.self) { row in
                 HStack(spacing: 10) {
                     ForEach(row, id: \.self) { type in
@@ -44,8 +46,8 @@ struct CarTypeBottomSheet: View {
                 .padding(.vertical, 4)
             }
             
-            Spacer()
-            
+            Spacer(minLength: 28) // 버튼과 하단 버튼 사이 여백
+
             // 하단 버튼 교체
             BottomSheetButtons(
                 onConfirm: {

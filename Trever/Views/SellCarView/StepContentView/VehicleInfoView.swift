@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct VehicleOptionView: View {
-    @State private var vehicleModel: String = ""
-    @State private var year: String = ""
-    @State private var carType: String = ""
-    @State private var mileage: String = ""
+struct VehicleInfoView: View {
+    @Binding var vehicleModel: String
+    @Binding var vehicleYear: String
+    @Binding var vehicleType: String
+    @Binding var vehicleMileage: String
     
-    @State private var step: Int = 0
+    @Binding var step: Int
     
     // FocusState
     enum Field: Hashable {
@@ -25,34 +25,34 @@ struct VehicleOptionView: View {
     @State private var showCarTypeSheet = false
     @State private var selectedCarTypes: [String] = []
     
-    
     var body: some View {
-        VStack(spacing: 12) {
-            
+        VStack(spacing: 7) {
             // 1. 차량 모델
             if step >= 0 {
                 InputSection(title: "차량 모델을 선택해주세요") {
                     CustomInputBox(placeholder: "현대 아반떼 SN7", text: $vehicleModel)
                         .focused($focusedField, equals: .vehicleModel)
+                        .id(Field.vehicleModel)
                         .onSubmit {
-                            withAnimation(.easeInOut) { step = 1 }
+                            withAnimation(.easeInOut) { step = max(step, 1) }
                             focusedField = .year
                         }
                 }
-                .stepTransition(step: step, target: 0)
+                //.stepTransition(step: step, target: 0)
             }
             
             // 2. 연식
             if step >= 1 {
                 InputSection(title: "연식을 입력해주세요") {
-                    CustomInputBox(placeholder: "2023년", text: $year)
+                    CustomInputBox(placeholder: "2023년", text: $vehicleYear)
                         .focused($focusedField, equals: .year)
+                        .id(Field.year)
                         .onSubmit {
-                            withAnimation(.easeInOut) { step = 2 }
+                            withAnimation(.easeInOut) { step = max(step, 2) }
                             focusedField = .carType
                         }
                 }
-                .stepTransition(step: step, target: 1)
+                //.stepTransition(step: step, target: 1)
             }
             
             // 3. 차종
@@ -60,31 +60,36 @@ struct VehicleOptionView: View {
                 InputSection(title: "차종을 선택해주세요") {
                     CustomInputBox(
                         placeholder: "대형, 준중형 등",
-                        isEditable: false,
-                        text: $carType,
+                        showSheet: true,
+                        text: $vehicleType
                     )
+                    .id(Field.carType)
                     .onTapGesture {
                         showCarTypeSheet = true
                     }
                 }
-                .stepTransition(step: step, target: 2)
+                //.stepTransition(step: step, target: 2)
             }
             
             // 4. 주행거리
             if step >= 3 {
-                InputSection(title: "주행거리를 입력해주세요") {
-                    CustomInputBox(placeholder: "11,234km", text: $mileage)
-                        .focused($focusedField, equals: .mileage)
-                        .onSubmit {
-                            // 마지막 단계
-                            focusedField = nil
-                        }
+                InputSection(title: "주행거리를 입력해주세요", subTitle: "(km)") {
+                    CustomInputBox(
+                        inputType: .number,
+                        placeholder: "11,234km",
+                        text: $vehicleMileage
+                    )
+                    .focused($focusedField, equals: .mileage)
+                    .id(Field.mileage)
+                    .onSubmit {
+                        focusedField = nil
+                    }
                 }
-                .stepTransition(step: step, target: 3)
+                //.stepTransition(step: step, target: 3)
             }
         }
         .onAppear {
-            focusedField = .vehicleModel // 처음 박스 포커스
+            focusedField = .vehicleModel
         }
         .sheet(isPresented: $showCarTypeSheet) {
             CarTypeBottomSheet(
@@ -92,22 +97,35 @@ struct VehicleOptionView: View {
                 selectedCarTypes: $selectedCarTypes
             )
             .onDisappear {
-                // 시트 닫힐 때 InputBox 업데이트
-                carType = selectedCarTypes.joined(separator: ", ")
-                
-                // 차종 선택 후 다음 단계로 이동
+                vehicleType = selectedCarTypes.joined(separator: ", ")
                 if !selectedCarTypes.isEmpty {
                     withAnimation(.easeInOut) {
-                        step = 3
+                        step = max(step, 3)
                         focusedField = .mileage
                     }
                 }
             }
-            .presentationDetents([.fraction(0.45)]) // 화면의 50% 차지
+            .presentationDetents([.fraction(0.4)])
         }
     }
 }
 
-#Preview {
-    VehicleOptionView()
+struct VehicleInfoView_Previews: PreviewProvider {
+    @State static var vehicleModel = ""
+    @State static var year = ""
+    @State static var carType = ""
+    @State static var mileage = ""
+    @State static var step = 0
+    
+    static var previews: some View {
+        VehicleInfoView(
+            vehicleModel: $vehicleModel,
+            vehicleYear: $year,
+            vehicleType: $carType,
+            vehicleMileage: $mileage,
+            step: $step
+        )
+        .previewLayout(.sizeThatFits)
+    }
 }
+

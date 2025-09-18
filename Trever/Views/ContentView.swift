@@ -16,7 +16,7 @@ struct ContentView: View {
     @State private var tabBarHidden: Bool = false
     private let tabBarPadding: CGFloat = 0 // space for custom tab bar when visible
 
-    private let tabBarHeight: CGFloat = 66 // CustomTabBar 실제 높이
+    private let tabBarHeight: CGFloat = 56 // CustomTabBar 실제 높이
 
     @State private var buyPath = NavigationPath()
     @State private var sellPath = NavigationPath()
@@ -46,7 +46,7 @@ struct ContentView: View {
                 }
             case .sell:
                 NavigationStack(path: $sellPath) {
-                    SellCarView()
+                    SellCarMainView()
                         .tabBarHidden(false)
                 }
             case .auction:

@@ -14,9 +14,10 @@ struct StepTransitionModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .transition(.opacity)
+            .opacity(step >= target ? 1 : 0)
             .offset(y: step >= target ? 0: 30)
-            .animation(.easeInOut, value: step)
+            .animation(.easeInOut(duration: 1), value: step)
+
     }
 }
 
