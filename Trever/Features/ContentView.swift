@@ -54,7 +54,7 @@ struct ContentView: View {
                 }
             case .sell:
                 NavigationStack(path: $sellPath) {
-                    SellCarMainView()
+                    SellCarView()
                         .tabBarHidden(false)
                 }
             case .auction:

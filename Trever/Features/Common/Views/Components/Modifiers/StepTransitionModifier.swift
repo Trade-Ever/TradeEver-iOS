@@ -17,7 +17,6 @@ struct StepTransitionModifier: ViewModifier {
             .opacity(step >= target ? 1 : 0)
             .offset(y: step >= target ? 0: 30)
             .animation(.easeInOut(duration: 1), value: step)
-
     }
 }
 

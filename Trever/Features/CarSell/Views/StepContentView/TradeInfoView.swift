@@ -63,7 +63,7 @@ struct TradeInfoView: View {
             if step >= 1 {
                 InputSection(title: "거래 날짜를 선택해주세요") {
                     HStack(spacing: 8) {
-                        DatePickerButton(title: "시작 날짜 선택", date: $startDate) { _ in
+                        DatePickerButton(title: "시작 날짜", date: $startDate) { _ in
                             // 시작 날짜 선택 시 처리
                             // 두 날짜가 모두 선택되면 다음 step으로
                             if startDate != nil && endDate != nil {
@@ -73,7 +73,7 @@ struct TradeInfoView: View {
                         }
                         Text("~")
                             .foregroundStyle(Color.grey300)
-                        DatePickerButton(title: "종료 날짜 선택", date: $endDate) { _ in
+                        DatePickerButton(title: "종료 날짜", date: $endDate) { _ in
                             // 종료 날짜 선택 시 처리
                             // 두 날짜가 모두 선택되면 다음 step으로
                             if startDate != nil && endDate != nil {

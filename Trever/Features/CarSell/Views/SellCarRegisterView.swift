@@ -7,8 +7,10 @@
 
 import SwiftUI
 
-struct SellCarView: View {
+struct SellCarRegisterView: View {
     @State private var currentStep: Int = 0
+    @State private var showExitAlert = false
+    
     @StateObject private var viewModel = SellCarViewModel()
     private let tabBarHeight: CGFloat = 66 // CustomTabBar height to avoid overlap
     @StateObject private var keyboard = KeyboardState()
@@ -24,7 +26,7 @@ struct SellCarView: View {
                     StepBarView(currentStep: $currentStep, totalSteps: totalSteps)
                         .padding(.top, 40)
                         .padding(.bottom, 24)
-
+                    
                     // 현재 페이지 내용
                     Group {
                         switch currentStep {
@@ -81,8 +83,7 @@ struct SellCarView: View {
                     .animation(.easeInOut, value: currentStep)
                     .frame(maxWidth: .infinity, alignment: .top)
                     .padding(.top, 8)
-                    .padding(.horizontal)
-
+                    
                     Spacer(minLength: 80) // 하단 바 영역 여유
                 }
             }
@@ -95,9 +96,33 @@ struct SellCarView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
+            .navigationBarBackButtonHidden(true) // 기본 Back 숨기기
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showExitAlert = true
+                    }) {
+                        HStack (spacing: 4) {
+                            Image(systemName: "arrow.left")
+                                .foregroundStyle(Color.errorRed)
+                            Text("나가기")
+                                .foregroundStyle(Color.errorRed)
+                                .bold()
+                        }
+                    }
+                }
+            }
+            .alert("정말 나가시겠습니까?", isPresented: $showExitAlert) {
+                Button("취소", role: .cancel) { }
+                Button("나가기", role: .destructive) {
+                    dismiss()
+                }
+            } message: {
+                Text("저장되지 않은 차량 등록 정보가 사라집니다.")
+            }
         }
     }
-
+    
     private var bottomActionBar: some View {
         HStack(spacing: 16) {
             if currentStep > 0 {
@@ -108,7 +133,7 @@ struct SellCarView: View {
                 )
                 .frame(width: 120)
             }
-
+            
             PrimaryButton(
                 title: currentStep == totalSteps - 1 ? "등록하기" : "다음",
                 action: { currentStep = min(currentStep + 1, totalSteps - 1) }
@@ -123,8 +148,8 @@ struct SellCarView: View {
     }
 }
 
-struct SellCarView_Previews: PreviewProvider {
+struct SellCarRegisterView_Previews: PreviewProvider {
     static var previews: some View {
-        SellCarView()
+        SellCarRegisterView()
     }
 }
