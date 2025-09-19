@@ -145,6 +145,30 @@ struct SellCarRegisterView: View {
             }
         }
     }
+//    
+//    private var bottomActionBar: some View {
+//        HStack(spacing: 16) {
+//            if currentStep > 0 {
+//                PrimaryButton(
+//                    title: "이전",
+//                    action: { currentStep = max(currentStep - 1, 0) },
+//                    isOutline: true
+//                )
+//                .frame(width: 120)
+//            }
+//            
+//            PrimaryButton(
+//                title: currentStep == totalSteps - 1 ? "등록하기" : "다음",
+//                action: { currentStep = min(currentStep + 1, totalSteps - 1) }
+//            )
+//            .frame(maxWidth: .infinity)
+//            .opacity(viewModel.isStepCompleted(currentStep: currentStep) ? 1.0 : 0.5)
+//            .disabled(!viewModel.isStepCompleted(currentStep: currentStep))
+//        }
+//        .padding(.horizontal)
+//        .padding(.vertical, 10)
+//        .background(Color.white) // 키보드 올라와도 위에 고정
+//    }
 }
 
 struct SellCarRegisterView_Previews: PreviewProvider {
