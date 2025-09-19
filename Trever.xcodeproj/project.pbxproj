@@ -6,13 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8410A12E2E7C1F0300CDC120 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8410A12D2E7C1F0300CDC120 /* Alamofire */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		534B0A6E2E77F48700998136 /* Trever.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trever.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		84A6FB0C2E7CEEB800E3190A /* Exceptions for "Trever" folder in "Trever" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 534B0A6D2E77F48700998136 /* Trever */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		534B0A702E77F48700998136 /* Trever */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				84A6FB0C2E7CEEB800E3190A /* Exceptions for "Trever" folder in "Trever" target */,
+			);
 			path = Trever;
 			sourceTree = "<group>";
 		};
@@ -23,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8410A12E2E7C1F0300CDC120 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +83,7 @@
 			);
 			name = Trever;
 			packageProductDependencies = (
+				8410A12D2E7C1F0300CDC120 /* Alamofire */,
 			);
 			productName = Trever;
 			productReference = 534B0A6E2E77F48700998136 /* Trever.app */;
@@ -94,6 +113,9 @@
 			);
 			mainGroup = 534B0A652E77F48700998136;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 534B0A6F2E77F48700998136 /* Products */;
 			projectDirPath = "";
@@ -255,6 +277,7 @@
 				DEVELOPMENT_TEAM = 9KQ22KVX75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Trever/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -285,6 +308,7 @@
 				DEVELOPMENT_TEAM = 9KQ22KVX75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Trever/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -326,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8410A12D2E7C1F0300CDC120 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 534B0A662E77F48700998136 /* Project object */;
 }

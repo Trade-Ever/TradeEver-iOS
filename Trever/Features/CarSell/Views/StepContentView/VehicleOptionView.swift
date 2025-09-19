@@ -22,10 +22,6 @@ struct VehicleOptionView: View {
     @State private var selectedCarOptions: [String] = []
     
     var body: some View {
-        //        ScrollView {
-        //
-        //        }
-        //        .ignoresSafeArea(.keyboard) // 키보드가 safe area를 침범할 수 있게
         VStack(spacing: 6) {
             
             // 1. 차량 옵션
