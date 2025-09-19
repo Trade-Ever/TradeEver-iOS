@@ -1,10 +1,3 @@
-//
-//  VehicleNamePage.swift
-//  Trever
-//
-//  Created by OhChangEun on 9/16/25.
-//
-
 import SwiftUI
 
 struct VehicleInfoView: View {
@@ -23,8 +16,8 @@ struct VehicleInfoView: View {
     
     // 바텀 시트 상태
     @State private var showCarTypeSheet = false
-    @State private var selectedCarTypes: [String] = []
-    
+    @State private var selectedCarType: String? = nil // 단일 선택
+
     var body: some View {
         VStack(spacing: 7) {
             // 1. 차량 모델
@@ -38,7 +31,6 @@ struct VehicleInfoView: View {
                             focusedField = .year
                         }
                 }
-                //.stepTransition(step: step, target: 0)
             }
             
             // 2. 연식
@@ -52,7 +44,6 @@ struct VehicleInfoView: View {
                             focusedField = .carType
                         }
                 }
-                //.stepTransition(step: step, target: 1)
             }
             
             // 3. 차종
@@ -68,7 +59,6 @@ struct VehicleInfoView: View {
                         showCarTypeSheet = true
                     }
                 }
-                //.stepTransition(step: step, target: 2)
             }
             
             // 4. 주행거리
@@ -85,7 +75,6 @@ struct VehicleInfoView: View {
                         focusedField = nil
                     }
                 }
-                //.stepTransition(step: step, target: 3)
             }
         }
         .onAppear {
@@ -94,11 +83,12 @@ struct VehicleInfoView: View {
         .sheet(isPresented: $showCarTypeSheet) {
             CarTypeBottomSheet(
                 isPresented: $showCarTypeSheet,
-                selectedCarTypes: $selectedCarTypes
+                selectedCarType: $selectedCarType // 단일 선택
             )
             .onDisappear {
-                vehicleType = selectedCarTypes.joined(separator: ", ")
-                if !selectedCarTypes.isEmpty {
+                // 선택된 값이 있으면 vehicleType에 반영
+                if let code = selectedCarType {
+                    vehicleType = code
                     withAnimation(.easeInOut) {
                         step = max(step, 3)
                         focusedField = .mileage
@@ -128,4 +118,3 @@ struct VehicleInfoView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
-

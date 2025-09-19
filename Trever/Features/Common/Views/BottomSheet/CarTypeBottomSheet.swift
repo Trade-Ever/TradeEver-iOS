@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CarTypeBottomSheet: View {
     @Binding var isPresented: Bool
-    @Binding var selectedCarTypes: [String]
+    @Binding var selectedCarType: String?  // 단일 선택으로 변경
     
     let carTypes = ["대형", "준중형", "중형", "소형", "스포츠", "SUV", "승합차", "경차"]
     
@@ -31,12 +31,13 @@ struct CarTypeBottomSheet: View {
                     ForEach(row, id: \.self) { type in
                         SelectableButton(
                             title: type,
-                            isSelected: selectedCarTypes.contains(type),
+                            isSelected: selectedCarType == type, // 단일 선택 비교
                             action: {
-                                if selectedCarTypes.contains(type) {
-                                    selectedCarTypes.removeAll { $0 == type }
+                                // 선택한 항목이 이미 선택된 경우 해제, 아니면 선택
+                                if selectedCarType == type {
+                                    selectedCarType = nil
                                 } else {
-                                    selectedCarTypes.append(type)
+                                    selectedCarType = type
                                 }
                             }
                         )
@@ -54,7 +55,7 @@ struct CarTypeBottomSheet: View {
                     isPresented = false
                 },
                 onReset: {
-                    selectedCarTypes.removeAll()
+                    selectedCarType = nil
                 }
             )
         }
@@ -67,9 +68,9 @@ struct CarTypeBottomSheet: View {
 // Preview
 struct CarTypePickerSheet_Previews: PreviewProvider {
     @State static var isPresented: Bool = true
-    @State static var selectedCarTypes: [String] = ["대형", "SUV"]
+    @State static var selectedCarType: String? = "대형"  // 단일 선택
     
     static var previews: some View {
-        CarTypeBottomSheet(isPresented: $isPresented, selectedCarTypes: $selectedCarTypes)
+        CarTypeBottomSheet(isPresented: $isPresented, selectedCarType: $selectedCarType)
     }
 }

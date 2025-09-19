@@ -49,5 +49,27 @@ class SellCarViewModel: ObservableObject {
         default: return true
         }
     }
+    
+    func registerVehicle() async {
+        do {
+            let request = SellCarRequest(from: model)
+            let imagesData = model.selectedImagesData
+
+            let apiResponse: ApiResponse<Int> = try await AFNetworkManager.shared.upload(
+                to: .vehicles,
+                request: request,
+                imagesData: imagesData,
+                responseType: ApiResponse<Int>.self
+            )
+
+            if apiResponse.success {
+                print("차량 등록 성공: \(apiResponse.message)")
+            } else {
+                print("차량 등록 실패: \(apiResponse.message)")
+            }
+        } catch {
+            print("차량 등록 실패: \(error.localizedDescription)")
+        }
+    }
 }
 
