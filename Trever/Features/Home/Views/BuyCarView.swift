@@ -21,7 +21,6 @@ struct BuyCarView: View {
                 }
                 .padding(.top, searchBarHeight + 16)
             }
-            .padding(.bottom, 60)
 
             // Floating search button
             NavigationLink {

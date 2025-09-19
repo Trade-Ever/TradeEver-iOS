@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		53CB71462E7D29BF00B940AE /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 53CB71452E7D29BF00B940AE /* Alamofire */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		534B0A6E2E77F48700998136 /* Trever.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trever.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				53CB71462E7D29BF00B940AE /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = Trever;
 			packageProductDependencies = (
+				53CB71452E7D29BF00B940AE /* Alamofire */,
 			);
 			productName = Trever;
 			productReference = 534B0A6E2E77F48700998136 /* Trever.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 534B0A652E77F48700998136;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				53CB71442E7D29BF00B940AE /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 534B0A6F2E77F48700998136 /* Products */;
 			projectDirPath = "";
@@ -326,6 +335,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		53CB71442E7D29BF00B940AE /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		53CB71452E7D29BF00B940AE /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 53CB71442E7D29BF00B940AE /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 534B0A662E77F48700998136 /* Project object */;
 }

@@ -144,7 +144,7 @@ struct SellCarRegisterView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .background(.ultraThinMaterial) // 키보드 올라와도 위에 고정
+        .background(Color.white) // 키보드 올라와도 위에 고정
     }
 }
 

@@ -16,7 +16,6 @@ struct AuctionView: View {
                     .padding(.horizontal, 16)
                 }
             }
-            .padding(.bottom, 60)
         }
         .navigationTitle("경매")
         .task { await vm.load() }
