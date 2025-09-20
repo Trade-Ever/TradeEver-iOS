@@ -3,20 +3,71 @@ import Combine
 
 @MainActor
 final class BuyCarListViewModel: ObservableObject {
-//    @Published var items: [CarListItem] = []
     @Published var vehicleItems: VehiclesPage?
+    @Published var isLoading = false
+    @Published var isLoadingMore = false
+    @Published var error: String?
     
-    private let networkMananger = NetworkManager.shared
+    private let networkManager = NetworkManager.shared
+    private var currentPage = 0
+    private let pageSize = 20
+    private var hasMorePages = true
+    private var currentTask: Task<Void, Never>?
     
     func fetchVehicles() async {
-        let result = await networkMananger.fetchVehicles(
-            page: 0,
-            size: 20,
+        // 이전 요청이 있으면 취소
+        currentTask?.cancel()
+        
+        currentPage = 0
+        hasMorePages = true
+        isLoading = true
+        error = nil
+        
+        currentTask = Task {
+            let result = await networkManager.fetchVehicles(
+                page: currentPage,
+                size: pageSize,
+                sortBy: nil,
+                isAuction: false
+            )
+            
+            // Task가 취소되었는지 확인
+            guard !Task.isCancelled else { return }
+            
+            await MainActor.run {
+                if let data = result {
+                    vehicleItems = data
+                    hasMorePages = data.vehicles.count == pageSize
+                } else {
+                    error = "차량 정보를 불러올 수 없습니다."
+                }
+                isLoading = false
+            }
+        }
+        
+        await currentTask?.value
+    }
+    
+    func loadMoreVehicles() async {
+        guard !isLoadingMore && hasMorePages else { return }
+        
+        isLoadingMore = true
+        currentPage += 1
+        
+        let result = await networkManager.fetchVehicles(
+            page: currentPage,
+            size: pageSize,
             sortBy: nil,
             isAuction: false
         )
+        
         await MainActor.run {
-            self.vehicleItems = result
+            if let data = result {
+                let newVehicles = data.vehicles
+                vehicleItems?.vehicles.append(contentsOf: newVehicles)
+                hasMorePages = newVehicles.count == pageSize
+            }
+            isLoadingMore = false
         }
     }
     

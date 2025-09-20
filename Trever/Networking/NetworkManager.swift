@@ -44,6 +44,23 @@ final class NetworkManager {
             return nil
         }
     }
+    
+    /// Fetch vehicle detail by ID
+    func fetchCarDetail(vehicleId: Int) async -> CarDetailData? {
+        do {
+            let response: CarDetailResponse = try await AF.request(
+                "\(baseURL)/vehicles/\(vehicleId)",
+                method: .get
+            )
+            .serializingDecodable(CarDetailResponse.self)
+            .value
+            
+            return response.data
+        } catch {
+            print("차량 상세 조회 실패: \(error)")
+            return nil
+        }
+    }
 
 //    private var jsonDecoder: JSONDecoder {
 //        let d = JSONDecoder()

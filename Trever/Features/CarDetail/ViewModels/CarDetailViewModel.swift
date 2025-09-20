@@ -5,23 +5,67 @@ final class CarDetailViewModel: ObservableObject {
     @Published var detail: CarDetail?
     @Published var isLoading = false
     @Published var error: String?
+    @Published var liveAuction: AuctionLive?
 
-    private let service: VehicleService
-    private let vehicleId: Int64
+    private let networkManager = NetworkManager.shared
+    private let vehicleId: Int
+    private let initialAuctionId: Int?
 
-    init(vehicleId: Int64, service: VehicleService = MockVehicleService.shared) {
+    init(vehicleId: Int, auctionId: Int? = nil) {
         self.vehicleId = vehicleId
-        self.service = service
+        self.initialAuctionId = auctionId
+        // If we already know auctionId, start live subscription immediately
+        if let aid = auctionId {
+            subscribeAuction(auctionId: aid)
+        }
     }
+
+    private var liveHandle: UInt?
+    nonisolated(unsafe) private var liveHandleUnsafe: UInt?
+    nonisolated(unsafe) private var subscribedAuctionIdUnsafe: Int?
 
     func load() async {
         isLoading = true
         defer { isLoading = false }
-        do {
-            let dto = try await service.fetchDetail(vehicleId: vehicleId)
-            detail = DTOMapper.toDetail(dto)
-        } catch {
-            self.error = String(describing: error)
+        
+        let result = await networkManager.fetchCarDetail(vehicleId: vehicleId)
+        
+        await MainActor.run { [weak self] in
+            if let data = result {
+                self?.detail = data
+                // subscribe live by auctionId first, else vehicleId
+                if let aid = data.auctionId {
+                    self?.subscribeAuction(auctionId: aid)
+                } else if self?.initialAuctionId == nil { // only fallback if we didn't already subscribe by initial id
+                    self?.subscribeAuctionByVehicleId(vehicleId: data.id)
+                }
+            } else {
+                self?.error = "차량 정보를 불러올 수 없습니다."
+            }
+        }
+    }
+
+    private nonisolated func subscribeAuction(auctionId: Int) {
+        let handle = FirebaseAuctionService.shared.observeAuction(auctionId: auctionId) { [weak self] live in
+            Task { @MainActor in self?.liveAuction = live }
+        }
+        // store safely on main actor and also in unsafe copies for deinit
+        Task { @MainActor in
+            self.liveHandle = handle
+            self.liveHandleUnsafe = handle
+            self.subscribedAuctionIdUnsafe = auctionId
+        }
+    }
+
+    private nonisolated func subscribeAuctionByVehicleId(vehicleId: Int) {
+        _ = FirebaseAuctionService.shared.observeAuctionByVehicleIdContinuous(vehicleId: vehicleId) { [weak self] live in
+            Task { @MainActor in self?.liveAuction = live }
+        }
+    }
+
+    deinit {
+        if let aid = subscribedAuctionIdUnsafe, let h = liveHandleUnsafe {
+            FirebaseAuctionService.shared.removeObserver(auctionId: aid, handle: h)
         }
     }
 }

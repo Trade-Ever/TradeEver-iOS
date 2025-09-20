@@ -2,7 +2,7 @@ import Foundation
 
 struct CarListItem: Identifiable, Hashable {
     let id: UUID
-    let backendId: Int64?
+    let backendId: Int?
     let title: String
     let subTitle: String?
     let year: Int
