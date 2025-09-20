@@ -8,11 +8,11 @@ struct BuyCarView: View {
             // Scrollable list with top padding to avoid overlap with floating search
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(vm.items) { item in
+                    ForEach(vm.vehicleItems?.vehicles ?? []) { vehicle in
                         NavigationLink {
-                            CarDetailScreen(vehicleId: item.backendId ?? 0)
+                            CarDetailScreen(vehicleId: vehicle.id)
                         } label: {
-                            CarListItemView(model: item)
+                            CarListItemView(apiModel: vehicle)
                         }
                         .buttonStyle(.plain)
                         .padding(.vertical, 12)
@@ -34,7 +34,7 @@ struct BuyCarView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await vm.load() }
+        .task { await vm.fetchVehicles() }
     }
 }
 
