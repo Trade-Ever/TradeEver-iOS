@@ -24,7 +24,7 @@ struct AccidentInfoView: View {
     var body: some View {
         VStack(spacing: 12) {
             
-            // 0. 사고 이력 선택
+            // 0. 사고 이력 선택(있음, 없음)
             if step >= 0 {
                 InputSection(title: "사고 이력을 선택해주세요") {
                     HStack(spacing: 16) {
@@ -35,7 +35,8 @@ struct AccidentInfoView: View {
                                 action: {
                                     accidentHistory = option
                                     // 선택하면 다음 step으로
-                                    withAnimation(.easeInOut) { step = max(step, 1) }
+                                    withAnimation(.easeInOut) {
+                                        step = max(step, 1) }
                                     focusedField = .detailedDescription
                                 }
                             )
@@ -46,11 +47,11 @@ struct AccidentInfoView: View {
                 .stepTransition(step: step, target: 0)
             }
             
-            // 1. 상세 설명 입력
-            if step >= 1 {
+            // 1. 상세 설명 입력(사고 이력 있을 때)
+            if step >= 1 && accidentHistory == "있음" {
                 InputSection(title: "사고 정보에 대해 입력해주세요") {
                     CustomMultilineInputBox(
-                        placeholder: "차량 상태, 사고 여부, 관리 이력 등",
+                        placeholder: "사고 정보에 대해 상세하게 입력해주세요(5글자 이상)",
                         text: $accidentDescription
                     )
                     .focused($focusedField, equals: .detailedDescription)

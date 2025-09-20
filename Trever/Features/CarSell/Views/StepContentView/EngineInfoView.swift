@@ -48,7 +48,6 @@ struct EngineInfoView: View {
                     .padding(.horizontal, 8)
 
                 }
-                .stepTransition(step: step, target: 0)
             }
 
             // 2. 변속기
@@ -70,7 +69,6 @@ struct EngineInfoView: View {
                     }
                     .padding(.horizontal, 8)
                 }
-                .stepTransition(step: step, target: 1)
             }
 
             
@@ -88,7 +86,6 @@ struct EngineInfoView: View {
                         focusedField = .horsepower
                     }
                 }
-                .stepTransition(step: step, target: 2)
             }
             
             // 4. 마력
@@ -104,7 +101,6 @@ struct EngineInfoView: View {
                         focusedField = nil
                     }
                 }
-                .stepTransition(step: step, target: 3)
             }
         }
         .onAppear {

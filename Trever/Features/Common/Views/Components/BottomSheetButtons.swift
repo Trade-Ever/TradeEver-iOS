@@ -16,21 +16,23 @@ struct BottomSheetButtons: View {
             // 초기화 버튼
             PrimaryButton(
                 title: "초기화",
-                action: onReset,
                 fontSize: 20,
                 cornerRadius: 50,
                 height: 52,
                 isOutline: true
-            )
+            ) {
+                onReset()
+            }
             
             // 확인 버튼
             PrimaryButton(
                 title: "확인",
-                action: onConfirm,
                 fontSize: 20,
                 cornerRadius: 50,
                 height: 52,
-            )
+            ) {
+                onConfirm()
+            }
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
