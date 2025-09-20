@@ -10,7 +10,7 @@ import Foundation
 typealias VehiclesResponse = ApiResponse<VehiclesPage>
 
 struct VehiclesPage: Codable {
-    let vehicles: [VehicleAPIItem]
+    var vehicles: [VehicleAPIItem]
     let totalCount: Int
     let pageNumber: Int
     let pageSize: Int
@@ -22,8 +22,8 @@ struct VehicleAPIItem: Codable, Identifiable {
     let carNumber: String?
     let manufacturer: String?
     let model: String?
-    let year_value: Int
-    let mileage: Int
+    let year_value: Int?
+    let mileage: Int?
     let transmission: String?
     let vehicleStatus: String?
     let fuelType: String?

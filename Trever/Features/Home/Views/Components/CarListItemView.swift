@@ -187,8 +187,8 @@ extension CarListItemView {
         let price = v.currentPrice ?? v.price ?? startPrice
         let vm = ViewModel(
             title: v.carName ?? v.model ?? "차량",
-            year: v.year_value,
-            mileageKilometers: v.mileage,
+            year: v.year_value ?? 0,
+            mileageKilometers: v.mileage ?? 0,
             thumbnailURLString: v.representativePhotoUrl,
             tags: tags,
             priceWon: price,

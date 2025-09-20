@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		53CB72382E7EA29400B940AE /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 53CB72372E7EA29400B940AE /* FirebaseAnalytics */; };
+		53CB723A2E7EA29400B940AE /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 53CB72392E7EA29400B940AE /* FirebaseCore */; };
+		53CB723C2E7EA34E00B940AE /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 53CB723B2E7EA34E00B940AE /* FirebaseDatabase */; };
+		53CB723E2E7EA34E00B940AE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 53CB723D2E7EA34E00B940AE /* FirebaseFirestore */; };
 		8410A12E2E7C1F0300CDC120 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8410A12D2E7C1F0300CDC120 /* Alamofire */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +44,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				53CB72382E7EA29400B940AE /* FirebaseAnalytics in Frameworks */,
+				53CB723A2E7EA29400B940AE /* FirebaseCore in Frameworks */,
+				53CB723C2E7EA34E00B940AE /* FirebaseDatabase in Frameworks */,
+				53CB723E2E7EA34E00B940AE /* FirebaseFirestore in Frameworks */,
 				8410A12E2E7C1F0300CDC120 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +92,10 @@
 			name = Trever;
 			packageProductDependencies = (
 				8410A12D2E7C1F0300CDC120 /* Alamofire */,
+				53CB72372E7EA29400B940AE /* FirebaseAnalytics */,
+				53CB72392E7EA29400B940AE /* FirebaseCore */,
+				53CB723B2E7EA34E00B940AE /* FirebaseDatabase */,
+				53CB723D2E7EA34E00B940AE /* FirebaseFirestore */,
 			);
 			productName = Trever;
 			productReference = 534B0A6E2E77F48700998136 /* Trever.app */;
@@ -115,6 +127,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 534B0A6F2E77F48700998136 /* Products */;
@@ -354,6 +367,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
+			};
+		};
 		8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -365,6 +386,26 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		53CB72372E7EA29400B940AE /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		53CB72392E7EA29400B940AE /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		53CB723B2E7EA34E00B940AE /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		53CB723D2E7EA34E00B940AE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 53CB72362E7EA29400B940AE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		8410A12D2E7C1F0300CDC120 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8410A12C2E7C1F0300CDC120 /* XCRemoteSwiftPackageReference "Alamofire" */;
