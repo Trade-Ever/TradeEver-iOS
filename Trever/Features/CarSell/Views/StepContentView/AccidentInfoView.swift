@@ -34,10 +34,22 @@ struct AccidentInfoView: View {
                                 isSelected: accidentHistory == option,
                                 action: {
                                     accidentHistory = option
+
+                                    // "없음" 선택 시 사고 정보 초기화
+                                    if option == "없음" {
+                                        accidentDescription = ""
+                                    }
                                     // 선택하면 다음 step으로
                                     withAnimation(.easeInOut) {
-                                        step = max(step, 1) }
-                                    focusedField = .detailedDescription
+                                        step = max(step, 1)
+                                    }
+                                    
+                                    // "있음" 선택 시에만 포커스
+                                    if option == "있음" {
+                                        focusedField = .detailedDescription
+                                    } else {
+                                        focusedField = nil
+                                    }
                                 }
                             )
                         }

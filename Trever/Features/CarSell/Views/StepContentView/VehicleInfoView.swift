@@ -209,7 +209,7 @@ struct CarSelectionFlowView: View {
     
     var body: some View {
         NavigationStack {
-            ManufacturerListView(
+            CarManufacturerListView(
                 filter: filter,
                 onComplete: { completedFilter in
                     onComplete(completedFilter)

@@ -24,7 +24,7 @@ class SellCarViewModel: ObservableObject {
     var isEngineInfoCompleted: Bool { engineInfoStep >= 3 && model.horsepower.count >= 1}
     var isImageUploadCompleted: Bool { imageUploadStep >= 1 && model.vehicleColor.count >= 1 }
     var isVehicleOptionCompleted: Bool { vehicleOptionStep >= 1 }
-    var isAccidentInfoCompleted: Bool { model.accidentHistory == "없음" || (accidentInfoStep >= 1 && model.accidentDescription.count >= 5) }
+    var isAccidentInfoCompleted: Bool { model.accidentHistory == "없음" || (accidentInfoStep >= 1 && model.accidentDescription.count >= 1) }
     var isTradeInfoCompleted: Bool { tradeInfoStep >= 2 && model.price.count >= 2}
     
     // 페이지별 완료 여부 계산
@@ -51,7 +51,7 @@ class SellCarViewModel: ObservableObject {
         }
     }
     
-    func registerVehicle() async {
+    func registerVehicle() async -> Bool {
         do {
             let request = SellCarRequest(from: model)
             let imagesData = model.selectedImagesData
@@ -64,13 +64,13 @@ class SellCarViewModel: ObservableObject {
             )
 
             if apiResponse.success {
-                print("차량 등록 성공: \(apiResponse.message)")
+                return true
             } else {
-                print("차량 등록 실패: \(apiResponse.message)")
+                return false
             }
         } catch {
             print("차량 등록 실패: \(error.localizedDescription)")
+            return false
         }
     }
 }
-

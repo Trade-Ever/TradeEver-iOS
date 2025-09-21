@@ -11,7 +11,9 @@ struct SellCarRegisterView: View {
     @State private var currentStep: Int = 0 // 현재 단계
     @State private var showExitAlert = false // 화면 나가기 클릭 시 상태
     @State private var showRegisterAlert = false // 차량 등록 시 표시 상태
-
+    @State private var showSuccessAlert = false // 등록 완료 알림 상태
+    @State private var registrationSuccess = false // 등록 성공 여부
+    
     @StateObject private var viewModel = SellCarViewModel()
     @StateObject private var keyboard = KeyboardState()
     
@@ -146,11 +148,26 @@ struct SellCarRegisterView: View {
                 Button("취소", role: .cancel) { }
                 Button("등록") {
                     Task {
-                        await viewModel.registerVehicle()
+                        let success = await viewModel.registerVehicle()
+                        registrationSuccess = success
+                        showSuccessAlert = true
                     }
                 }
             } message: {
                 Text("차량을 등록하시겠습니까?")
+            }
+            // 등록 완료 알림
+            .alert(registrationSuccess ? "등록 완료" : "등록 실패",
+                   isPresented: $showSuccessAlert) {
+                Button("확인") {
+                    if registrationSuccess {
+                        dismiss() // 성공시 화면 닫기
+                    }
+                }
+            } message: {
+                Text(registrationSuccess ?
+                     "차량이 성공적으로 등록되었습니다." :
+                     "차량 등록에 실패했습니다. 다시 시도해주세요.")
             }
         }
     }

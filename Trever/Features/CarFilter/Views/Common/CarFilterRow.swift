@@ -33,7 +33,7 @@ struct CarFilterRow: View {
             
             Spacer()
             
-            if count >= 0 {
+            if count > 0 {
                 Text("\(count)")
                     .foregroundColor(Color.grey300.opacity(0.7))
                     .font(.system(size: 14))
@@ -82,25 +82,5 @@ struct CarFilterRow: View {
              
          )
          */
-    }
-}
-
-#Preview {
-    VStack(spacing: 12) {
-        CarFilterRow(
-            image: "hyundai_logo",
-            name: "현대",
-            count: 123,
-            isSelected: true,
-            onTap: { print("현대 클릭됨") }
-        )
-        
-        CarFilterRow(
-            image: nil, // 이미지 없음
-            name: "기아",
-            count: 56,
-            isSelected: false,
-            onTap: { print("기아 클릭됨") }
-        )
     }
 }
