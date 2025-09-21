@@ -11,7 +11,6 @@ struct TermsView: View {
         }
         .navigationTitle("약관 및 정책")
         .navigationBarTitleDisplayMode(.large)
-        .tabBarHidden(true)
         .background(Color(.systemGroupedBackground))
     }
 

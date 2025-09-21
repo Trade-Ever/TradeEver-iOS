@@ -41,7 +41,6 @@ struct CarDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) { bottomActionBar }
         .background(Color(.systemBackground))
-        .tabBarHidden(true)
         .sheet(isPresented: $showMarkSoldSheet) {
 //            MarkSoldSheet(buyers: detail.potentialBuyers ?? []) { buyerId in
 //                // TODO: API call with buyerId
@@ -52,15 +51,18 @@ struct CarDetailView: View {
 //            .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showBidSheet) {
-//            AuctionBidSheet(
-//                currentPriceWon: detail.priceWon,
-//                startPriceWon: detail.startPrice,
-//                onConfirm: { _, _ in
-//                    showBidSheet = false
-//                }
-//            )
-//            .presentationDetents([.fraction(0.3)])
-//            .presentationDragIndicator(.hidden)
+            let currentPrice = vm.liveAuction?.currentBidPrice ?? vm.liveAuction?.startPrice ?? detail.price ?? 0
+            let startPrice = vm.liveAuction?.startPrice ?? detail.price ?? 0
+            
+            AuctionBidSheet(
+                currentPriceWon: currentPrice,
+                startPriceWon: startPrice,
+                onConfirm: { _, _ in
+                    showBidSheet = false
+                }
+            )
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.hidden)
         }
     }
 
@@ -213,12 +215,12 @@ struct CarDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             let specs = buildSpecs()
             if !specs.isEmpty {
-                ForEach(specs.sorted(by: { $0.key < $1.key }), id: \.key) { kv in
+                ForEach(specs, id: \.0) { key, value in
                     HStack(alignment: .top) {
-                        Text(kv.key)
+                        Text(key)
                             .frame(width: 120, alignment: .leading)
                             .foregroundStyle(.secondary)
-                        Text(kv.value)
+                        Text(value)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .font(.subheadline)
@@ -232,14 +234,48 @@ struct CarDetailView: View {
         .padding(.horizontal, 16)
     }
     
-    private func buildSpecs() -> [String: String] {
-        var specs: [String: String] = [:]
-        if let fuelType = detail.fuelType, !fuelType.isEmpty { specs["연료"] = fuelType }
-        if let transmission = detail.transmission, !transmission.isEmpty { specs["변속기"] = transmission }
-        if let color = detail.color, !color.isEmpty { specs["색상"] = color }
-        if let horsepower = detail.horsepower { specs["마력"] = "\(horsepower)hp" }
-        if let engineCc = detail.engineCc { specs["배기량"] = "\(engineCc)cc" }
-        if let accidentHistory = detail.accidentHistory { specs["사고이력"] = accidentHistory == "Y" ? "있음" : "없음" }
+    private func buildSpecs() -> [(String, String)] {
+        var specs: [(String, String)] = []
+
+        // 기본 정보
+        if let carNumber = detail.carNumber, !carNumber.isEmpty { specs.append(("차량번호", carNumber)) }
+//        if let carName = detail.carName, !carName.isEmpty { specs.append(("차명", carName)) }
+//        if let manufacturer = detail.manufacturer, !manufacturer.isEmpty { specs.append(("제조사", manufacturer)) }
+//        if let model = detail.model, !model.isEmpty { specs.append(("모델", model)) }
+//
+//        // 연식 / 주행거리
+//        if let year = detail.yearValue { specs.append(("연식", Formatters.yearText(year))) }
+//        if let mileage = detail.mileage { specs.append(("주행거리", Formatters.mileageText(km: mileage))) }
+
+        // 파워트레인/제원
+        if let fuelType = detail.fuelType, !fuelType.isEmpty { specs.append(("연료", fuelType)) }
+        if let transmission = detail.transmission, !transmission.isEmpty { specs.append(("변속기", transmission)) }
+        if let engineCc = detail.engineCc { specs.append(("배기량", "\(engineCc)cc")) }
+        if let horsepower = detail.horsepower { specs.append(("마력", "\(horsepower)hp")) }
+
+        // 외관/차종
+        if let color = detail.color, !color.isEmpty { specs.append(("색상", color)) }
+        if let vehicleType = detail.vehicleTypeName, !vehicleType.isEmpty { specs.append(("차종", vehicleType)) }
+
+        // 사고 이력 및 설명
+        if let accidentHistory = detail.accidentHistory {
+            let hasAccident = (accidentHistory == "Y")
+            specs.append(("사고이력", hasAccident ? "있음" : "없음"))
+            if hasAccident, let accDesc = detail.accidentDescription, !accDesc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                specs.append(("사고설명", accDesc))
+            }
+        }
+
+        // 설명(상세 설명)
+        if let desc = detail.description, !desc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            specs.append(("설명", desc))
+        }
+
+        // 옵션 목록 (샘플 payload의 `options` 또는 기존 필드 대체)
+        if let options = detail.options, !options.isEmpty {
+            specs.append(("옵션", options.joined(separator: ", ")))
+        }
+
         return specs
     }
 
@@ -265,7 +301,8 @@ struct CarDetailView: View {
                     .bold()
                 Spacer()
                 NavigationLink {
-                    AuctionBidHistoryView(vehicleId: Int64(detail.id ?? 0))
+                    AuctionBidHistoryView(vehicleId: Int64(detail.id), auctionId: detail.auctionId)
+                        .environmentObject(vm)
                 } label: {
                     Text("더보기")
                         .font(.subheadline)
@@ -277,10 +314,18 @@ struct CarDetailView: View {
                 }
             }
             .padding(.bottom, 8)
-            // 상위 5개 입찰 내역만 노출
-//            ForEach(detail.bids.prefix(5)) { bid in
-//                BidListItem(bid: bid)
-//            }
+            // 상위 3개 입찰 내역 (실시간)
+            if vm.topBids.isEmpty {
+                Text("입찰 내역이 없습니다.")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
+            } else {
+                ForEach(vm.topBids) { bid in
+                    BidListItem(bid: bid)
+                }
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 24)
@@ -340,7 +385,7 @@ struct CarDetailView: View {
                             HStack {
                                 Circle().fill(Color.grey100).frame(width: 25, height: 25)
                                     .overlay(Image(systemName: "person").foregroundStyle(.secondary))
-                                Text("홍길동")
+                                Text(vm.liveAuction?.currentBidUserName ?? "입찰자 없음")
                                     .font(.subheadline)
                             }
                         }

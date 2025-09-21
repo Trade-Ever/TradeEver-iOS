@@ -6,6 +6,8 @@ final class CarDetailViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var error: String?
     @Published var liveAuction: AuctionLive?
+    @Published var topBids: [BidEntry] = []
+    @Published var allBids: [BidEntry] = []
 
     private let networkManager = NetworkManager.shared
     private let vehicleId: Int
@@ -17,12 +19,14 @@ final class CarDetailViewModel: ObservableObject {
         // If we already know auctionId, start live subscription immediately
         if let aid = auctionId {
             subscribeAuction(auctionId: aid)
+            subscribeBids(auctionId: aid)
         }
     }
 
     private var liveHandle: UInt?
     nonisolated(unsafe) private var liveHandleUnsafe: UInt?
     nonisolated(unsafe) private var subscribedAuctionIdUnsafe: Int?
+    private var bidsHandle: UInt?
 
     func load() async {
         isLoading = true
@@ -36,6 +40,7 @@ final class CarDetailViewModel: ObservableObject {
                 // subscribe live by auctionId first, else vehicleId
                 if let aid = data.auctionId {
                     self?.subscribeAuction(auctionId: aid)
+                    self?.subscribeBids(auctionId: aid)
                 } else if self?.initialAuctionId == nil { // only fallback if we didn't already subscribe by initial id
                     self?.subscribeAuctionByVehicleId(vehicleId: data.id)
                 }
@@ -59,13 +64,31 @@ final class CarDetailViewModel: ObservableObject {
 
     private nonisolated func subscribeAuctionByVehicleId(vehicleId: Int) {
         _ = FirebaseAuctionService.shared.observeAuctionByVehicleIdContinuous(vehicleId: vehicleId) { [weak self] live in
-            Task { @MainActor in self?.liveAuction = live }
+            Task { @MainActor in
+                self?.liveAuction = live
+                if let aid = live?.id, self?.bidsHandle == nil {
+                    self?.subscribeBids(auctionId: aid)
+                    self?.subscribedAuctionIdUnsafe = aid
+                }
+            }
+        }
+    }
+
+    private func subscribeBids(auctionId: Int) {
+        bidsHandle = FirebaseAuctionService.shared.observeBids(auctionId: auctionId) { [weak self] bids in
+            Task { @MainActor in
+                self?.allBids = bids
+                self?.topBids = Array(bids.prefix(3))
+            }
         }
     }
 
     deinit {
         if let aid = subscribedAuctionIdUnsafe, let h = liveHandleUnsafe {
             FirebaseAuctionService.shared.removeObserver(auctionId: aid, handle: h)
+        }
+        if let aid = subscribedAuctionIdUnsafe, let bh = bidsHandle {
+            FirebaseAuctionService.shared.removeBidsObserver(auctionId: aid, handle: bh)
         }
     }
 }

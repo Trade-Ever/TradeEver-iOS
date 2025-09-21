@@ -46,7 +46,7 @@ struct BuyCarView: View {
 
             // Floating search button
             NavigationLink {
-                SearchView().tabBarHidden(true)
+                SearchView()
             } label: {
                 SearchBarButton(title: "차량 검색") {}
                     .shadow(color: .black.opacity(0.06), radius: 6, y: 2)

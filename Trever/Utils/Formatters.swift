@@ -2,6 +2,7 @@ import Foundation
 
 enum Formatters {
     static func yearText(_ year: Int) -> String { "\(year)년식" }
+    
     static func mileageText(km: Int) -> String {
         // 1만 km 단위 반올림 표기
         if km >= 10_000 {
@@ -11,16 +12,35 @@ enum Formatters {
         }
         return "\(km)km"
     }
-    static func priceText(won: Int) -> String {
-        // 억/만 단위 한국형 포맷 간단 버전
-        let eok = won / 100_000_000
-        let man = (won % 100_000_000) / 10_000
-        if eok > 0 {
-            if man > 0 { return "\(eok)억 \(man)만원" }
-            return "\(eok)억원"
-        }
-        return "\(man)만원"
+    
+    // Decimal comma formatter: 1234567 -> "1,234,567"
+    private static let decimalNumberFormatter: NumberFormatter = {
+        let nf = NumberFormatter()
+        nf.numberStyle = .decimal
+        nf.locale = Locale(identifier: "ko_KR")
+        return nf
+    }()
+
+    static func decimal(_ number: Int) -> String {
+        decimalNumberFormatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
+
+    // Backward-compatible API used across views: show as 만원/억원 with commas
+    static func priceText(won: Int) -> String {
+        if won >= 100_000_000 { // 1억 이상
+            let eok = won / 100_000_000
+            let man = (won % 100_000_000) / 10_000
+            if man > 0 {
+                return "\(decimal(eok))억 \(decimal(man))만원"
+            } else {
+                return "\(decimal(eok))억원"
+            }
+        } else {
+            let man = won / 10_000
+            return "\(decimal(man))만원"
+        }
+    }
+    
     static func timerText(until endsAt: Date) -> String {
         let remain = Int(endsAt.timeIntervalSinceNow)
         if remain <= 0 { return "종료" }
@@ -29,12 +49,14 @@ enum Formatters {
         if h > 0 { return "\(h)시간 \(m)분" }
         return "\(m)분"
     }
+    
     static func dateText(_ date: Date) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
         f.dateFormat = "yyyy.MM.dd"
         return f.string(from: date)
     }
+    
     static func dateTimeText(_ date: Date) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")

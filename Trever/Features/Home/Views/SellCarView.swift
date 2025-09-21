@@ -22,7 +22,6 @@ struct SellCarView: View {
             }
             .navigationDestination(isPresented: $showSellCarView) {
                 SellCarRegisterView()
-                    .tabBarHidden(true)
             }
         }
     }

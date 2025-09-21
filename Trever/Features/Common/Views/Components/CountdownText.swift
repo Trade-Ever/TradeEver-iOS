@@ -37,8 +37,14 @@ struct CountdownText: View {
         let s = seconds % 60
         if d > 0 { return "\(d)일 \(h)시간 \(m)분" }
         if h > 0 { return "\(h)시간 \(m)분" }
-        // Under 10 minutes: show minutes + seconds
-        if seconds <= 600 { return String(format: "%d분 %02d초", m, s) }
+        // Under 10 minutes:
+        if seconds <= 600 {
+            if seconds < 60 {
+                return "\(s)초"
+            } else {
+                return String(format: "%d분 %02d초", m, s)
+            }
+        }
         return "\(m)분"
     }
 }
