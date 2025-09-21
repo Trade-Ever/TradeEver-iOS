@@ -29,7 +29,7 @@ struct ImageUploadView: View {
                         Spacer()
                         ImageUploader(selectedImagesData: $selectedImagesData) {
                             // 메인 스레드에서 1초 후 동작하도록(색상 입력란 썸네일 등장 후 등장하도록)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                                 withAnimation {
                                     step = max(step, 1)
                                     focusedField = .color

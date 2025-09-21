@@ -33,9 +33,10 @@ public struct StepActionBar: View {
             if currentStep > 0 {
                 PrimaryButton(
                     title: "이전",
-                    action: onPrevious,
                     isOutline: true
-                )
+                ) {
+                    onPrevious()
+                }
                 .frame(width: 120)
             }
             
@@ -50,5 +51,37 @@ public struct StepActionBar: View {
         .padding(.horizontal)
         .padding(.vertical, 10)
         .background(.white)
+    }
+}
+
+struct StepActionBar_Previews: PreviewProvider {
+    @State static var currentStep = 1
+    static let totalSteps = 3
+
+    static var previews: some View {
+        VStack {
+            StepActionBar(
+                currentStep: currentStep,
+                totalSteps: totalSteps,
+                onNext: {
+                    print("다음 버튼 클릭")
+                    if currentStep < totalSteps - 1 {
+                        currentStep += 1
+                    }
+                },
+                onPrevious: {
+                    print("이전 버튼 클릭")
+                    if currentStep > 0 {
+                        currentStep -= 1
+                    }
+                },
+                isStepCompleted: { step in
+                    // 예시: 모든 단계 완료로 처리
+                    return true
+                }
+            )
+        }
+        .previewLayout(.sizeThatFits)
+        .padding()
     }
 }
