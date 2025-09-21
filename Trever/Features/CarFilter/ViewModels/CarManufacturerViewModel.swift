@@ -17,6 +17,7 @@ class ManufacturerViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     func fetchCarManufacturers(category: String) async {
+        guard !isLoading else { return }   // 이미 실행 중이면 무시
         isLoading = true
         defer { isLoading = false } // 함수가 종료될 때 반드시 실행되는 코드 블록
                 

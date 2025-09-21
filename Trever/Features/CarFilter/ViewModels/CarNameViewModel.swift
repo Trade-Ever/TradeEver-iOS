@@ -16,6 +16,7 @@ class CarNameViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     func fetchCarNames(category: String, manufacturer: String) async {
+        guard !isLoading else { return }   // 이미 실행 중이면 무시
         isLoading = true
         defer { isLoading = false } 
                 

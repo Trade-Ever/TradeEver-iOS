@@ -149,10 +149,7 @@ struct DatePickerButton: View {
         // 날짜 선택 시트
         .sheet(isPresented: $showPicker) {
             VStack(spacing: 20) {
-                // 시트 제목
-                Text(title)
-                    .font(.headline)
-                    .padding(.top)
+                Spacer(minLength: 60)
                 
                 // 그래프 스타일 날짜 피커
                 DatePicker(
@@ -164,11 +161,9 @@ struct DatePickerButton: View {
                 .datePickerStyle(.graphical)    // 달력 스타일
                 .padding(.horizontal)
                 .tint(Color.purple300)          // 선택된 날짜 강조 색상
-                
-                Spacer()
-                
+                                
                 // 하단 버튼들
-                HStack(spacing: 16) {
+                HStack(spacing: 4) {
                     // 취소 버튼
                     PrimaryButton(title: "취소", isOutline: true) {
                         showPicker = false
@@ -182,7 +177,8 @@ struct DatePickerButton: View {
                         completeDateSelection()
                     }
                 }
-                .padding()
+                .padding(.bottom, 72)
+                .padding(.horizontal)
             }
             .presentationDetents([.fraction(0.6)]) // 화면의 60% 높이로 표시
         }
