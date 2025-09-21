@@ -35,6 +35,7 @@ final class NetworkManager {
             .serializingDecodable(VehiclesResponse.self/*, decoder: jsonDecoder*/)
             .value
             
+            print("차량 리스트 조회 성공: \(String(describing: response.data))")
             return response.data
 //            let items = response.data.vehicles.map(mapToListItem(_:))
 //
@@ -55,6 +56,7 @@ final class NetworkManager {
             .serializingDecodable(CarDetailResponse.self)
             .value
             
+            print("차량 상세 조회 성공: \(response.data)")
             return response.data
         } catch {
             print("차량 상세 조회 실패: \(error)")
