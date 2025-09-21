@@ -16,7 +16,6 @@
 
 /* Begin PBXFileReference section */
 		534B0A6E2E77F48700998136 /* Trever.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trever.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		53CB72472E7F1F2400B940AE /* car.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = car.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -61,7 +60,6 @@
 			children = (
 				534B0A702E77F48700998136 /* Trever */,
 				534B0A6F2E77F48700998136 /* Products */,
-				53CB72472E7F1F2400B940AE /* car.mp4 */,
 			);
 			sourceTree = "<group>";
 		};
