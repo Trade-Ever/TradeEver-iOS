@@ -22,9 +22,13 @@ struct MyPageView: View {
             Section { accountPill.listRowSeparator(.hidden) }
 
             Section("나의 활동") {
-                NavigationLink("최근 본 차") { MyPagePlaceholder(title: "최근 본 차") }
-                NavigationLink("찜한 차") { MyPagePlaceholder(title: "찜한 차") }
-                NavigationLink("판매 차량") { MyPagePlaceholder(title: "판매 차량") }
+                NavigationLink("최근 본 차") { MyActivityDetailView(initialTab: .recent) }
+                NavigationLink("찜한 차") { MyActivityDetailView(initialTab: .liked) }
+            }
+            
+            Section("거래 내역") {
+                NavigationLink("판매 내역") { TransactionHistoryDetailView(initialTab: .sales) }
+                NavigationLink("구매 내역") { TransactionHistoryDetailView(initialTab: .purchases) }
             }
 
             Section("고객지원") {

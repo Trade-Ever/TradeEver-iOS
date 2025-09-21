@@ -66,6 +66,42 @@ final class FirebaseAuctionService {
     func removeObserver(auctionId: Int, handle: UInt) {
         root.child("auctions").child("\(auctionId)").removeObserver(withHandle: handle)
     }
+
+    // MARK: - Bids (bids/<auctionId>/{autoId: { bidderName, bidPrice, createdAt }})
+    @discardableResult
+    func observeBids(auctionId: Int, onChange: @escaping ([BidEntry]) -> Void) -> UInt {
+        let ref = root.child("bids").child("\(auctionId)")
+        return ref.observe(.value) { snap in
+            var entries: [BidEntry] = []
+            for child in snap.children {
+                guard let c = child as? DataSnapshot, let dict = c.value as? [String: Any] else { continue }
+                let name = dict["bidderName"] as? String ?? "-"
+                let price = dict["bidPrice"] as? Int ?? 0
+                let createdAt = (dict["createdAt"] as? String).flatMap(Self.parseISO8601) ?? Date()
+                entries.append(BidEntry(bidderName: name, priceWon: price, placedAt: createdAt))
+            }
+            // 최신순 정렬 (createdAt 내림차순)
+            entries.sort { $0.placedAt > $1.placedAt }
+            onChange(entries)
+        }
+    }
+
+    func removeBidsObserver(auctionId: Int, handle: UInt) {
+        root.child("bids").child("\(auctionId)").removeObserver(withHandle: handle)
+    }
+
+    private static func parseISO8601(_ s: String) -> Date? {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = iso.date(from: s) { return d }
+        iso.formatOptions = [.withInternetDateTime]
+        if let d2 = iso.date(from: s) { return d2 }
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: .iso8601)
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return df.date(from: s)
+    }
 }
 
 

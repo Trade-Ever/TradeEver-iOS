@@ -41,7 +41,7 @@ struct AuctionBidSheet: View {
                         .padding(.vertical, 10)
                         .onChange(of: incrementMan) { _, newValue in
                             if newValue < 1 { incrementMan = 1 }
-                            if newValue > 99999 { incrementMan = 99999 }
+                            if newValue > 1000000 { incrementMan = 1000000 }
                         }
                     Text("만원").foregroundStyle(.secondary)
                 }

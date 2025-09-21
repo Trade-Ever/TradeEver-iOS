@@ -74,7 +74,7 @@ private extension AuctionCarListItemView {
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .background(
-                Capsule().fill(Color(red: 1.0, green: 0.54, blue: 0.54))
+                Capsule().fill(Color.errorRed)
             )
             .padding(8)
     }
@@ -93,31 +93,35 @@ private extension AuctionCarListItemView {
     var infoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center) {
-                Text(vehicle.carName ?? "차량")
+                Text(vehicle.manufacturer != nil && vehicle.model != nil ? "\(vehicle.manufacturer!) \(vehicle.model!)" : (vehicle.model ?? "차량"))
                     .font(.headline)
                     .foregroundStyle(.black)
                 Spacer()
                 // 경매 종료까지 남은 시간
                 if let end = resolvedEndDate() {
                     HStack(spacing: 4) {
-                        Image(systemName: "timer")
+                        Image("gavel")
+                            .resizable()
+                            .frame(width: 16, height: 16)
                         CountdownText(endDate: normalizedAuctionEnd(end))
-                            .font(.subheadline)
+                            .font(.body).bold()
                     }
                     .foregroundStyle(Color.likeRed)
-                    .font(.subheadline)
+                    .font(.headline)
                 }
             }
 
             Text("\(Formatters.yearText(vehicle.year_value ?? 0)) · \(Formatters.mileageText(km: vehicle.mileage ?? 0))")
                 .foregroundStyle(.black.opacity(0.7))
                 .font(.subheadline)
-
-            if let options = vehicle.mainOptions, !options.isEmpty { 
-                tagsView(options: options) 
+            
+            HStack {
+                if let options = vehicle.mainOptions, !options.isEmpty {
+                    tagsView(options: options)
+                }
+                Spacer()
+                priceRow
             }
-
-            priceRow
         }
     }
 

@@ -126,9 +126,11 @@ private extension CarListItemView {
                 .foregroundStyle(.black.opacity(0.7))
                 .font(.subheadline)
 
-            if !model.tags.isEmpty { tagsView }
-
-            priceRow
+            HStack {
+                if !model.tags.isEmpty { tagsView }
+                Spacer()
+                priceRow
+            }
         }
     }
 
@@ -186,7 +188,7 @@ extension CarListItemView {
         let startPrice = v.startPrice ?? v.price ?? 0
         let price = v.currentPrice ?? v.price ?? startPrice
         let vm = ViewModel(
-            title: v.carName ?? v.model ?? "차량",
+            title: (v.manufacturer != nil && v.model != nil ? "\(v.manufacturer!) \(v.model!)" : (v.carName ?? v.model ?? "차량")),
             year: v.year_value ?? 0,
             mileageKilometers: v.mileage ?? 0,
             thumbnailURLString: v.representativePhotoUrl,
