@@ -18,9 +18,10 @@ import SwiftUI
 struct CarManufacturerListView: View {
     @ObservedObject var filter: CarFilterModel
     @StateObject private var viewModel = ManufacturerViewModel()
-    
-    @State private var navigateToNext = false
-    let onComplete: ((CarFilterModel) -> Void)? // 완료 콜백
+
+    @State private var navigateToNext = false    
+    var includeYear: Bool = true                  // 연도까지 필터링할것인지
+    let onComplete: ((CarFilterModel) -> Void)?   // 완료 콜백
     
     //    // 샘플 데이터
     //    let domesticCars: [(String, String, Int, Bool)] = [
@@ -62,7 +63,7 @@ struct CarManufacturerListView: View {
                             onRowTap: { selectedManufacturer in
                                 filter.category = "국산"
                                 filter.manufacturer = selectedManufacturer
-                                navigateToNext = true
+                                navigateToNext = true // 다음 단계(차명)로
                             }
                         )
                         
@@ -84,7 +85,7 @@ struct CarManufacturerListView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToNext) {
-                CarNameListView(filter: filter, onComplete: onComplete) // 완료 콜백 전달
+                CarNameListView(filter: filter, includeYear: includeYear, onComplete: onComplete) // 완료 콜백 전달
             }
         }
     }

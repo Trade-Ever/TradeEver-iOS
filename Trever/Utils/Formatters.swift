@@ -63,4 +63,23 @@ enum Formatters {
         f.dateFormat = "yyyy-MM-dd HH:mm"
         return f.string(from: date)
     }
+    
+    static func priceToEokFormat(_ value: Double) -> String {
+        let intValue = Int(value)
+        
+        if intValue >= 10 {
+            let eok = intValue / 10       // 억 단위
+            let thousand = intValue % 10  // 천만원 단위 나머지
+            
+            if thousand == 0 {
+                return "\(eok)억원"
+            } else {
+                return "\(eok)억 \(thousand)천만원"
+            }
+        } else if intValue <= 0 {
+            return "0원"
+        } else {
+            return "\(intValue)천만원"
+        }
+    }
 }

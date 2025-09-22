@@ -22,12 +22,11 @@ class ManufacturerViewModel: ObservableObject {
         defer { isLoading = false } // 함수가 종료될 때 반드시 실행되는 코드 블록
                 
         do {
-            let response = try await AF.request(APIEndpoint.manufacturers.url,
-                                                method: .get,
-                                                parameters: ["category": category],
-                                                encoding: URLEncoding.default)
-                .serializingDecodable(ApiResponse<[String]>.self)
-                .value
+            let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
+                to: .manufacturers,
+                parameters: ["category": category],
+                responseType: ApiResponse<[String]>.self
+            )
             
             if response.success, let manufacturers = response.data {
                 if category == "국산" {

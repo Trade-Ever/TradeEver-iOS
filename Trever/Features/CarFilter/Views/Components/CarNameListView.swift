@@ -13,6 +13,8 @@ struct CarNameListView: View {
     @StateObject private var viewModel = CarNameViewModel()
 
     @State private var navigateToNext = false
+    
+    var includeYear: Bool = true                // 연도까지 필터링할것인지
     let onComplete: ((CarFilterModel) -> Void)? // 콜백 받기
 
     var body: some View {
@@ -35,7 +37,8 @@ struct CarNameListView: View {
                         onRowTap: { selectedCarName in
                             filter.carName = selectedCarName
                             print("선택된 차량 이름: \(selectedCarName)")
-                            navigateToNext = true
+
+                            navigateToNext = true // 다음 단계(차 모델)로
                         }
                     )
                 }
@@ -50,7 +53,7 @@ struct CarNameListView: View {
             }
         }
         .navigationDestination(isPresented: $navigateToNext) {
-            CarModelListView(filter: filter, onComplete: onComplete)
+            CarModelListView(filter: filter, includeYear: includeYear, onComplete: onComplete)
         }
     }
 }

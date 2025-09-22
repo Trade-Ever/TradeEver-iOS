@@ -21,16 +21,15 @@ class CarModelsViewModel: ObservableObject {
         defer { isLoading = false }
                 
         do {
-            let response = try await AF.request(APIEndpoint.modelNames.url,
-                                                method: .get,
-                                                parameters: [
-                                                    "category": category,
-                                                    "manufacturer": manufacturer,
-                                                    "carName": carName
-                                                ],
-                                                encoding: URLEncoding.default)
-                .serializingDecodable(ApiResponse<[String]>.self)
-                .value
+            let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
+                to: .modelNames,
+                parameters: [
+                    "category": category,
+                    "manufacturer": manufacturer,
+                    "carName": carName
+                ],
+                responseType: ApiResponse<[String]>.self
+            )
         
             if response.success, let models = response.data {
                 carModels = models

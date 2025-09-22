@@ -1,8 +1,10 @@
 import Foundation
 import Alamofire
+import UIKit
 
 // MARK: - Token Interceptor
 final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
+    
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var request = urlRequest
         
@@ -41,6 +43,31 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
     }
 }
 
+enum APIEndpoint {
+    static let baseURL = "https://www.trever.store/api"
+    
+    case vehicles
+    case manufacturers
+    case carNames
+    case modelNames
+    case years
+    
+    var url: String {
+        switch self {
+        case .vehicles:
+            return "\(APIEndpoint.baseURL)/vehicles"
+        case .manufacturers:
+            return "\(APIEndpoint.baseURL)/cars/manufacturers" // 제조사
+        case .carNames:
+            return "\(APIEndpoint.baseURL)/cars/carnames" // 차명
+        case .modelNames:
+            return "\(APIEndpoint.baseURL)/cars/modelnames" // 모델명
+        case .years:
+            return "\(APIEndpoint.baseURL)/cars/years" // 연식
+        }
+    }
+}
+
 final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
@@ -54,6 +81,76 @@ final class NetworkManager {
         let interceptor = TokenInterceptor()
         return Session(configuration: configuration, interceptor: interceptor)
     }()
+    
+        // 일반 GET/POST 요청
+        func request<T: Decodable>(
+            to endpoint: APIEndpoint,
+            method: HTTPMethod = .get,
+            parameters: [String: Any]? = nil,
+            encoding: ParameterEncoding = URLEncoding.default,
+            responseType: T.Type
+        ) async throws -> T {
+            try await session.request(
+                endpoint.url,
+                method: method,
+                parameters: parameters,
+                encoding: encoding
+            )
+            .validate(statusCode: 200..<300)
+            .serializingDecodable(T.self)
+            .value
+        }
+    
+        // 멀티파트 업로드 (토큰 자동 추가)
+        func upload<T: Decodable>(
+            to endpoint: APIEndpoint,
+            request: Encodable,
+            imagesData: [Data],
+            responseType: T.Type
+        ) async throws -> T {
+            
+            return try await withCheckedThrowingContinuation { continuation in
+                session.upload( // session 사용
+                    multipartFormData: { formData in
+                        // 1. JSON 추가
+                        if let jsonData = try? JSONEncoder().encode(request) {
+                            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                                print("Request JSON: \(jsonString)")
+                            }
+                            formData.append(
+                                jsonData,
+                                withName: "request",
+                                mimeType: "application/json"
+                            )
+                        }
+                        
+                        // 2. 이미지들 추가
+                        for (index, imageData) in imagesData.enumerated() {
+                            if let image = UIImage(data: imageData),
+                               let compressedData = image.jpegData(compressionQuality: 0.5) {
+                                formData.append(
+                                    compressedData,
+                                    withName: "photos",
+                                    fileName: "image\(index).jpg",
+                                    mimeType: "image/jpeg"
+                                )
+                            }
+                        }
+                    },
+                    to: endpoint.url,
+                    method: .post
+                )
+                .validate(statusCode: 200..<300)
+                .responseDecodable(of: responseType) { response in
+                    switch response.result {
+                    case .success(let value):
+                        continuation.resume(returning: value)
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
 
     /// Fetch vehicle list (general or auction) and map to UI list items.
     func fetchVehicles(

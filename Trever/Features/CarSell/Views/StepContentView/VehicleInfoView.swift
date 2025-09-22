@@ -47,6 +47,7 @@ struct VehicleInfoView: View {
                     CustomInputBox(
                         inputType: .number,
                         placeholder: "2023년",
+                        maxLength: 4,
                         text: $vehicleYear
                     )
                     .focused($focusedField, equals: .year)
@@ -92,9 +93,10 @@ struct VehicleInfoView: View {
         }
         // 차량 선택 플로우 시트
         .fullScreenCover(isPresented: $showCarSelectionSheet) {
-            CarSelectionFlowView(
+            CarFilterFlowView(
                 isPresented: $showCarSelectionSheet,
                 filter: carFilter,
+                includeYear: true,
                 onComplete: { filter in
                     handleCarSelectionComplete(filter)
                     
@@ -194,35 +196,6 @@ struct VehicleInfoView: View {
             // 4단계: 마지막에 포커스 변경
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 focusedField = .year
-            }
-        }
-    }
-}
-
-
-
-// 차량 선택 플로우를 담는 래퍼 뷰
-struct CarSelectionFlowView: View {
-    @Binding var isPresented: Bool
-    @ObservedObject var filter: CarFilterModel
-    let onComplete: (CarFilterModel) -> Void
-    
-    var body: some View {
-        NavigationStack {
-            CarManufacturerListView(
-                filter: filter,
-                onComplete: { completedFilter in
-                    onComplete(completedFilter)
-                    isPresented = false // 시트 닫기
-                }
-            )
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
-                        isPresented = false
-                    }
-                }
             }
         }
     }

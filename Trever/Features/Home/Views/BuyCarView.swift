@@ -2,6 +2,7 @@ import SwiftUI
 import Lottie
 
 struct BuyCarView: View {
+    @State private var showingSearchView = false
     @ObservedObject private var vm = BuyCarListViewModel.shared
     private let searchBarHeight: CGFloat = 48
     
@@ -60,15 +61,16 @@ struct BuyCarView: View {
                 }
             }
 
-            // Floating search button
-            NavigationLink {
-                SearchView()
-            } label: {
-                SearchBarButton(title: "차량 검색") {}
-                    .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
+            SearchBarButton(title: "차량 검색") {
+                showingSearchView = true
             }
+            .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
             .padding(.horizontal, 16)
             .padding(.top, 8)
+            .fullScreenCover(isPresented: $showingSearchView) {
+                // 전체 화면으로 표시
+                CarSearchView()
+            }
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
