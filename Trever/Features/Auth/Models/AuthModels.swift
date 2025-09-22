@@ -56,6 +56,13 @@ struct UserProfileData: Codable {
     let birthDate: String
     let locationCity: String
     let balance: Int
+    let profileComplete: Bool?
+    
+    // 프로필 완성 상태를 판단하는 computed property
+    var isProfileComplete: Bool {
+        // name, phone, birthDate, locationCity가 모두 비어있지 않으면 프로필 완성으로 간주
+        return !name.isEmpty && !phone.isEmpty && !birthDate.isEmpty && !locationCity.isEmpty
+    }
 }
 
 // MARK: - Token Reissue API Models
@@ -96,4 +103,25 @@ struct ProfileUpdateResponse: Codable {
     let status: Int
     let success: Bool
     let message: String
+}
+
+// MARK: - Auction Bid API Models
+struct BidRequest: Codable {
+    let auctionId: Int
+    let bidPrice: Int
+}
+
+struct BidResponse: Codable {
+    let status: Int
+    let success: Bool
+    let message: String
+    let data: BidData?
+}
+
+struct BidData: Codable {
+    let bidId: Int
+    let auctionId: Int
+    let bidderId: Int
+    let bidPrice: Int
+    let bidTime: String
 }

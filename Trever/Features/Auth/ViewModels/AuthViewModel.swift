@@ -128,8 +128,11 @@ final class AuthViewModel: ObservableObject {
         if isValid {
             print("✅ 토큰 유효 - 자동 로그인 성공")
             self.isSignedIn = true
-            self.profileComplete = TokenManager.shared.profileComplete
             self.isNewLogin = false
+            
+            // 자동 로그인 시에는 로컬에 저장된 profileComplete 값 사용
+            self.profileComplete = TokenManager.shared.profileComplete
+            print("   - Profile Complete (로컬): \(self.profileComplete)")
         } else {
             print("❌ 토큰 재발급도 실패 - 로그아웃 처리")
             // 토큰 재발급도 실패했으므로 로그아웃 처리
