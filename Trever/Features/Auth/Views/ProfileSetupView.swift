@@ -30,61 +30,53 @@ struct ProfileSetupView: View {
                 VStack(spacing: 0) {
                     // 스크롤 가능한 입력 폼
                     ScrollView {
-                        VStack(spacing: 20) {
+                        VStack(spacing: 0) {
                             // 상단 여백
                             Spacer()
-                                .frame(height: 20)
+                                .frame(height: 40)
                             
                             // 입력 폼
                             VStack(spacing: 20) {
                                 // 이름 입력
-                                InputSection(title: "이름을 입력해주세요") {
-                                    CustomInputBox(
-                                        placeholder: "이름을 입력하세요",
-                                        text: $name
-                                    )
-                                    .focused($focusedField, equals: .name)
-                                    .onSubmit {
-                                        focusedField = .phone
-                                    }
+                                CustomInputBox(
+                                    placeholder: "이름을 입력하세요",
+                                    text: $name
+                                )
+                                .focused($focusedField, equals: .name)
+                                .onSubmit {
+                                    focusedField = .phone
                                 }
                                 
                                 // 전화번호 입력
-                                InputSection(title: "전화번호를 입력해주세요") {
-                                    CustomInputBox(
-                                        inputType: .number,
-                                        placeholder: "010-0000-0000",
-                                        text: $phone
-                                    )
-                                    .focused($focusedField, equals: .phone)
-                                    .onSubmit {
-                                        focusedField = .locationCity
-                                    }
+                                CustomInputBox(
+                                    inputType: .number,
+                                    placeholder: "전화번호를 입력하세요. (010-0000-0000)",
+                                    text: $phone
+                                )
+                                .focused($focusedField, equals: .phone)
+                                .onSubmit {
+                                    focusedField = .locationCity
                                 }
                                 
                                 // 생년월일 입력
-                                InputSection(title: "생년월일을 선택해주세요") {
-                                    CustomInputBox(
-                                        placeholder: dateFormatter.string(from: birthDate),
-                                        showSheet: true,
-                                        textColor: .black, text: .constant("")
-                                    )
-                                    .onTapGesture {
-                                        tempBirthDate = birthDate
-                                        showingDatePicker = true
-                                    }
+                                CustomInputBox(
+                                    placeholder: dateFormatter.string(from: birthDate),
+                                    showSheet: true,
+                                    textColor: .black, text: .constant("")
+                                )
+                                .onTapGesture {
+                                    tempBirthDate = birthDate
+                                    showingDatePicker = true
                                 }
                                 
                                 // 지역 입력
-                                InputSection(title: "지역을 입력해주세요") {
-                                    CustomInputBox(
-                                        placeholder: "지역을 입력하세요",
-                                        text: $locationCity
-                                    )
-                                    .focused($focusedField, equals: .locationCity)
-                                    .onSubmit {
-                                        focusedField = nil
-                                    }
+                                CustomInputBox(
+                                    placeholder: "지역을 입력하세요",
+                                    text: $locationCity
+                                )
+                                .focused($focusedField, equals: .locationCity)
+                                .onSubmit {
+                                    focusedField = nil
                                 }
                             }
                             .padding(.horizontal, 20)
@@ -93,21 +85,20 @@ struct ProfileSetupView: View {
                             Spacer()
                                 .frame(height: focusedField != nil ? 150 : 100)
                         }
+                        .frame(minHeight: geometry.size.height - 100) // 최소 높이 설정
                     }
                     
                     // 하단 고정 버튼
                     VStack {
-                        Divider()
-                        
                         Button(action: {
                             submitProfile()
                         }) {
                             Text("입력 완료")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(Color.primaryText)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(isFormValid ? brand : Color.gray)
+                                .background(isFormValid ? brand : Color.grey100)
                                 .cornerRadius(8)
                                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                         }
@@ -115,7 +106,7 @@ struct ProfileSetupView: View {
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
                     }
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                 }
             }
             .navigationTitle("추가정보 입력")

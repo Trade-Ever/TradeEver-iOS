@@ -288,7 +288,7 @@ final class NetworkManager {
             let userInfoData = try JSONEncoder().encode(userInfo)
             let userInfoString = String(data: userInfoData, encoding: .utf8) ?? ""
             
-            var parameters: [String: Any] = [
+            var _: [String: Any] = [
                 "userInfo": userInfoString
             ]
             
@@ -440,5 +440,129 @@ final class NetworkManager {
             return false
         }
     }
+    
+    // MARK: - Wallet APIs
+    
+    /// 지갑 충전
+    func depositWallet(amount: Int) async -> Bool {
+        let url = "\(baseURL)/v1/wallets/deposit"
+        print("💰 지갑 충전 API 호출")
+        print("   - URL: \(url)")
+        print("   - Amount: \(amount)")
+        
+        do {
+            let response = try await session.request(
+                url,
+                method: .post,
+                parameters: ["amount": amount]
+            )
+            .validate()
+            .serializingString()
+            .value
+            
+            print("✅ 지갑 충전 성공")
+            print("   - Response: \(response)")
+            return true
+        } catch {
+            print("❌ 지갑 충전 실패")
+            print("   - Error: \(error)")
+            return false
+        }
+    }
+    
+    /// 지갑 출금
+    func withdrawWallet(amount: Int) async -> Bool {
+        let url = "\(baseURL)/v1/wallets/withdraw"
+        print("💰 지갑 출금 API 호출")
+        print("   - URL: \(url)")
+        print("   - Amount: \(amount)")
+        
+        do {
+            let response = try await session.request(
+                url,
+                method: .post,
+                parameters: ["amount": amount]
+            )
+            .validate()
+            .serializingString()
+            .value
+            
+            print("✅ 지갑 출금 성공")
+            print("   - Response: \(response)")
+            return true
+        } catch {
+            print("❌ 지갑 출금 실패")
+            print("   - Error: \(error)")
+            return false
+        }
+    }
+    
+    // MARK: - Auction Bid API
+    func submitBid(auctionId: Int, bidPrice: Int) async -> Bool {
+        let url = "\(baseURL)/auctions/bids"
+        print("💰 경매 입찰 API 호출")
+        print("   - URL: \(url)")
+        print("   - AuctionId: \(auctionId)")
+        print("   - BidPrice: \(bidPrice)")
+        
+        do {
+            let request = BidRequest(
+                auctionId: auctionId,
+                bidPrice: bidPrice
+            )
+            
+            let response: BidResponse = try await session.request(
+                url,
+                method: .post,
+                parameters: request,
+                encoder: JSONParameterEncoder.default
+            )
+            .validate()
+            .serializingDecodable(BidResponse.self)
+            .value
+            
+            print("✅ 경매 입찰 성공")
+            print("   - Status: \(response.status)")
+            print("   - Success: \(response.success)")
+            print("   - Message: \(response.message)")
+            
+            return response.success
+        } catch {
+            print("❌ 경매 입찰 실패")
+            print("   - Error: \(error)")
+            return false
+        }
+    }
+    
+    // MARK: - Favorite API
+    func toggleFavorite(vehicleId: Int) async -> Bool? {
+        let url = "\(baseURL)/v1/favorites/\(vehicleId)/toggle"
+        print("❤️ 찜 토글 API 호출")
+        print("   - URL: \(url)")
+        print("   - VehicleId: \(vehicleId)")
+        
+        do {
+            let response: FavoriteToggleResponse = try await session.request(
+                url,
+                method: .post
+            )
+            .validate()
+            .serializingDecodable(FavoriteToggleResponse.self)
+            .value
+            
+            print("✅ 찜 토글 성공")
+            print("   - Status: \(response.status)")
+            print("   - Success: \(response.success)")
+            print("   - Message: \(response.message)")
+            print("   - IsFavorite: \(response.data)")
+            
+            return response.data
+        } catch {
+            print("❌ 찜 토글 실패")
+            print("   - Error: \(error)")
+            return nil
+        }
+    }
+    
     
 }

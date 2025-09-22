@@ -43,4 +43,5 @@ struct VehicleAPIItem: Codable, Identifiable {
     let endAt: String?
     let auctionStatus: String?
     let bidCount: Int?
+    let isFavorite: Bool?
 }

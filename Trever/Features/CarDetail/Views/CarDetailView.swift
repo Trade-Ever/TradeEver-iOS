@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct CarDetailView: View {
     var detail: CarDetail
@@ -10,6 +11,8 @@ struct CarDetailView: View {
     @State private var fullscreenSources: [String] = []
     @State private var showBidSheet: Bool = false
     @State private var showMarkSoldSheet: Bool = false
+    @StateObject private var favoriteManager = FavoriteManager.shared
+    @State private var isTogglingFavorite = false
 //    @State private var soldCompleted: Bool = false
 
     var body: some View {
@@ -41,6 +44,16 @@ struct CarDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) { bottomActionBar }
         .background(Color(.systemBackground))
+        .onAppear {
+            // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
+            if favoriteManager.favoriteStates[detail.id] == nil {
+                favoriteManager.setFavoriteState(vehicleId: detail.id, isFavorite: detail.favorite ?? false)
+            }
+            // 찜하기 카운트도 설정
+            if let favoriteCount = detail.favoriteCount {
+                favoriteManager.setFavoriteCount(vehicleId: detail.id, count: favoriteCount)
+            }
+        }
         .sheet(isPresented: $showMarkSoldSheet) {
 //            MarkSoldSheet(buyers: detail.potentialBuyers ?? []) { buyerId in
 //                // TODO: API call with buyerId
@@ -57,7 +70,10 @@ struct CarDetailView: View {
             AuctionBidSheet(
                 currentPriceWon: currentPrice,
                 startPriceWon: startPrice,
-                onConfirm: { _, _ in
+                onConfirm: { incrementMan, newPriceWon in
+                    Task {
+                        await submitBid(bidPrice: newPriceWon)
+                    }
                     showBidSheet = false
                 }
             )
@@ -160,13 +176,27 @@ struct CarDetailView: View {
                     Spacer()
                     // 찜 하기
                     HStack(spacing: 8) {
-//                        Text("\(detail.likes)")
-//                            .foregroundStyle(.secondary)
-//                            .font(.subheadline)
-                        Image(systemName: "heart")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .foregroundStyle(.secondary)
+                        if let favoriteCount = favoriteManager.favoriteCount(vehicleId: detail.id) {
+                            Text("\(favoriteCount)")
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                        Button {
+                            toggleFavorite()
+                        } label: {
+                            if isTogglingFavorite {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                let isFavorite = favoriteManager.isFavorite(vehicleId: detail.id)
+                                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundStyle(isFavorite ? Color.likeRed : .secondary)
+                            }
+                        }
+                        .disabled(isTogglingFavorite)
                     }
                 }
                 
@@ -392,14 +422,48 @@ struct CarDetailView: View {
                         Spacer()
                         HStack(spacing: 4) {
                             Image("gavel")
-                            if let end = resolvedEndDate() {
-                                CountdownText(endDate: normalizedAuctionEnd(end))
-                                    .font(.title2)
+                            if let status = vm.liveAuction?.status {
+                                switch status {
+                                case "UPCOMING":
+                                    // 시작 대기: 시작 시간까지 카운트다운
+                                    if let start = resolvedStartDate() {
+//                                        print("UPCOMING - 시작 시간 파싱 성공: \(start)")
+                                        HStack(spacing: 4) {
+                                            Text("경매 시작까지")
+                                                .font(.subheadline)
+                                                .foregroundStyle(Color.blue.opacity(0.8))
+                                            CountdownText(endDate: start)
+                                                .font(.title2)
+                                        }
+                                    } else {
+//                                        print("UPCOMING - 시작 시간 파싱 실패")
+                                        Text("시작 대기").font(.title2)
+                                    }
+                                case "ACTIVE":
+                                    // 경매 진행 중: 종료 시간까지 카운트다운
+                                    if let end = resolvedEndDate() {
+                                        HStack(spacing: 4) {
+                                            Text("경매 종료까지")
+                                                .font(.subheadline)
+                                                .foregroundStyle(Color.likeRed.opacity(0.8))
+                                            CountdownText(endDate: normalizedAuctionEnd(end))
+                                                .font(.title2)
+                                        }
+                                    } else {
+                                        Text("진행 중").font(.title2)
+                                    }
+                                default:
+                                    // 종료된 상태들: 상태 텍스트 표시
+                                    Text(getAuctionStatusText()).font(.title2)
+                                }
                             } else {
-                                Text("-").font(.title2)
+                                Text("상태 불명").font(.title2)
                             }
                         }
-                        .foregroundStyle(Color.likeRed)
+                        .foregroundStyle(
+                            isAuctionEnded() ? Color.grey300 :
+                            vm.liveAuction?.status == "ACTIVE" ? Color.likeRed : Color.blue
+                        )
                         .font(.subheadline)
                     }
                     .padding(.vertical, 4)
@@ -430,17 +494,24 @@ struct CarDetailView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         CustomButton(
-                            title: "상위 입찰",
-                            action: { showBidSheet = true },
+                            title: getAuctionButtonText(),
+                            action: { 
+                                if isAuctionStarted() && !isAuctionEnded() {
+                                    showBidSheet = true 
+                                }
+                            },
                             fontSize: 16,
                             fontWeight: .semibold,
                             cornerRadius: 12,
                             horizontalPadding: 0,
                             foregroundColor: .white,
-                            backgroundColor: brand,
-                            pressedBackgroundColor: brand.opacity(0.85),
+                            backgroundColor: isAuctionEnded() ? Color.grey300 :
+                                           isAuctionStarted() ? brand : Color.grey300,
+                            pressedBackgroundColor: isAuctionEnded() ? Color.grey300.opacity(0.85) :
+                                                   isAuctionStarted() ? brand.opacity(0.85) : Color.grey300.opacity(0.85),
                             shadowColor: Color.black.opacity(0.1)
                         )
+                        .disabled(!isAuctionStarted() || isAuctionEnded() || vm.liveAuction?.status == nil)
                         .frame(maxWidth: .infinity)
                     }
                 }
@@ -487,23 +558,204 @@ struct CarDetailView: View {
         )
     }
 
-    private func resolvedEndDate() -> Date? {
-        if let s = vm.liveAuction?.endAt, let d = parseISO8601(s) { return d }
+    private func resolvedStartDate() -> Date? {
+        guard let startAt = vm.liveAuction?.startAt else {
+            print("❌ 시작 시간이 없습니다")
+            return nil
+        }
+        print("🕐 시작 시간 파싱 시도: \(startAt)")
+        if let d = parseISO8601(startAt) {
+            print("✅ 시작 시간 파싱 성공: \(d)")
+            return d
+        }
+        print("❌ 시작 시간 파싱 실패")
         return nil
     }
-
+    
+    private func resolvedEndDate() -> Date? {
+        guard let endAt = vm.liveAuction?.endAt else {
+            print("❌ 종료 시간이 없습니다")
+            return nil
+        }
+        print("🕐 종료 시간 파싱 시도: \(endAt)")
+        if let d = parseISO8601(endAt) {
+            print("✅ 종료 시간 파싱 성공: \(d)")
+            return d
+        }
+        print("❌ 종료 시간 파싱 실패")
+        return nil
+    }
+    
     private func parseISO8601(_ s: String) -> Date? {
+        print("📅 날짜 파싱 시도: \(s)")
+        
+        // 1. ISO8601 포맷터로 시도 (시간대 포함)
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = iso.date(from: s) { return d }
+        if let d = iso.date(from: s) { 
+            print("✅ ISO8601 (시간대 포함) 파싱 성공: \(d)")
+            return d 
+        }
+        print("❌ ISO8601 (시간대 포함) 파싱 실패")
+        
         iso.formatOptions = [.withInternetDateTime]
-        if let d2 = iso.date(from: s) { return d2 }
-        // Fallback: no timezone provided, treat as local time
+        if let d2 = iso.date(from: s) { 
+            print("✅ ISO8601 (시간대 없음) 파싱 성공: \(d2)")
+            return d2 
+        }
+        print("❌ ISO8601 (시간대 없음) 파싱 실패")
+        
+        // 2. Fallback: 시간대 없는 형식 (Firebase 형식)
         let df = DateFormatter()
         df.calendar = Calendar(identifier: .iso8601)
         df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return df.date(from: s)
+        if let d3 = df.date(from: s) {
+            print("✅ Fallback (HH:mm:ss) 파싱 성공: \(d3)")
+            return d3
+        }
+        print("❌ Fallback (HH:mm:ss) 파싱 실패")
+        
+        // 2-1. 시간이 HH:mm 형식인 경우 (startAt이 00:00인 경우)
+        df.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        if let d3_1 = df.date(from: s) {
+            print("✅ Fallback (HH:mm) 파싱 성공: \(d3_1)")
+            return d3_1
+        }
+        print("❌ Fallback (HH:mm) 파싱 실패")
+        
+        // 3. 날짜만 있는 형식
+        df.dateFormat = "yyyy-MM-dd"
+        if let d4 = df.date(from: s) {
+            print("✅ 날짜만 파싱 성공: \(d4)")
+            return d4
+        }
+        print("❌ 날짜만 파싱 실패")
+        
+        print("❌ 모든 파싱 시도 실패")
+        return nil
+    }
+    
+    private func isAuctionStarted() -> Bool {
+        guard let status = vm.liveAuction?.status else {
+            print("⚠️ 경매 상태가 없습니다 - 시작된 것으로 간주")
+            return true
+        }
+        
+        let isStarted = status == "ACTIVE"
+        
+        print("🕐 경매 상태 체크")
+        print("   - 경매 상태: \(status)")
+        print("   - 경매 시작됨: \(isStarted)")
+        
+        return isStarted
+    }
+    
+    private func isAuctionEnded() -> Bool {
+        guard let status = vm.liveAuction?.status else {
+            print("⚠️ 경매 상태가 없습니다 - 종료되지 않은 것으로 간주")
+            return false
+        }
+        
+        let isEnded = status == "ENDED" || 
+                     status == "PENDING_CLOSE" || 
+                     status == "CANCELLED" || 
+                     status == "EXPIRED"
+        
+        print("🕐 경매 종료 상태 체크")
+        print("   - 경매 상태: \(status)")
+        print("   - 경매 종료됨: \(isEnded)")
+        
+        return isEnded
+    }
+    
+    private func getAuctionStatusText() -> String {
+        guard let status = vm.liveAuction?.status else {
+            return "상태 불명"
+        }
+        
+        switch status {
+        case "UPCOMING":
+            return "시작 대기"
+        case "ACTIVE":
+            return "진행 중"
+        case "ENDED":
+            return "경매 종료"
+        case "PENDING_CLOSE":
+            return "종료 처리 중"
+        case "CANCELLED":
+            return "경매 취소"
+        case "EXPIRED":
+            return "유찰됨"
+        default:
+            return "상태 불명"
+        }
+    }
+    
+    private func getAuctionButtonText() -> String {
+        guard let status = vm.liveAuction?.status else {
+            return "상태 불명"
+        }
+        
+        switch status {
+        case "UPCOMING":
+            return "경매 시작 대기"
+        case "ACTIVE":
+            return "상위 입찰"
+        case "ENDED":
+            return "경매 종료"
+        case "PENDING_CLOSE":
+            return "종료 처리 중"
+        case "CANCELLED":
+            return "경매 취소"
+        case "EXPIRED":
+            return "유찰됨"
+        default:
+            return "상태 불명"
+        }
+    }
+
+    
+    private func submitBid(bidPrice: Int) async {
+        guard let auctionId = detail.auctionId else {
+            print("❌ 경매 ID가 없습니다")
+            return
+        }
+        
+        print("💰 경매 입찰 시작")
+        print("   - AuctionId: \(auctionId)")
+        print("   - BidPrice: \(bidPrice)")
+        
+        let success = await NetworkManager.shared.submitBid(
+            auctionId: auctionId,
+            bidPrice: bidPrice
+        )
+        
+        if success {
+            print("✅ 경매 입찰 성공")
+            // TODO: 성공 알림 표시
+        } else {
+            print("❌ 경매 입찰 실패")
+            // TODO: 실패 알림 표시
+        }
+    }
+    
+    private func toggleFavorite() {
+        guard !isTogglingFavorite else { return }
+        
+        isTogglingFavorite = true
+        
+        Task {
+            let result = await NetworkManager.shared.toggleFavorite(vehicleId: detail.id)
+            
+            await MainActor.run {
+                isTogglingFavorite = false
+                if let newFavoriteState = result {
+                    // 전역 상태 업데이트
+                    favoriteManager.toggleFavorite(vehicleId: detail.id, newState: newFavoriteState)
+                }
+            }
+        }
     }
 }
 

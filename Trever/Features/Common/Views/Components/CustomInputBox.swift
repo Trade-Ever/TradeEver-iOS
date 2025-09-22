@@ -51,7 +51,7 @@ struct CustomInputBox: View {
                 .background(
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .strokeBorder(borderColor(), lineWidth: borderWidth())
-                        .background(RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white))
+                        .background(RoundedRectangle(cornerRadius: cornerRadius).fill(Color(.systemBackground)))
                 )
                 .focused($isFocused)
                 .disabled(showSheet)
