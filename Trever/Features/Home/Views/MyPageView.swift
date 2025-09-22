@@ -5,6 +5,12 @@ struct MyPageView: View {
     @State private var showingLogoutAlert = false
     @State private var showingLogoutSuccessAlert = false
     @State private var isLoggingOut = false
+    @State private var userProfile: UserProfileData?
+    @State private var isLoadingProfile = false
+    @State private var walletBalance: Int?
+    @State private var isLoadingWallet = false
+    @State private var showingProfileEdit = false
+    @State private var isUpdatingProfile = false
     
     private let brand = Color.purple400
 
@@ -68,6 +74,59 @@ struct MyPageView: View {
         } message: {
             Text("로그아웃이 완료되었습니다.")
         }
+        .onAppear {
+            // 항상 최신 데이터 로드
+            loadUserProfile()
+        }
+        .sheet(isPresented: $showingProfileEdit) {
+            ProfileEditView(
+                userProfile: userProfile,
+                onSave: { name, phone, locationCity, birthDate, profileImage in
+                    await updateProfile(name: name, phone: phone, locationCity: locationCity, birthDate: birthDate, profileImage: profileImage)
+                }
+            )
+        }
+    }
+    
+    private func loadUserProfile() {
+        isLoadingProfile = true
+        isLoadingWallet = true
+        
+        Task {
+            async let profileTask = NetworkManager.shared.fetchUserProfile()
+            async let walletTask = NetworkManager.shared.fetchWalletBalance()
+            
+            let (profile, balance) = await (profileTask, walletTask)
+            
+            await MainActor.run {
+                self.userProfile = profile
+                self.walletBalance = balance
+                self.isLoadingProfile = false
+                self.isLoadingWallet = false
+            }
+        }
+    }
+    
+    private func updateProfile(name: String, phone: String, locationCity: String, birthDate: String, profileImage: Data?) async {
+        isUpdatingProfile = true
+        
+        let success = await NetworkManager.shared.updateProfile(
+            name: name,
+            phone: phone,
+            locationCity: locationCity,
+            birthDate: birthDate,
+            profileImage: profileImage
+        )
+        
+        await MainActor.run {
+            isUpdatingProfile = false
+            if success {
+                showingProfileEdit = false
+                // 프로필 정보 새로고침
+                print("🔄 프로필 수정 성공 - 데이터 새로고침")
+                loadUserProfile()
+            }
+        }
     }
     
     private func performLogout() {
@@ -86,23 +145,68 @@ struct MyPageView: View {
     private var profileCard: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("닉네임").font(.title3).bold()
-                Text("nick@email.com").foregroundStyle(.secondary)
+                if isLoadingProfile {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("로딩 중...")
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let profile = userProfile {
+                    Text(profile.name)
+                        .font(.title3)
+                        .bold()
+                    Text(profile.email)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("사용자 정보")
+                        .font(.title3)
+                        .bold()
+                    Text("정보를 불러올 수 없습니다")
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
-            Circle()
-                .fill(Color.grey100)
+            
+            if let profile = userProfile, let profileImageUrl = profile.profileImageUrl, !profileImageUrl.isEmpty {
+                AsyncImage(url: URL(string: profileImageUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    Circle()
+                        .fill(Color.grey100)
+                        .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                }
                 .frame(width: 48, height: 48)
-                .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.grey100)
+                    .frame(width: 48, height: 48)
+                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+            }
         }
         .padding(16)
+        .onTapGesture {
+            showingProfileEdit = true
+        }
     }
 
     private var accountPill: some View {
         HStack(spacing: 12) {
             Text("내 계좌").foregroundStyle(.white).bold()
             Spacer()
-            Text("10,000원").foregroundStyle(.white)
+            if isLoadingWallet {
+                Text("로딩 중...")
+                    .foregroundStyle(.white)
+            } else if let balance = walletBalance {
+                Text("\(balance.formatted())원")
+                    .foregroundStyle(.white)
+            } else {
+                Text("잔액 조회 실패")
+                    .foregroundStyle(.white)
+            }
             Capsule()
                 .fill(Color.white.opacity(0.2))
                 .frame(width: 1, height: 16)
