@@ -316,8 +316,8 @@ struct CarDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(.primary)
                 .padding(16)
+                .frame(maxWidth: .infinity)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.purple50))
-
         }
         .padding(.horizontal, 16)
     }
@@ -371,9 +371,26 @@ struct CarDetailView: View {
                     .font(.title3)
                     .bold()
                 Spacer()
-                Circle().fill(Color.grey100).frame(width: 48, height: 48)
-                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
-
+                
+                // 판매자 프로필 이미지
+                if let profileImageUrl = detail.sellerProfileImageUrl, !profileImageUrl.isEmpty {
+                    AsyncImage(url: URL(string: profileImageUrl)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    } placeholder: {
+                        Circle()
+                            .fill(Color.grey100)
+                            .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                    }
+                    .frame(width: 48, height: 48)
+                    .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color.grey100)
+                        .frame(width: 48, height: 48)
+                        .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                }
             }
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
