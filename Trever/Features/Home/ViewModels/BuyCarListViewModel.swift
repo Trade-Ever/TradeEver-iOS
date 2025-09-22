@@ -3,6 +3,8 @@ import Combine
 
 @MainActor
 final class BuyCarListViewModel: ObservableObject {
+    static let shared = BuyCarListViewModel()
+    
     @Published var vehicleItems: VehiclesPage?
     @Published var isLoading = false
     @Published var isLoadingMore = false
@@ -13,6 +15,8 @@ final class BuyCarListViewModel: ObservableObject {
     private let pageSize = 20
     private var hasMorePages = true
     private var currentTask: Task<Void, Never>?
+    
+    private init() {}
     
     func fetchVehicles() async {
         // 이전 요청이 있으면 취소

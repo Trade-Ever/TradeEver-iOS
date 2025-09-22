@@ -2,6 +2,8 @@ import Foundation
 
 @MainActor
 final class AuctionListViewModel: ObservableObject {
+    static let shared = AuctionListViewModel()
+    
     @Published var vehicleItems: VehiclesPage?
     @Published var isLoading = false
     @Published var isLoadingMore = false
@@ -14,6 +16,8 @@ final class AuctionListViewModel: ObservableObject {
     private var hasMorePages = true
     private var currentTask: Task<Void, Never>?
     private var liveHandles: [Int: UInt] = [:]
+    
+    private init() {}
     
     func fetchAuctionVehicles() async {
         // 이전 요청이 있으면 취소
