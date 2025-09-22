@@ -22,7 +22,7 @@ struct SplashView: View {
             VStack(spacing: 16) {
                 Image("Trever")
                     .resizable()
-                    .renderingMode(.template)
+//                    .renderingMode(.template)
                     .scaledToFit()
                     .frame(width: 200, height: 200)
             }

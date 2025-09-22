@@ -28,6 +28,7 @@ struct CustomInputBox: View {
     var height: CGFloat = 54
     var horizontalPadding: CGFloat = 4
     var showSheet: Bool = false
+    var textColor: Color = .primary
     
     // 외부와 바인딩
     @Binding var text: String
@@ -38,6 +39,7 @@ struct CustomInputBox: View {
             TextField(placeholder, text: $text)
                 .disableAutocorrection(true) // QuickType 제거
                 .textInputAutocapitalization(.never) // 자동 대문자 방지
+                .foregroundColor(textColor)
                 // .keyboardType(inputType == .number ? .numberPad : .default) // 숫자 키보드 설정
                 .onChange(of: text) { oldValue, newValue in
                     if inputType == .number {

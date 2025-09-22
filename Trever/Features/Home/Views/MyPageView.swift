@@ -1,6 +1,11 @@
 import SwiftUI
 
 struct MyPageView: View {
+    @ObservedObject private var authViewModel = AuthViewModel.shared
+    @State private var showingLogoutAlert = false
+    @State private var showingLogoutSuccessAlert = false
+    @State private var isLoggingOut = false
+    
     private let brand = Color.purple400
 
     var body: some View {
@@ -34,10 +39,48 @@ struct MyPageView: View {
             Section("고객지원") {
                 NavigationLink("약관 및 정책") { TermsView() }
                 NavigationLink("개인정보 처리방침") { PrivacyPolicyView() }
-                Button(role: .destructive) { /* TODO: logout */ } label: { Text("로그아웃") }
+                Button(role: .destructive) {
+                    showingLogoutAlert = true
+                } label: { 
+                    HStack {
+                        Text("로그아웃")
+                        if isLoggingOut {
+                            Spacer()
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                    }
+                }
+                .disabled(isLoggingOut)
             }
         }
         .listStyle(.insetGrouped)
+        .alert("로그아웃", isPresented: $showingLogoutAlert) {
+            Button("취소", role: .cancel) { }
+            Button("로그아웃", role: .destructive) {
+                performLogout()
+            }
+        } message: {
+            Text("로그아웃 하시겠습니까?")
+        }
+        .alert("로그아웃 완료", isPresented: $showingLogoutSuccessAlert) {
+            Button("확인") { }
+        } message: {
+            Text("로그아웃이 완료되었습니다.")
+        }
+    }
+    
+    private func performLogout() {
+        isLoggingOut = true
+        
+        Task {
+            await authViewModel.signOut()
+            
+            await MainActor.run {
+                isLoggingOut = false
+                showingLogoutSuccessAlert = true
+            }
+        }
     }
 
     private var profileCard: some View {
