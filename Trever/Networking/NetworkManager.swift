@@ -51,9 +51,12 @@ enum APIEndpoint {
     case carNames
     case modelNames
     case years
+    case recentSearch
+    case deleteRecentSearch(keyword: String)
+    case vehicleSearch
     
     var url: String {
-        switch self {
+        switch self{
         case .vehicles:
             return "\(APIEndpoint.baseURL)/vehicles"
         case .manufacturers:
@@ -64,6 +67,12 @@ enum APIEndpoint {
             return "\(APIEndpoint.baseURL)/cars/modelnames" // 모델명
         case .years:
             return "\(APIEndpoint.baseURL)/cars/years" // 연식
+        case .recentSearch:
+            return "\(APIEndpoint.baseURL)/v1/recent-searches" // 최근 검색어 조회
+        case .deleteRecentSearch(let keyword):
+            return "\(APIEndpoint.baseURL)/v1/recent-searches?keyword=\(keyword)" // 최근 검색어 삭제
+        case .vehicleSearch:
+            return "\(APIEndpoint.baseURL)/vehicles/search" // 차량 검색
         }
     }
 }
@@ -71,9 +80,9 @@ enum APIEndpoint {
 final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
-
+    
     private let baseURL = "https://www.trever.store/api"
-//    private let baseURL = "http://54.180.107.111:8080/api"
+    //    private let baseURL = "http://54.180.107.111:8080/api"
     
     // Alamofire Session with interceptor
     private lazy var session: Session = {
@@ -82,76 +91,76 @@ final class NetworkManager {
         return Session(configuration: configuration, interceptor: interceptor)
     }()
     
-        // 일반 GET/POST 요청
-        func request<T: Decodable>(
-            to endpoint: APIEndpoint,
-            method: HTTPMethod = .get,
-            parameters: [String: Any]? = nil,
-            encoding: ParameterEncoding = URLEncoding.default,
-            responseType: T.Type
-        ) async throws -> T {
-            try await session.request(
-                endpoint.url,
-                method: method,
-                parameters: parameters,
-                encoding: encoding
-            )
-            .validate(statusCode: 200..<300)
-            .serializingDecodable(T.self)
-            .value
-        }
+    // 일반 GET/POST 요청
+    func request<T: Decodable>(
+        to endpoint: APIEndpoint,
+        method: HTTPMethod = .get,
+        parameters: [String: Any]? = nil,
+        encoding: ParameterEncoding = URLEncoding.default,
+        responseType: T.Type
+    ) async throws -> T {
+        try await session.request(
+            endpoint.url,
+            method: method,
+            parameters: parameters,
+            encoding: encoding
+        )
+        .validate(statusCode: 200..<300)
+        .serializingDecodable(T.self)
+        .value
+    }
     
-        // 멀티파트 업로드 (토큰 자동 추가)
-        func upload<T: Decodable>(
-            to endpoint: APIEndpoint,
-            request: Encodable,
-            imagesData: [Data],
-            responseType: T.Type
-        ) async throws -> T {
-            
-            return try await withCheckedThrowingContinuation { continuation in
-                session.upload( // session 사용
-                    multipartFormData: { formData in
-                        // 1. JSON 추가
-                        if let jsonData = try? JSONEncoder().encode(request) {
-                            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                                print("Request JSON: \(jsonString)")
-                            }
+    // 멀티파트 업로드 (토큰 자동 추가)
+    func upload<T: Decodable>(
+        to endpoint: APIEndpoint,
+        request: Encodable,
+        imagesData: [Data],
+        responseType: T.Type
+    ) async throws -> T {
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            session.upload( // session 사용
+                multipartFormData: { formData in
+                    // 1. JSON 추가
+                    if let jsonData = try? JSONEncoder().encode(request) {
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            print("Request JSON: \(jsonString)")
+                        }
+                        formData.append(
+                            jsonData,
+                            withName: "request",
+                            mimeType: "application/json"
+                        )
+                    }
+                    
+                    // 2. 이미지들 추가
+                    for (index, imageData) in imagesData.enumerated() {
+                        if let image = UIImage(data: imageData),
+                           let compressedData = image.jpegData(compressionQuality: 0.5) {
                             formData.append(
-                                jsonData,
-                                withName: "request",
-                                mimeType: "application/json"
+                                compressedData,
+                                withName: "photos",
+                                fileName: "image\(index).jpg",
+                                mimeType: "image/jpeg"
                             )
                         }
-                        
-                        // 2. 이미지들 추가
-                        for (index, imageData) in imagesData.enumerated() {
-                            if let image = UIImage(data: imageData),
-                               let compressedData = image.jpegData(compressionQuality: 0.5) {
-                                formData.append(
-                                    compressedData,
-                                    withName: "photos",
-                                    fileName: "image\(index).jpg",
-                                    mimeType: "image/jpeg"
-                                )
-                            }
-                        }
-                    },
-                    to: endpoint.url,
-                    method: .post
-                )
-                .validate(statusCode: 200..<300)
-                .responseDecodable(of: responseType) { response in
-                    switch response.result {
-                    case .success(let value):
-                        continuation.resume(returning: value)
-                    case .failure(let error):
-                        continuation.resume(throwing: error)
                     }
+                },
+                to: endpoint.url,
+                method: .post
+            )
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: responseType) { response in
+                switch response.result {
+                case .success(let value):
+                    continuation.resume(returning: value)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
                 }
             }
         }
-
+    }
+    
     /// Fetch vehicle list (general or auction) and map to UI list items.
     func fetchVehicles(
         page: Int = 0,
@@ -173,14 +182,14 @@ final class NetworkManager {
                 method: .get,
                 parameters: params
             )
-            .serializingDecodable(VehiclesResponse.self)
-            .value
+                .serializingDecodable(VehiclesResponse.self)
+                .value
             
             print("차량 리스트 조회 성공: \(String(describing: response.data))")
             return response.data
-//            let items = response.data.vehicles.map(mapToListItem(_:))
-//
-//            return items
+            //            let items = response.data.vehicles.map(mapToListItem(_:))
+            //
+            //            return items
         } catch {
             print("차량 리스트 조회 실패: \(error)")
             return nil
@@ -194,8 +203,8 @@ final class NetworkManager {
                 "\(baseURL)/vehicles/\(vehicleId)",
                 method: .get
             )
-            .serializingDecodable(CarDetailResponse.self)
-            .value
+                .serializingDecodable(CarDetailResponse.self)
+                .value
             
             print("차량 상세 조회 성공: \(response.data)")
             return response.data
@@ -229,9 +238,9 @@ final class NetworkManager {
                     "Accept": "application/json"
                 ])
             )
-            .validate() // HTTP 상태 코드 검증
-            .serializingDecodable(GoogleLoginResponse.self)
-            .value
+                .validate() // HTTP 상태 코드 검증
+                .serializingDecodable(GoogleLoginResponse.self)
+                .value
             
             print("✅ Google 로그인 API 호출 성공")
             print("   - Status: \(response.status)")
@@ -250,22 +259,22 @@ final class NetworkManager {
             print("   - Error: \(error)")
             print("   - Error Type: \(type(of: error))")
             
-//            if let afError = error as? AFError {
-//                print("   - AFError Code: \(afError.responseCode ?? -1)")
-//                print("   - AFError Description: \(afError.localizedDescription)")
-//                
-//                if let responseData = afError.responseData {
-//                    if let responseString = String(data: responseData, encoding: .utf8) {
-//                        print("   - Response Data: \(responseString)")
-//                    }
-//                }
-//                
-//                // URL 요청 정보 출력
-//                if let request = afError.request {
-//                    print("   - Request URL: \(request.url?.absoluteString ?? "Unknown")")
-//                    print("   - Request Method: \(request.method?.rawValue ?? "Unknown")")
-//                }
-//            }
+            //            if let afError = error as? AFError {
+            //                print("   - AFError Code: \(afError.responseCode ?? -1)")
+            //                print("   - AFError Description: \(afError.localizedDescription)")
+            //
+            //                if let responseData = afError.responseData {
+            //                    if let responseString = String(data: responseData, encoding: .utf8) {
+            //                        print("   - Response Data: \(responseString)")
+            //                    }
+            //                }
+            //
+            //                // URL 요청 정보 출력
+            //                if let request = afError.request {
+            //                    print("   - Request URL: \(request.url?.absoluteString ?? "Unknown")")
+            //                    print("   - Request Method: \(request.method?.rawValue ?? "Unknown")")
+            //                }
+            //            }
             
             return nil
         }
@@ -282,9 +291,9 @@ final class NetworkManager {
                 url,
                 method: .post
             )
-            .validate()
-            .serializingString()
-            .value
+                .validate()
+                .serializingString()
+                .value
             
             print("✅ 로그아웃 API 호출 성공")
             print("   - Response: \(response)")
@@ -318,9 +327,9 @@ final class NetworkManager {
                 parameters: request,
                 encoder: JSONParameterEncoder.default
             )
-            .validate()
-            .serializingDecodable(ProfileCompletionResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(ProfileCompletionResponse.self)
+                .value
             
             print("✅ 프로필 완성 API 호출 성공")
             print("   - Status: \(response.status)")
@@ -346,9 +355,9 @@ final class NetworkManager {
                 url,
                 method: .get
             )
-            .validate()
-            .serializingDecodable(WalletResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(WalletResponse.self)
+                .value
             
             print("✅ 지갑 잔액 조회 성공")
             print("   - Status: \(response.status)")
@@ -404,9 +413,9 @@ final class NetworkManager {
                 to: url,
                 method: .patch
             )
-            .validate()
-            .serializingDecodable(ProfileUpdateResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(ProfileUpdateResponse.self)
+                .value
             
             print("✅ 프로필 수정 성공")
             print("   - Status: \(response.status)")
@@ -432,9 +441,9 @@ final class NetworkManager {
                 url,
                 method: .get
             )
-            .validate()
-            .serializingDecodable(UserProfileResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(UserProfileResponse.self)
+                .value
             
             print("✅ 사용자 프로필 조회 성공")
             print("   - Status: \(response.status)")
@@ -468,9 +477,9 @@ final class NetworkManager {
                 url,
                 method: .get
             )
-            .validate()
-            .serializingDecodable(UserProfileResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(UserProfileResponse.self)
+                .value
             
             print("✅ 토큰 유효성 검증 성공")
             print("   - Status: \(response.status)")
@@ -511,9 +520,9 @@ final class NetworkManager {
                 parameters: request,
                 encoder: JSONParameterEncoder.default
             )
-            .validate()
-            .serializingDecodable(TokenReissueResponse.self)
-            .value
+                .validate()
+                .serializingDecodable(TokenReissueResponse.self)
+                .value
             
             print("✅ 토큰 재발급 성공")
             print("   - Status: \(response.status)")

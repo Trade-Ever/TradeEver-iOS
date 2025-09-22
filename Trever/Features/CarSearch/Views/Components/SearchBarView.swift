@@ -23,12 +23,12 @@ struct SearchBarView: View {
             HStack(spacing: 10) {
                 // 돋보기 아이콘
                 Image(systemName: "magnifyingglass")
-                    .foregroundStyle(Color.grey300)
+                    .foregroundColor(iconColor)
                     .font(.body)
                 
                 // 커스텀 텍스트 입력 영역
                 TextField("차량 검색", text: $searchText)
-                    .foregroundStyle(searchText.isEmpty ? Color.grey400.opacity(0.7) : Color.black)
+                    .foregroundColor(textColor)
                     .font(.body)
                     .focused($isFocused)
                     .submitLabel(.search)
@@ -50,6 +50,10 @@ struct SearchBarView: View {
                         x: 0,
                         y: 1
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22)
+                            .stroke(borderColor, lineWidth: 1.5)
+                    )
             )
             .onTapGesture {
                 isFocused = true
@@ -66,6 +70,19 @@ struct SearchBarView: View {
         }
         .padding(.vertical)
         .padding(.horizontal, 20)
+    }
+    
+    // MARK: - 색상 상태
+    private var iconColor: Color {
+        isFocused || !searchText.isEmpty ? .purple400 : .gray.opacity(0.6)
+    }
+    
+    private var textColor: Color {
+        isFocused || !searchText.isEmpty ? .purple400 : .gray.opacity(0.6)
+    }
+    
+    private var borderColor: Color {
+        isFocused || !searchText.isEmpty ? .purple300 : Color.clear
     }
     
     private func performSearch() {

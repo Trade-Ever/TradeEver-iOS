@@ -44,6 +44,7 @@ final class AuthViewModel: ObservableObject {
             
             self.user = user
             self.idToken = user.idToken?.tokenString
+            print(self.idToken)
         } else {
             print("로그인된 사용자 없음")
             self.isSignedIn = false
@@ -128,7 +129,8 @@ final class AuthViewModel: ObservableObject {
         if isValid {
             print("✅ 토큰 유효 - 자동 로그인 성공")
             self.isSignedIn = true
-            self.profileComplete = TokenManager.shared.profileComplete
+            self.profileComplete = true // 임시로 true로 바꿔놓음, 백엔드 요청 필요
+            print("TokenManager profileComplete:", TokenManager.shared.profileComplete)
             self.isNewLogin = false
         } else {
             print("❌ 토큰 재발급도 실패 - 로그아웃 처리")

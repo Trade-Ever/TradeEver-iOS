@@ -1,31 +1,26 @@
-//
-//  CarSearchView.swift
-//  Trever
-//
-//  Created by OhChangEun on 9/22/25.
-//
-
 import SwiftUI
-
 
 struct CarSearchView: View {
     @StateObject private var viewModel = CarSearchViewModel()
     @Environment(\.dismiss) private var dismiss
     
-    // 차량 선택 플로우 시트
-    @State private var showCarFilterFlowSheet: Bool = false // 제조사 플로우 시트
-    @State private var showYearFilterSheet: Bool = false    // 연식 범위 시트
-    @State private var showMileageFilterSheet: Bool = false // 주행거리 범위 시트
-    @State private var showPriceFilterSheet: Bool = false   // 가격 범위 시트
-    @State private var showCarTypeSheet: Bool = false       // 차량 타입 선택 시트
-    
-    @State private var yearRange: ClosedRange<Double> = 1998...2025
-    @State private var mileageRange: ClosedRange<Double> = 0...30    // 0 ~ 30억
-    @State private var priceRange: ClosedRange<Double> = 1...30      // 천만원 ~ 3억
-    
-    @State private var selectedCarType: String?  // 선택된 차량 타입
-
+    // CarSearch 객체로 통합 관리
+    @State private var carSearch = CarSearchModel()
     @StateObject private var carFilter = CarFilterModel()
+    
+    // UI 상태들
+    @State private var showCarFilterFlowSheet: Bool = false
+    @State private var showYearFilterSheet: Bool = false
+    @State private var showMileageFilterSheet: Bool = false
+    @State private var showPriceFilterSheet: Bool = false
+    @State private var showCarTypeSheet: Bool = false
+    
+    // 슬라이더 상태들
+    @State private var yearRange: ClosedRange<Double> = 1998...2025
+    @State private var mileageRange: ClosedRange<Double> = 0...30
+    @State private var priceRange: ClosedRange<Double> = 1...30
+    @State private var selectedCarType: String?
+    
     
     var body: some View {
         NavigationView {
@@ -34,7 +29,7 @@ struct CarSearchView: View {
                 SearchBarView(
                     searchText: $viewModel.searchText,
                     onClose: {
-                        dismiss() // 창 닫기
+                        dismiss()
                     }
                 )
                 
@@ -42,95 +37,97 @@ struct CarSearchView: View {
                 ScrollView {
                     VStack(spacing: 8) {
                         // 최근 검색
-                        if !viewModel.recentSearches.isEmpty {
-                            RecentSearchView(
-                                recentSearches: viewModel.recentSearches,
-                                onSearchTap: { term in
-                                    viewModel.searchText = term
-                                },
-                                onRemove: { search in
-                                    viewModel.removeRecentSearch(search)
+                        RecentSearchView(
+                            recentSearches: viewModel.recentSearches,
+                            onSearchTap: { term in
+                                viewModel.searchText = term
+                            },
+                            onRemove: { search in
+                                Task {
+                                    await viewModel.removeRecentSearch(search)
+                                }
+                            }
+                        )
+                        .padding(.bottom, 12)
+                        
+                        // 구분선
+                        Divider()
+                            .background(Color(UIColor.separator))
+                        
+                        VStack(spacing: 0) {
+                            FilterRowView(
+                                title: "제조사 • 모델",
+                                value: formatManufacturerText(),
+                                action: {
+                                    showCarFilterFlowSheet = true
                                 }
                             )
-                            .padding(.bottom, 20)
+                            
+                            Divider()
+                                .padding(.horizontal, 20)
+                                .foregroundStyle(Color.grey100)
+                            
+                            FilterRowView(
+                                title: "연식",
+                                value: formatYearText(),
+                                action: {
+                                    showYearFilterSheet = true
+                                }
+                            )
+                            
+                            Divider()
+                                .padding(.horizontal, 20)
+                            
+                            FilterRowView(
+                                title: "주행거리",
+                                value: formatMileageText(),
+                                action: {
+                                    showMileageFilterSheet = true
+                                }
+                            )
+                            
+                            Divider()
+                                .padding(.horizontal, 20)
+                            
+                            FilterRowView(
+                                title: "가격",
+                                value: formatPriceText(),
+                                action: {
+                                    showPriceFilterSheet = true
+                                }
+                            )
+                            
+                            Divider()
+                                .padding(.horizontal, 20)
+                            
+                            FilterRowView(
+                                title: "차종",
+                                value: carSearch.vehicleType ?? "",
+                                action: {
+                                    showCarTypeSheet = true
+                                }
+                            )
                         }
-                        
-                        // 여백을 추가하여 필터가 하단에 고정되도록 함
-                        Spacer(minLength: 100)
                     }
-                }
-                
-                // 고정된 필터 영역
-                VStack(spacing: 0) {
-                    // 구분선 추가
-                    Divider()
-                        .background(Color(UIColor.separator))
                     
-                    VStack(spacing: 0) {
-                        FilterRowView(
-                            title: "제조사 • 모델",
-                            value: viewModel.filters.manufacturer,
-                            action: {
-                                showCarFilterFlowSheet = true
-                            }
-                        )
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                            .foregroundStyle(Color.grey100)
-                        
-                        FilterRowView(
-                            title: "연식",
-                            value: viewModel.filters.year,
-                            action: {
-                                showYearFilterSheet = true
-                            }
-                        )
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                        
-                        FilterRowView(
-                            title: "주행거리",
-                            value: viewModel.filters.mileage,
-                            action: {
-                                showMileageFilterSheet = true
-                            }
-                        )
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                        
-                        FilterRowView(
-                            title: "가격",
-                            value: viewModel.filters.price,
-                            action: {
-                                showPriceFilterSheet = true
-                            }
-                        )
-                        
-                        Divider()
-                            .padding(.horizontal, 20)
-                        
-                        FilterRowView(
-                            title: "차종",
-                            value: viewModel.filters.vehicleType,
-                            action: {
-                                showCarTypeSheet = true
-                            }
-                        )
-                    }
-                    .background(Color(UIColor.systemBackground))
+                    Spacer()
                     
                     BottomSheetButtons(
-                        title : "매물보기",
-                        onConfirm: { viewModel.performSearch() },
-                        onReset: {viewModel.resetFilters()}
+                        title: "매물보기",
+                        onConfirm: {
+                            performSearch()
+                        },
+                        onReset: {
+                            resetFilters()
+                        }
                     )
                 }
             }
             .navigationBarHidden(true)
             .background(Color(UIColor.systemBackground))
+            .task {
+                await viewModel.fetchRecentSearches()
+            }
             // 차량 필터 플로우 시트
             .fullScreenCover(isPresented: $showCarFilterFlowSheet) {
                 CarFilterFlowView(
@@ -144,7 +141,7 @@ struct CarSearchView: View {
             }
             // 연식 필터 시트
             .sheet(isPresented: $showYearFilterSheet, onDismiss: {
-                updateYearFilterComplete()
+                updateYearFilter()
             }) {
                 YearFilterBottomSheet(
                     isPresented: $showYearFilterSheet,
@@ -154,7 +151,7 @@ struct CarSearchView: View {
             }
             // 주행거리 필터 시트
             .sheet(isPresented: $showMileageFilterSheet, onDismiss: {
-                updateMileageFilterComplete()
+                updateMileageFilter()
             }) {
                 MileageFilterBottomSheet(
                     isPresented: $showMileageFilterSheet,
@@ -164,7 +161,7 @@ struct CarSearchView: View {
             }
             // 가격 필터 시트
             .sheet(isPresented: $showPriceFilterSheet, onDismiss: {
-                updatePriceFilterComplete()
+                updatePriceFilter()
             }) {
                 PriceFilterBottomSheet(
                     isPresented: $showPriceFilterSheet,
@@ -174,63 +171,103 @@ struct CarSearchView: View {
             }
             // 차종 선택 시트
             .sheet(isPresented: $showCarTypeSheet, onDismiss: {
-                updatePriceFilterComplete()
+                updateCarTypeFilter()
             }) {
                 CarTypeBottomSheet(
                     isPresented: $showCarTypeSheet,
-                    selectedCarType: $selectedCarType // 단일 선택
+                    selectedCarType: $selectedCarType
                 )
                 .presentationDetents([.fraction(0.45)])
             }
         }
     }
     
-    // 차량 선택 완료 처리
+    // MARK: - 포맷팅 함수들
+    private func formatManufacturerText() -> String {
+        var components: [String] = []
+        
+        if let manufacturer = carSearch.manufacturer {
+            components.append(manufacturer)
+        }
+        if let carName = carSearch.carName {
+            components.append(carName)
+        }
+        if let carModel = carSearch.carModel {
+            components.append(carModel)
+        }
+        
+        return components.joined(separator: " ")
+    }
+    
+    private func formatYearText() -> String {
+        guard let yearStart = carSearch.yearStart,
+              let yearEnd = carSearch.yearEnd else {
+            return ""
+        }
+        return "\(yearStart)년 ~ \(yearEnd)년"
+    }
+    
+    private func formatMileageText() -> String {
+        guard let mileageStart = carSearch.mileageStart,
+              let mileageEnd = carSearch.mileageEnd else {
+            return ""
+        }
+        return "\(mileageStart)만km ~ \(mileageEnd)만km"
+    }
+    
+    private func formatPriceText() -> String {
+        guard let priceStart = carSearch.priceStart,
+              let priceEnd = carSearch.priceEnd else {
+            return ""
+        }
+        return "\(Formatters.priceToEokFormat(Double(priceStart))) ~ \(Formatters.priceToEokFormat(Double(priceEnd)))"
+    }
+    
+    // MARK: - 업데이트 함수들
     private func handleCarFilterComplete(_ filter: CarFilterModel) {
-        // 시트 닫기
         showCarFilterFlowSheet = false
         
-        // 선택된 차량 정보를 뷰모델 필터에 반영
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            // 제조사 •모델 조합해서 표시
-            var filteredCarInfoText = ""
-            if let manufacturer = filter.manufacturer {
-                filteredCarInfoText += manufacturer
-            }
-            if let modelName = filter.modelName {
-                filteredCarInfoText += filteredCarInfoText.isEmpty ? modelName : " \(modelName)"
-            }
-
-            viewModel.filters.manufacturer = filteredCarInfoText
+            carSearch.manufacturer = filter.manufacturer
+            carSearch.carName = filter.carName
+            carSearch.carModel = filter.modelName
         }
     }
     
-    // 차량 연식 완료처리
-    private func updateYearFilterComplete() {
-        let lower = Int(yearRange.lowerBound)
-        let upper = Int(yearRange.upperBound)
-        viewModel.filters.year = "\(lower)년 ~ \(upper)년"
+    private func updateYearFilter() {
+        carSearch.yearStart = Int(yearRange.lowerBound)
+        carSearch.yearEnd = Int(yearRange.upperBound)
     }
     
-    // 차량 연식 완료처리
-    private func updateMileageFilterComplete() {
-        let lower = Int(mileageRange.lowerBound)
-        let upper = Int(mileageRange.upperBound)
-        viewModel.filters.mileage = "\(lower)만km ~ \(upper)만km"
+    private func updateMileageFilter() {
+        carSearch.mileageStart = Int(mileageRange.lowerBound)
+        carSearch.mileageEnd = Int(mileageRange.upperBound)
     }
     
-    // 차량 가격 완료처리
-    private func updatePriceFilterComplete() {
-        let lower = priceRange.lowerBound
-        let upper = priceRange.upperBound
+    private func updatePriceFilter() {
+        carSearch.priceStart = Int(priceRange.lowerBound)
+        carSearch.priceEnd = Int(priceRange.upperBound)
+    }
+    
+    private func updateCarTypeFilter() {
+        carSearch.vehicleType = selectedCarType
+    }
+    
+    // MARK: - 액션 함수들
+    private func performSearch() {
+        // 키워드도 포함
+        carSearch.keyword = viewModel.searchText.isEmpty ? nil : viewModel.searchText
         
-        viewModel.filters.price = "\(Formatters.priceToEokFormat(lower)) ~ \(Formatters.priceToEokFormat(upper))"
+        Task {
+            await viewModel.fetchFilteredCars(with: carSearch)
+        }
     }
     
-    // 차량 가격 완료처리
-    private func updateCarTypeComplete() {
-        if let carType = selectedCarType {
-            viewModel.filters.vehicleType = carType
-        }
+    private func resetFilters() {
+        carSearch = CarSearchModel()
+        selectedCarType = nil
+        yearRange = 1998...2025
+        mileageRange = 0...30
+        priceRange = 1...30
     }
 }

@@ -33,7 +33,7 @@ struct MileageFilterBottomSheet: View {
             
             // 선택된 값 표시
             HStack {
-                Text("\(Int(selectedMileageRange.lowerBound))년")
+                Text("\(Int(selectedMileageRange.lowerBound))만 km")
                     .font(.system(size: 32))
                     .foregroundColor(.purple300)
                     .fontWeight(.heavy)
@@ -44,7 +44,7 @@ struct MileageFilterBottomSheet: View {
                     .foregroundColor(.purple200)
                     .bold()
                 
-                Text("\(Int(selectedMileageRange.upperBound))년")
+                Text("\(Int(selectedMileageRange.upperBound))만 km")
                     .font(.system(size: 32))
                     .foregroundColor(.purple300)
                     .fontWeight(.heavy)
