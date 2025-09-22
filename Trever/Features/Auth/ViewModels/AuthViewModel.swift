@@ -30,9 +30,12 @@ final class AuthViewModel: ObservableObject {
         // TokenManager에서 로그인 상태 확인
         if TokenManager.shared.isLoggedIn {
             print("AccessToken:  \(TokenManager.shared.accessToken ?? "없음")")
-            self.isSignedIn = true
-            self.profileComplete = TokenManager.shared.profileComplete
-            self.isNewLogin = false // 자동 로그인
+            print("자동 로그인 - 토큰 유효성 검증 중...")
+            
+            // 토큰 유효성 검증을 위해 API 호출
+            Task {
+                await validateToken()
+            }
         } else if let user = GIDSignIn.sharedInstance.currentUser {
             print("Google 로그인")
             print("Google 사용자 이메일: \(user.profile?.email ?? "없음")")
@@ -114,6 +117,24 @@ final class AuthViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    // 토큰 유효성 검증
+    func validateToken() async {
+        print("🔍 토큰 유효성 검증 시작")
+        
+        let isValid = await NetworkManager.shared.validateToken()
+        
+        if isValid {
+            print("✅ 토큰 유효 - 자동 로그인 성공")
+            self.isSignedIn = true
+            self.profileComplete = TokenManager.shared.profileComplete
+            self.isNewLogin = false
+        } else {
+            print("❌ 토큰 재발급도 실패 - 로그아웃 처리")
+            // 토큰 재발급도 실패했으므로 로그아웃 처리
+            await signOut()
+        }
     }
     
     // 백엔드로 ID Token 전송하여 인증

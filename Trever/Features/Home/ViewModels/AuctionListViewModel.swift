@@ -42,7 +42,7 @@ final class AuctionListViewModel: ObservableObject {
             await MainActor.run { [weak self] in
                 if let data = result {
                     self?.vehicleItems = data
-                    self?.hasMorePages = data.vehicles.count == pageSize
+                    self?.hasMorePages = data.vehicles.count == (self?.pageSize ?? 0)
                     self?.resubscribeLiveAuctions()
                 } else {
                     self?.error = "경매 차량 정보를 불러올 수 없습니다."
@@ -71,7 +71,7 @@ final class AuctionListViewModel: ObservableObject {
             if let data = result {
                 let newVehicles = data.vehicles
                 self?.vehicleItems?.vehicles.append(contentsOf: newVehicles)
-                self?.hasMorePages = newVehicles.count == pageSize
+                self?.hasMorePages = newVehicles.count == (self?.pageSize ?? 0)
                 self?.subscribeLiveAuctions(for: newVehicles)
             }
             self?.isLoadingMore = false
