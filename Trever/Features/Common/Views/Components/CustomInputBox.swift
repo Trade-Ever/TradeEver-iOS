@@ -28,7 +28,8 @@ struct CustomInputBox: View {
     var height: CGFloat = 54
     var horizontalPadding: CGFloat = 4
     var showSheet: Bool = false
-    
+    var maxLength: Int? = nil // 글자 수 제한 (nil이면 무제한)
+
     // 외부와 바인딩
     @Binding var text: String
     @FocusState private var isFocused: Bool
@@ -40,9 +41,18 @@ struct CustomInputBox: View {
                 .textInputAutocapitalization(.never) // 자동 대문자 방지
                 // .keyboardType(inputType == .number ? .numberPad : .default) // 숫자 키보드 설정
                 .onChange(of: text) { oldValue, newValue in
+                    var filteredText = newValue
+                    
                     if inputType == .number {
                         text = newValue.filter { $0.isNumber }
                     }
+                    
+                    // 글자 수 제한
+                    if let maxLength = maxLength {
+                        filteredText = String(filteredText.prefix(maxLength))
+                    }
+                    
+                    text = filteredText
                 }
                 .padding(.horizontal, 12)
                 .frame(height: height)

@@ -13,6 +13,7 @@ struct CarModelListView: View {
     @StateObject private var viewModel = CarModelsViewModel()
     
     @State private var navigateToNext = false
+    var includeYear: Bool = true                // 연도까지 필터링할것인지
     let onComplete: ((CarFilterModel) -> Void)? // 콜백 받기
 
 //    // 아우디 A4
@@ -39,7 +40,14 @@ struct CarModelListView: View {
                         onRowTap: { selectedCarModel in
                             filter.modelName = selectedCarModel
                             print("선택된 차량 모델: \(selectedCarModel)")
-                            navigateToNext = true
+                            
+                            if includeYear {
+                                navigateToNext = true // 다음 단계(연식)로
+                            } else {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    onComplete?(filter) // 연식 필터링 전에 끝내기
+                                }
+                            }
                         }
                     )
                 }

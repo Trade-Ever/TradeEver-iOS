@@ -36,8 +36,8 @@ struct SellCarRequest: Codable {
     var price: Int?                     // 가격(일반거래)
     var startPrice: Int?                // 가격(경매)
 
-    // 한글 → 영문 매핑
-    private let vehicleTypeMapping: [String: String] = [
+    // 한글 → 영문 매핑을 static으로 변경하고 더 포괄적으로 만들기
+    private static let vehicleTypeMapping: [String: String] = [
         "대형": "LARGE",
         "중형": "MID_SIZE",
         "준중형": "SEMI_MID_SIZE",
@@ -45,7 +45,7 @@ struct SellCarRequest: Codable {
         "스포츠": "SPORTS",
         "SUV": "SUV",
         "승합차": "VAN",
-        "경차": "COMPACT"
+        "경차": "COMPACT",
     ]
     
     init(from sellCarModel: SellCarModel) {
@@ -58,8 +58,14 @@ struct SellCarRequest: Codable {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        // 차량 타입 매핑
-        let mappedVehicleType = vehicleTypeMapping[sellCarModel.vehicleType] ?? sellCarModel.vehicleType
+        // 차량 타입 매핑 - 공백 제거 및 디버깅 추가
+        let originalVehicleType = sellCarModel.vehicleType.trimmingCharacters(in: .whitespacesAndNewlines)
+        let mappedVehicleType = Self.vehicleTypeMapping[originalVehicleType] ?? originalVehicleType
+        
+        // 디버깅용 출력 (필요시 주석 해제)
+        //print("Original vehicleType: '\(sellCarModel.vehicleType)'")
+        //print("Trimmed vehicleType: '\(originalVehicleType)'")
+        //print("Mapped vehicleType: '\(mappedVehicleType)'")
         
         self.carNumber = sellCarModel.vehicleNumber
 
@@ -85,8 +91,6 @@ struct SellCarRequest: Codable {
         self.accidentDescription = sellCarModel.accidentDescription
         
         // 거래 방식에 따라 isAuction, start/end, price 처리
-        // 경매: startPrice, 날짜 입력
-        // 일반거래: price, 날짜 입력x
         if sellCarModel.tradeMethod == "경매" {
             self.isAuction = true
             self.startPrice = (Int(sellCarModel.price) ?? 0) * 10000 // 만원 단위
@@ -103,4 +107,23 @@ struct SellCarRequest: Codable {
     }
 }
 
-
+/*
+// MARK: - 추가 유틸리티 메서드
+extension SellCarRequest {
+    // 차량 타입 매핑을 확인하는 헬퍼 메서드
+    static func getAvailableVehicleTypes() -> [String: String] {
+        return vehicleTypeMapping
+    }
+    
+    // 특정 한글 차량 타입이 매핑되는지 확인하는 메서드
+    static func getMappedVehicleType(from koreanType: String) -> String {
+        let trimmedType = koreanType.trimmingCharacters(in: .whitespacesAndNewlines)
+        return vehicleTypeMapping[trimmedType] ?? trimmedType
+    }
+    
+    // 모든 가능한 한글 차량 타입 반환
+    static func getKoreanVehicleTypes() -> [String] {
+        return Array(vehicleTypeMapping.keys).sorted()
+    }
+}
+*/

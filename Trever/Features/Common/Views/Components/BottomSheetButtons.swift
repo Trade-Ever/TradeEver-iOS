@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BottomSheetButtons: View {
+    var title: String = "확인"
     var onConfirm: () -> Void
     var onReset: () -> Void
     
@@ -16,23 +17,26 @@ struct BottomSheetButtons: View {
             // 초기화 버튼
             PrimaryButton(
                 title: "초기화",
-                fontSize: 20,
+                fontSize: 18,
                 cornerRadius: 50,
                 height: 52,
                 isOutline: true
             ) {
                 onReset()
             }
+            .frame(maxWidth: 120) // 고정 최대 너비
             
             // 확인 버튼
             PrimaryButton(
-                title: "확인",
-                fontSize: 20,
+                title: title,
+                fontSize: 18
+                ,
                 cornerRadius: 50,
                 height: 52,
             ) {
                 onConfirm()
             }
+            .frame(maxWidth: .infinity)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)

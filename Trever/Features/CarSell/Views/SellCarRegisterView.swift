@@ -67,7 +67,7 @@ struct SellCarRegisterView: View {
                                 detailedDescription: $viewModel.model.detailedDescription,
                                 step: $viewModel.vehicleOptionStep
                             )
-                        case 5: // 추가 정보
+                        case 5: // 사고 정보 
                             AccidentInfoView(
                                 accidentHistory: $viewModel.model.accidentHistory,
                                 accidentDescription: $viewModel.model.accidentDescription,
