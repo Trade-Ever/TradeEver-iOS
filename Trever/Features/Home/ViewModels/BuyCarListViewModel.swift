@@ -3,6 +3,8 @@ import Combine
 
 @MainActor
 final class BuyCarListViewModel: ObservableObject {
+    static let shared = BuyCarListViewModel()
+    
     @Published var vehicleItems: VehiclesPage?
     @Published var isLoading = false
     @Published var isLoadingMore = false
@@ -13,6 +15,8 @@ final class BuyCarListViewModel: ObservableObject {
     private let pageSize = 20
     private var hasMorePages = true
     private var currentTask: Task<Void, Never>?
+    
+    private init() {}
     
     func fetchVehicles() async {
         // 이전 요청이 있으면 취소
@@ -34,14 +38,14 @@ final class BuyCarListViewModel: ObservableObject {
             // Task가 취소되었는지 확인
             guard !Task.isCancelled else { return }
             
-            await MainActor.run {
+            await MainActor.run { [weak self] in
                 if let data = result {
-                    vehicleItems = data
-                    hasMorePages = data.vehicles.count == pageSize
+                    self?.vehicleItems = data
+                    self?.hasMorePages = data.vehicles.count == (self?.pageSize ?? 0)
                 } else {
-                    error = "차량 정보를 불러올 수 없습니다."
+                    self?.error = "차량 정보를 불러올 수 없습니다."
                 }
-                isLoading = false
+                self?.isLoading = false
             }
         }
         
@@ -61,13 +65,13 @@ final class BuyCarListViewModel: ObservableObject {
             isAuction: false
         )
         
-        await MainActor.run {
+        await MainActor.run { [weak self] in
             if let data = result {
                 let newVehicles = data.vehicles
-                vehicleItems?.vehicles.append(contentsOf: newVehicles)
-                hasMorePages = newVehicles.count == pageSize
+                self?.vehicleItems?.vehicles.append(contentsOf: newVehicles)
+                self?.hasMorePages = newVehicles.count == (self?.pageSize ?? 0)
             }
-            isLoadingMore = false
+            self?.isLoadingMore = false
         }
     }
     

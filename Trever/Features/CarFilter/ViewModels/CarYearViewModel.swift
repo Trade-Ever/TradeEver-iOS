@@ -1,9 +1,8 @@
-////
-////  ManufacturerViewModel.swift
-////  Trever
-////
-////  Created by OhChangEun on 9/21/25.
-////
+//
+//  CarYearViewModel.swift
+//  Trever
+//
+//  Created by OhChangEun on 9/21/25.
 //
 
 import Foundation
@@ -29,15 +28,14 @@ class CarYearViewModel: ObservableObject {
         ]
         
         do {
-            let response = try await AF.request(APIEndpoint.years.url,
-                                                method: .get,
-                                                parameters: parameters,
-                                                encoding: URLEncoding.default)
-                .serializingDecodable(ApiResponse<[Int]>.self)
-                .value
+            let response: ApiResponse<[Int]> = try await NetworkManager.shared.request(
+                to: .years,
+                parameters: parameters,
+                responseType: ApiResponse<[Int]>.self
+            )
             
             if response.success, let years = response.data {
-                carYears = years.map { "\($0)" }
+                carYears = years.map { "\($0)" } // Int → String 변환
             } else {
                 errorMessage = response.message
             }

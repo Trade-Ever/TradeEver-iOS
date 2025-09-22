@@ -8,31 +8,6 @@ import Foundation
 import Alamofire
 import UIKit
 
-enum APIEndpoint {
-    static let baseURL = "https://www.trever.store/api"
-    
-    case vehicles
-    case manufacturers
-    case carNames
-    case modelNames
-    case years
-    
-    var url: String {
-        switch self {
-        case .vehicles:
-            return "\(APIEndpoint.baseURL)/vehicles"
-        case .manufacturers:
-            return "\(APIEndpoint.baseURL)/cars/manufacturers" // 제조사
-        case .carNames:
-            return "\(APIEndpoint.baseURL)/cars/carnames" // 차명
-        case .modelNames:
-            return "\(APIEndpoint.baseURL)/cars/modelnames" // 모델명
-        case .years:
-            return "\(APIEndpoint.baseURL)/cars/years" // 연식
-        }
-    }
-}
-
 final class AFNetworkManager {
     static let shared = AFNetworkManager()
     private init() {}

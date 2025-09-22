@@ -56,7 +56,7 @@ class SellCarViewModel: ObservableObject {
             let request = SellCarRequest(from: model)
             let imagesData = model.selectedImagesData
 
-            let apiResponse: ApiResponse<Int> = try await AFNetworkManager.shared.upload(
+            let apiResponse: ApiResponse<Int> = try await NetworkManager.shared.upload(
                 to: .vehicles,
                 request: request,
                 imagesData: imagesData,
