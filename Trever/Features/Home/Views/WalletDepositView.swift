@@ -19,7 +19,7 @@ struct WalletDepositView: View {
                     Text("얼마나 충전할까요?")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.primaryText)
                     
                     // Bank Account Info
                     HStack(spacing: 12) {
@@ -31,24 +31,25 @@ struct WalletDepositView: View {
                                 Text("우")
                                     .font(.title3)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(Color.primaryText)
                             )
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("우리은행")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
+                                .foregroundStyle(Color.primaryText)
                             Text("1002-044-***** 에서")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color.primaryText)
                         }
                         
                         Spacer()
                     }
                     .padding(16)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
@@ -67,18 +68,18 @@ struct WalletDepositView: View {
                                 HStack {
                                     Text(amount.formatted() + "원")
                                         .font(.subheadline)
-                                        .foregroundColor(selectedAmount == amount ? .white : .black)
+                                        .foregroundColor(selectedAmount == amount ? .white : .primary)
                                     Spacer()
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 24)
                                 .background(
-                                    selectedAmount == amount ? Color.purple400 : Color.clear
+                                    selectedAmount == amount ? Color.purple400 : Color(.secondarySystemBackground)
                                 )
                                 .cornerRadius(8)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .stroke(selectedAmount == amount ? Color.clear : Color.gray.opacity(0.3), lineWidth: 1)
+                                        .stroke(selectedAmount == amount ? Color.clear : Color(.separator), lineWidth: 1)
                                 )
                             }
                         }
@@ -114,16 +115,17 @@ struct WalletDepositView: View {
                         if isProcessing {
                             ProgressView()
                                 .scaleEffect(0.8)
-                                .foregroundColor(.white)
+                                .foregroundColor(Color.primaryText)
                         }
                         Text("충전하기")
                             .font(.headline)
                             .fontWeight(.semibold)
+                            .foregroundColor(Color.primaryText)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .background(
-                        (selectedAmount != nil || !customAmount.isEmpty) ? Color.purple400 : Color.gray
+                        (selectedAmount != nil || !customAmount.isEmpty) ? Color.purple400 : Color(.tertiarySystemBackground)
                     )
                     .foregroundColor(.white)
                     .cornerRadius(12)

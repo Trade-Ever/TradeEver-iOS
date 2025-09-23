@@ -25,7 +25,7 @@ struct AuctionCarListItemView: View {
 
             infoSection
                 .padding(12)
-                .background(Color.white)
+                .background(Color.secondaryBackground)
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(
@@ -131,14 +131,14 @@ private extension AuctionCarListItemView {
             HStack(alignment: .center) {
                 Text(vehicle.manufacturer != nil && vehicle.model != nil ? "\(vehicle.manufacturer!) \(vehicle.model!)" : (vehicle.model ?? "차량"))
                     .font(.headline)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.primaryText)
                 Spacer()
                 // 경매 상태별 시간 표시
                 auctionTimeDisplay
             }
 
             Text("\(Formatters.yearText(vehicle.year_value ?? 0)) · \(Formatters.mileageText(km: vehicle.mileage ?? 0))")
-                .foregroundStyle(.black.opacity(0.7))
+                .foregroundStyle(Color.primaryText.opacity(0.7))
                 .font(.subheadline)
             
             HStack {
@@ -156,7 +156,7 @@ private extension AuctionCarListItemView {
             ForEach(Array(options.prefix(3)), id: \.self) { option in
                 Text(option)
                     .font(.caption2)
-                    .foregroundStyle(.black.opacity(0.7))
+                    .foregroundStyle(Color.secondaryText.opacity(0.7))
                     .padding(.vertical, 4)
                     .padding(.horizontal, 6)
                     .background(
@@ -175,11 +175,11 @@ private extension AuctionCarListItemView {
             if let price = priceToShow, price > 0 {
                 if live?.currentBidPrice != nil {
                     Text("현재 입찰가 ")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Color.primaryText.opacity(0.7))
                         .font(.subheadline)
                 } else {
                     Text("시작가 ")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Color.primaryText.opacity(0.7))
                         .font(.subheadline)
                 }
                 Text(Formatters.priceText(won: price))
@@ -203,7 +203,9 @@ private extension AuctionCarListItemView {
                     HStack(spacing: 4) {
                         Image("gavel")
                             .resizable()
+                            .renderingMode(.template)
                             .frame(width: 16, height: 16)
+                            .foregroundStyle(Color.primaryText)
                         HStack(spacing: 2) {
                             Text("시작까지")
                                 .font(.caption)
@@ -217,7 +219,9 @@ private extension AuctionCarListItemView {
                     HStack(spacing: 4) {
                         Image("gavel")
                             .resizable()
+                            .renderingMode(.template)
                             .frame(width: 16, height: 16)
+                            .foregroundStyle(Color.primaryText)
                         Text("시작 대기")
                             .font(.body).bold()
                     }
@@ -229,7 +233,9 @@ private extension AuctionCarListItemView {
                     HStack(spacing: 4) {
                         Image("gavel")
                             .resizable()
+                            .renderingMode(.template)
                             .frame(width: 16, height: 16)
+                            .foregroundStyle(Color.primaryText)
                         HStack(spacing: 2) {
                             Text("종료까지")
                                 .font(.caption)
@@ -243,7 +249,9 @@ private extension AuctionCarListItemView {
                     HStack(spacing: 4) {
                         Image("gavel")
                             .resizable()
+                            .renderingMode(.template)
                             .frame(width: 16, height: 16)
+                            .foregroundStyle(Color.primaryText)
                         Text("진행 중")
                             .font(.body).bold()
                     }
@@ -254,7 +262,9 @@ private extension AuctionCarListItemView {
                 HStack(spacing: 4) {
                     Image("gavel")
                         .resizable()
+                        .renderingMode(.template)
                         .frame(width: 16, height: 16)
+                        .foregroundStyle(Color.primaryText)
                     Text(getAuctionStatusText())
                         .font(.body).bold()
                 }

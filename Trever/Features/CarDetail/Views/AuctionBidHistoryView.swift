@@ -16,7 +16,7 @@ struct AuctionBidHistoryView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.secondaryBackground)
         .navigationTitle("입찰 내역")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

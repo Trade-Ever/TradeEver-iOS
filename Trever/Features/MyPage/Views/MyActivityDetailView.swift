@@ -23,10 +23,10 @@ struct MyActivityDetailView: View {
             
             // 컨텐츠
             TabView(selection: $selectedTab) {
-                RecentCarsView()
+                RecentViewsView()
                     .tag(ActivityTab.recent)
                 
-                LikedCarsView()
+                FavoritesView()
                     .tag(ActivityTab.liked)
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
