@@ -58,7 +58,7 @@ struct CarManufacturerListView: View {
                         
                         CarFilterSection(
                             title: "국산차",
-                            data: viewModel.domesticCars.map { (nil, $0, 0, false) },
+                            data: viewModel.domesticCars.map { (nil, $0.manufacturer, $0.count, false) },
                             showDivider: true,
                             onRowTap: { selectedManufacturer in
                                 filter.category = "국산"
@@ -69,7 +69,7 @@ struct CarManufacturerListView: View {
                         
                         CarFilterSection(
                             title: "수입차",
-                            data: viewModel.importedCars.map { (nil, $0, 0, false) },
+                            data: viewModel.importedCars.map { (nil, $0.manufacturer, $0.count, false) },
                             onRowTap: { selectedManufacturer in
                                 filter.category = "수입"
                                 filter.manufacturer = selectedManufacturer
@@ -80,8 +80,9 @@ struct CarManufacturerListView: View {
                     Spacer(minLength: 40) // 하단 자리 확보
                 }
                 .task {
-                    await viewModel.fetchCarManufacturers(category: "국산")
-                    await viewModel.fetchCarManufacturers(category: "수입")
+                    // 년도가 필요하면 > 차량 등록시 필요한 필터 > 숫자 등장 x
+                    // 년도가 필요없으면 > 차량 검색시 필요한 필터 > 숫자 등장 o
+                    await viewModel.fetchCarManufacturers(includeYear: includeYear)
                 }
             }
             .navigationDestination(isPresented: $navigateToNext) {

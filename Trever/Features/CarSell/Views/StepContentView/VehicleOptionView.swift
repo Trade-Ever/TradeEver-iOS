@@ -76,7 +76,7 @@ struct VehicleOptionView: View {
                     }
                 }
             }
-            .presentationDetents([.fraction(0.4)]) // 화면의 40% 차지
+            .presentationDetents([.fraction(0.45)]) // 화면의 40% 차지
         }
     }
 }

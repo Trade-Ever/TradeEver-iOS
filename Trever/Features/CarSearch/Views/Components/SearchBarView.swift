@@ -31,11 +31,6 @@ struct SearchBarView: View {
                     .foregroundColor(textColor)
                     .font(.body)
                     .focused($isFocused)
-                    .submitLabel(.search)
-                    .onSubmit {
-                        // 검색 실행
-                        performSearch()
-                    }
                 
                 Spacer()
             }
@@ -83,11 +78,5 @@ struct SearchBarView: View {
     
     private var borderColor: Color {
         isFocused || !searchText.isEmpty ? .purple300 : Color.clear
-    }
-    
-    private func performSearch() {
-        // 검색 로직 (필요시 구현)
-        isFocused = false
-        print("검색: \(searchText)")
     }
 }

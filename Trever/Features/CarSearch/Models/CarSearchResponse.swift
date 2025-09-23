@@ -7,14 +7,30 @@
 
 import Foundation
 
-// MARK: - API 응답 모델들
+// MARK: - Vehicle Search Response
 struct CarSearchResponse: Codable {
     let vehicles: [Vehicle]
     let totalCount: Int
-    let currentPage: Int?
-    let totalPages: Int?
+    let pageNumber: Int
+    let pageSize: Int
 }
 
+struct Pageable: Codable {
+    let pageNumber: Int
+    let pageSize: Int
+    let sort: Sort
+    let offset: Int
+    let paged: Bool
+    let unpaged: Bool
+}
+
+struct Sort: Codable {
+    let empty: Bool
+    let sorted: Bool
+    let unsorted: Bool
+}
+
+// MARK: - Vehicle Model
 struct Vehicle: Codable, Identifiable {
     let id: Int
     let carName: String
@@ -26,10 +42,10 @@ struct Vehicle: Codable, Identifiable {
     let transmission: String
     let vehicleStatus: String
     let fuelType: String
-    let price: Int
+    let price: Int?
     let isAuction: String
-    let auctionId: Int
-    let representativePhotoUrl: String
+    let auctionId: Int?
+    let representativePhotoUrl: String?
     let favoriteCount: Int
     let createdAt: String
     let isFavorite: Bool
@@ -37,11 +53,9 @@ struct Vehicle: Codable, Identifiable {
     let mainOptions: [String]
     let totalOptionsCount: Int
     
-    enum CodingKeys: String, CodingKey {
-        case id, carName, carNumber, manufacturer, model, mileage
-        case transmission, vehicleStatus, fuelType, price, isAuction
-        case auctionId, representativePhotoUrl, favoriteCount, createdAt
-        case isFavorite, vehicleTypeName, mainOptions, totalOptionsCount
+    private enum CodingKeys: String, CodingKey {
+        case id, carName, carNumber, manufacturer, model, mileage, transmission, vehicleStatus, fuelType, price, isAuction, auctionId, representativePhotoUrl, favoriteCount, createdAt, isFavorite, vehicleTypeName, mainOptions, totalOptionsCount
         case yearValue = "year_value"
     }
 }
+

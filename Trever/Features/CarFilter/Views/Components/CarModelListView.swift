@@ -36,7 +36,7 @@ struct CarModelListView: View {
                     
                     CarFilterSection(
                         title: "세부 모델",
-                        data: viewModel.carModels.map { (nil, $0, 0, false) },
+                        data: viewModel.carModels.map { (nil, $0.carModel, $0.count, false) },
                         onRowTap: { selectedCarModel in
                             filter.modelName = selectedCarModel
                             print("선택된 차량 모델: \(selectedCarModel)")
@@ -58,7 +58,7 @@ struct CarModelListView: View {
                 if let category = filter.category ,
                    let manufacturer = filter.manufacturer,
                    let carName = filter.carName {
-                    await viewModel.fetchCarModels(category: category, manufacturer: manufacturer, carName : carName)
+                    await viewModel.fetchCarModels(category: category, manufacturer: manufacturer, carName : carName, includeYear: includeYear)
                 }
             }
         }

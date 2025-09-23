@@ -54,7 +54,10 @@ enum APIEndpoint {
     case recentSearch
     case deleteRecentSearch(keyword: String)
     case vehicleSearch
-    
+    case vehicleManufacturers
+    case vehicleNames(manufacturer: String)
+    case vehicleModels(manufacturer: String, carName: String)
+
     var url: String {
         switch self{
         case .vehicles:
@@ -73,6 +76,12 @@ enum APIEndpoint {
             return "\(APIEndpoint.baseURL)/v1/recent-searches?keyword=\(keyword)" // 최근 검색어 삭제
         case .vehicleSearch:
             return "\(APIEndpoint.baseURL)/vehicles/search" // 차량 검색
+        case .vehicleManufacturers:
+            return "\(APIEndpoint.baseURL)/vehicles/manufacturers" // 제조사별 차량 수 조회
+        case .vehicleNames(let manufacturer):
+            return "\(APIEndpoint.baseURL)/vehicles/manufacturers/\(manufacturer)/car-names" // 제조사별 차명별 차량 수 조회
+        case .vehicleModels(let manufacturer, let carName):
+            return "\(APIEndpoint.baseURL)/vehicles/manufacturers/\(manufacturer)/car-names/\(carName)/car-models" // 제조사별 차명별 차량 수 조회
         }
     }
 }
@@ -90,6 +99,43 @@ final class NetworkManager {
         let interceptor = TokenInterceptor()
         return Session(configuration: configuration, interceptor: interceptor)
     }()
+    
+    func searchVehicles(request: CarSearchRequest) async -> CarSearchResponse? {
+        let url = "\(baseURL)/vehicles/search"
+        print("🔍 차량 검색 API 호출")
+        print("   - URL: \(url)")
+        print("   - Request: \(request)")
+        
+        do {
+            let response: ApiResponse<CarSearchResponse> = try await session.request(
+                url,
+                method: .post,
+                parameters: request,
+                encoder: JSONParameterEncoder.default
+            )
+                .validate()
+                .serializingDecodable(ApiResponse<CarSearchResponse>.self)
+                .value
+            
+            print("✅ 차량 검색 성공")
+            print("   - Status: \(response.status)")
+            print("   - Success: \(response.success)")
+            print("   - Message: \(response.message)")
+            
+            if let data = response.data {
+                print("   - Total Count: \(data.totalCount)")
+                print("   - Page Number: \(data.pageNumber)")
+                print("   - Page Size: \(data.pageSize)")
+                print("   - Vehicles Count: \(data.vehicles.count)")
+            }
+            
+            return response.data
+        } catch {
+            print("❌ 차량 검색 실패")
+            print("   - Error: \(error)")
+            return nil
+        }
+    }
     
     // 일반 GET/POST 요청
     func request<T: Decodable>(

@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var selection: MainTab = .buy
     @State private var selectedTab: Int = 0
     
+    //@State private var searchModel = CarSearchModel() // 검색 조건 모델
+    
     var body: some View {
         Group {
             if authViewModel.isSignedIn {
@@ -58,6 +60,8 @@ struct ContentView: View {
                     case .auction: AuctionView()
                     case .mypage: MyPageView()
                     default: BuyCarView()
+                            //CarSearchResultsView(searchModel: searchModel)
+
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

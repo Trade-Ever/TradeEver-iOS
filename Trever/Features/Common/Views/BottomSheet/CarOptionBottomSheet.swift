@@ -18,7 +18,7 @@ struct CarOptionBottomSheet: View {
             RoundedRectangle(cornerRadius: 2.5)
                 .fill(Color.grey200)
                 .frame(width: 36, height: 5)
-                .padding(.top, 12)
+                .padding(.top, 20)
             
             Text("차량 옵션 선택")
                 .font(.title2)

@@ -18,6 +18,6 @@ struct CarSearchRequest: Codable {
     let priceStart: Int?
     let priceEnd: Int?
     let vehicleType: String?
-    let page: Int
-    let size: Int
+    var page: Int
+    var size: Int
 }

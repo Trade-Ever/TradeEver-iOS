@@ -139,7 +139,7 @@ struct VehicleInfoView: View {
                     }
                 }
             }
-            .presentationDetents([.fraction(0.4)])
+            .presentationDetents([.fraction(0.45)])
         }
     }
     // 표시용 텍스트 계산

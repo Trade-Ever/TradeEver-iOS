@@ -15,6 +15,10 @@ struct CarSearchView: View {
     @State private var showPriceFilterSheet: Bool = false
     @State private var showCarTypeSheet: Bool = false
     
+    // 검색 결과 페이지 이동용 상태 추가
+    @State private var showSearchResults: Bool = false
+    @State private var searchResultModel: CarSearchModel?
+    
     // 슬라이더 상태들
     @State private var yearRange: ClosedRange<Double> = 1998...2025
     @State private var mileageRange: ClosedRange<Double> = 0...30
@@ -127,6 +131,12 @@ struct CarSearchView: View {
             .background(Color(UIColor.systemBackground))
             .task {
                 await viewModel.fetchRecentSearches()
+            }
+            .fullScreenCover(isPresented: $showSearchResults) {
+                if let searchModel = searchResultModel {
+                    CarSearchResultsView(searchModel: searchModel)
+                }
+                
             }
             // 차량 필터 플로우 시트
             .fullScreenCover(isPresented: $showCarFilterFlowSheet) {
@@ -258,8 +268,16 @@ struct CarSearchView: View {
         // 키워드도 포함
         carSearch.keyword = viewModel.searchText.isEmpty ? nil : viewModel.searchText
         
+        // 검색 모델을 복사해서 결과 페이지로 전달
+        searchResultModel = carSearch
+        
+        // 실제 검색 API 호출
         Task {
             await viewModel.fetchFilteredCars(with: carSearch)
+            // Argument passed to call that takes no arguments
+            DispatchQueue.main.async {
+                showSearchResults = true
+            }
         }
     }
     

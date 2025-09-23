@@ -15,6 +15,11 @@ struct CarTypeBottomSheet: View {
     
     var body: some View {
         VStack(spacing: 8) {
+            RoundedRectangle(cornerRadius: 2.5)
+                .fill(Color.grey200)
+                .frame(width: 36, height: 5)
+                .padding(.top, 20)
+            
             Text("차종 선택")
                 .font(.title2)
                 .bold()
