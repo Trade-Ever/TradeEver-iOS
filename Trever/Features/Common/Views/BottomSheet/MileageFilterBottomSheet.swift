@@ -10,6 +10,7 @@ import SwiftUI
 struct MileageFilterBottomSheet: View {
     @Binding var isPresented: Bool
     @Binding var selectedMileageRange: ClosedRange<Double>
+    let action: () -> Void
 
     private let minMileage: Double = 0
     private let maxMileage: Double = 30 // km 단위
@@ -80,6 +81,7 @@ struct MileageFilterBottomSheet: View {
             BottomSheetButtons(
                 title: "적용",
                 onConfirm: {
+                    action()
                     isPresented = false
                 },
                 onReset: {

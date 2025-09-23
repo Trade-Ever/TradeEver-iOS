@@ -24,8 +24,11 @@ class CarNameViewModel: ObservableObject {
             if includeYear {
                 // ApiResponse<[String]>
                 let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
-                    to: .vehicleNames(manufacturer: manufacturer),
-                    parameters: ["category": category],
+                    to: .carNames,
+                    parameters: [
+                        "category": category,
+                        "manufacturer": manufacturer,
+                    ],
                     responseType: ApiResponse<[String]>.self
                 )
                 

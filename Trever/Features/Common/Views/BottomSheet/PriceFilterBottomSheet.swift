@@ -10,6 +10,7 @@ import SwiftUI
 struct PriceFilterBottomSheet: View {
     @Binding var isPresented: Bool
     @Binding var selectedPriceRange: ClosedRange<Double>
+    let action: () -> Void
 
     private let minPrice: Double = 0     // 천만원 단위(0원)
     private let maxPrice: Double = 30    // 천만원 단위(30억)
@@ -80,6 +81,7 @@ struct PriceFilterBottomSheet: View {
             BottomSheetButtons(
                 title: "적용",
                 onConfirm: {
+                    action()
                     isPresented = false
                 },
                 onReset: {

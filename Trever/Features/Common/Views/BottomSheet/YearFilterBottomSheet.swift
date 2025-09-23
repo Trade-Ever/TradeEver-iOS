@@ -10,6 +10,7 @@ import SwiftUI
 struct YearFilterBottomSheet: View {
     @Binding var isPresented: Bool
     @Binding var selectedYearRange: ClosedRange<Double>
+    let action: () -> Void
     
     private let minYear: Double = 1998
     private let maxYear: Double = 2025
@@ -79,6 +80,7 @@ struct YearFilterBottomSheet: View {
             BottomSheetButtons(
                 title: "적용",
                 onConfirm: {
+                    action()
                     isPresented = false
                 },
                 onReset: {

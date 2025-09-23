@@ -57,7 +57,8 @@ enum APIEndpoint {
     case vehicleManufacturers
     case vehicleNames(manufacturer: String)
     case vehicleModels(manufacturer: String, carName: String)
-
+    case vehicleCheckCarNumber(carNumber: String)
+    
     var url: String {
         switch self{
         case .vehicles:
@@ -82,6 +83,8 @@ enum APIEndpoint {
             return "\(APIEndpoint.baseURL)/vehicles/manufacturers/\(manufacturer)/car-names" // 제조사별 차명별 차량 수 조회
         case .vehicleModels(let manufacturer, let carName):
             return "\(APIEndpoint.baseURL)/vehicles/manufacturers/\(manufacturer)/car-names/\(carName)/car-models" // 제조사별 차명별 차량 수 조회
+        case .vehicleCheckCarNumber(let carNumber):
+            return "\(APIEndpoint.baseURL)/vehicles/check-car-number?carNumber=\(carNumber)"
         }
     }
 }
@@ -592,5 +595,4 @@ final class NetworkManager {
             return false
         }
     }
-    
 }

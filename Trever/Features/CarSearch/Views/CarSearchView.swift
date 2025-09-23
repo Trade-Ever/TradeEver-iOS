@@ -150,43 +150,43 @@ struct CarSearchView: View {
                 )
             }
             // 연식 필터 시트
-            .sheet(isPresented: $showYearFilterSheet, onDismiss: {
-                updateYearFilter()
-            }) {
+            .sheet(isPresented: $showYearFilterSheet) {
                 YearFilterBottomSheet(
                     isPresented: $showYearFilterSheet,
                     selectedYearRange: $yearRange
-                )
+                ) {
+                    updateYearFilter()
+                }
                 .presentationDetents([.fraction(0.45)])
             }
             // 주행거리 필터 시트
-            .sheet(isPresented: $showMileageFilterSheet, onDismiss: {
-                updateMileageFilter()
-            }) {
+            .sheet(isPresented: $showMileageFilterSheet) {
                 MileageFilterBottomSheet(
                     isPresented: $showMileageFilterSheet,
                     selectedMileageRange: $mileageRange
-                )
+                ) {
+                    updateMileageFilter()
+                }
                 .presentationDetents([.fraction(0.45)])
             }
             // 가격 필터 시트
-            .sheet(isPresented: $showPriceFilterSheet, onDismiss: {
-                updatePriceFilter()
-            }) {
+            .sheet(isPresented: $showPriceFilterSheet) {
                 PriceFilterBottomSheet(
                     isPresented: $showPriceFilterSheet,
                     selectedPriceRange: $priceRange
-                )
+                ) {
+                    updatePriceFilter()
+                }
                 .presentationDetents([.fraction(0.45)])
             }
             // 차종 선택 시트
-            .sheet(isPresented: $showCarTypeSheet, onDismiss: {
-                updateCarTypeFilter()
-            }) {
+            .sheet(isPresented: $showCarTypeSheet) {
                 CarTypeBottomSheet(
                     isPresented: $showCarTypeSheet,
                     selectedCarType: $selectedCarType
-                )
+                ) {
+                    updateCarTypeFilter()
+                }
                 .presentationDetents([.fraction(0.45)])
             }
         }

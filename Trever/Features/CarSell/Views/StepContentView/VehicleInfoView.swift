@@ -128,8 +128,7 @@ struct VehicleInfoView: View {
             CarTypeBottomSheet(
                 isPresented: $showCarTypeSheet,
                 selectedCarType: $selectedCarType // 단일 선택
-            )
-            .onDisappear {
+            ) {
                 // 선택된 값이 있으면 vehicleType에 반영
                 if let code = selectedCarType {
                     vehicleType = code

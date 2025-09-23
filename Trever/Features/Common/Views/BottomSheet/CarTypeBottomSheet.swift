@@ -10,7 +10,8 @@ import SwiftUI
 struct CarTypeBottomSheet: View {
     @Binding var isPresented: Bool
     @Binding var selectedCarType: String?  // 단일 선택으로 변경
-    
+    let action: () -> Void?
+
     let carTypes = ["대형", "준중형", "중형", "소형", "스포츠", "SUV", "승합차", "경차"]
     
     var body: some View {
@@ -57,6 +58,7 @@ struct CarTypeBottomSheet: View {
             // 하단 버튼 교체
             BottomSheetButtons(
                 onConfirm: {
+                    action()
                     isPresented = false
                 },
                 onReset: {
@@ -74,8 +76,8 @@ struct CarTypeBottomSheet: View {
 struct CarTypePickerSheet_Previews: PreviewProvider {
     @State static var isPresented: Bool = true
     @State static var selectedCarType: String? = "대형"  // 단일 선택
-    
+
     static var previews: some View {
-        CarTypeBottomSheet(isPresented: $isPresented, selectedCarType: $selectedCarType)
+        CarTypeBottomSheet(isPresented: $isPresented, selectedCarType: $selectedCarType, action: {})
     }
 }

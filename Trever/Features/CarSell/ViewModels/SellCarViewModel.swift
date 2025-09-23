@@ -73,4 +73,19 @@ class SellCarViewModel: ObservableObject {
             return false
         }
     }
+    
+    func checkCarNumberDuplicate(carNumber: String) async -> ApiResponse<CarNumDuplicateResponse>? {
+        do {
+            let response: ApiResponse<CarNumDuplicateResponse> = try await NetworkManager.shared.request(
+                to: .vehicleCheckCarNumber(carNumber: carNumber),
+                responseType: ApiResponse<CarNumDuplicateResponse>.self
+            )
+            
+            return response
+        } catch {
+            print("[ERROR] 차 중복 검사 시 오류: \(error.localizedDescription)")
+            return nil
+        }
+    }
 }
+

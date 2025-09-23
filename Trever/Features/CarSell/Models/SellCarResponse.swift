@@ -9,3 +9,9 @@ struct SellCarResponse: Decodable {
     let vehicleModel: String
     let vehicleYear: Int
 }
+
+struct CarNumDuplicateResponse: Decodable {
+    let carNumber: String
+    let exists: Bool
+}
+

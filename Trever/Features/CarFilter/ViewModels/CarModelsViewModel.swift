@@ -16,7 +16,7 @@ class CarModelsViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     func fetchCarModels(category: String, manufacturer: String, carName: String, includeYear: Bool) async {
-        guard !isLoading else { return }   // 이미 실행 중이면 무시
+        guard !isLoading else { return } // 이미 실행 중이면 무시
         isLoading = true
         defer { isLoading = false }
         
@@ -41,7 +41,7 @@ class CarModelsViewModel: ObservableObject {
             } else {
                 // ApiResponse<[CarModelInfo]>
                 let response: ApiResponse<[CarModelInfo]> = try await NetworkManager.shared.request(
-                    to: .modelNames,
+                    to: .vehicleModels(manufacturer: manufacturer, carName: carName),
                     parameters: [
                         "category": category,
                         "manufacturer": manufacturer,
