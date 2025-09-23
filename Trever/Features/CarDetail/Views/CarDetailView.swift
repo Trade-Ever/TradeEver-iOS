@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import UIKit
 
 struct CarDetailView: View {
     var detail: CarDetail
@@ -13,9 +14,115 @@ struct CarDetailView: View {
     @State private var showMarkSoldSheet: Bool = false
     @StateObject private var favoriteManager = FavoriteManager.shared
     @State private var isTogglingFavorite = false
-//    @State private var soldCompleted: Bool = false
+    @State private var showBidErrorAlert = false
+    @State private var bidErrorMessage = ""
+    @State private var showBidSuccessAlert = false
+    @State private var showContactActionSheet = false
+    @State private var showPurchaseConfirmAlert = false
+    @State private var showPurchaseSuccessAlert = false
+    @State private var showPurchaseErrorAlert = false
+    @State private var purchaseErrorMessage = ""
+    @State private var purchaseRequests: [PurchaseRequestData] = []
+    @State private var isLoadingPurchaseRequests = false
 
     var body: some View {
+        mainContent
+            .ignoresSafeArea(edges: .top)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .bottom) { bottomActionBar }
+            .background(Color.cardBackground)
+            .onAppear {
+                setupInitialState()
+            }
+        .sheet(isPresented: $showMarkSoldSheet) {
+            MarkSoldSheet(
+                buyers: purchaseRequests.map { 
+                    PotentialBuyer(id: String($0.buyerId), name: $0.buyerName) 
+                },
+                vehicleId: detail.id,
+                onConfirm: { buyerId in
+                    print("선택된 구매자 ID: \(buyerId)")
+                    showMarkSoldSheet = false
+                },
+                onTransactionComplete: {
+                    // 거래 완료 후 바텀시트 닫고 차량 상세 정보 새로고침
+                    showMarkSoldSheet = false
+                    Task {
+                        await vm.load()
+                    }
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
+        }
+        .sheet(isPresented: $showBidSheet) {
+            let currentPrice = vm.liveAuction?.currentBidPrice ?? vm.liveAuction?.startPrice ?? detail.price ?? 0
+            let startPrice = vm.liveAuction?.startPrice ?? detail.price ?? 0
+            
+            AuctionBidSheet(
+                currentPriceWon: currentPrice,
+                startPriceWon: startPrice,
+                onConfirm: { incrementMan, newPriceWon in
+                    Task {
+                        await submitBid(bidPrice: newPriceWon)
+                    }
+                    showBidSheet = false
+                }
+            )
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.hidden)
+        }
+        .alert("입찰 오류", isPresented: $showBidErrorAlert) {
+            Button("확인") {
+                showBidErrorAlert = false
+            }
+        } message: {
+            Text(bidErrorMessage)
+        }
+        .alert("입찰 성공", isPresented: $showBidSuccessAlert) {
+            Button("확인") {
+                showBidSuccessAlert = false
+            }
+        } message: {
+            Text("입찰이 성공적으로 완료되었습니다.")
+        }
+        .sheet(isPresented: $showContactActionSheet) {
+            ContactActionSheet(
+                phoneNumber: detail.sellerPhone ?? "",
+                onCall: { callSeller() },
+                onMessage: { sendMessageToSeller() },
+                onCopy: { copyPhoneNumber() }
+            )
+        }
+        .alert("구매 신청", isPresented: $showPurchaseConfirmAlert) {
+            Button("취소", role: .cancel) { }
+            Button("확인") {
+                Task {
+                    await applyPurchase()
+                }
+            }
+        } message: {
+            Text("이 매물을 구매 신청하시겠습니까?")
+        }
+        .alert("구매 신청 성공", isPresented: $showPurchaseSuccessAlert) {
+            Button("확인") {
+                showPurchaseSuccessAlert = false
+            }
+        } message: {
+            Text("구매 신청이 성공적으로 완료되었습니다.")
+        }
+        .alert("구매 신청 실패", isPresented: $showPurchaseErrorAlert) {
+            Button("확인") {
+                showPurchaseErrorAlert = false
+            }
+        } message: {
+            Text(purchaseErrorMessage)
+        }
+    }
+
+    // MARK: - Main Content
+    private var mainContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // 이미지 페이저
@@ -39,46 +146,17 @@ struct CarDetailView: View {
                 Spacer(minLength: 40)
             }
         }
-        .ignoresSafeArea(edges: .top)
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { bottomActionBar }
-        .background(Color(.systemBackground))
-        .onAppear {
-            // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
-            if favoriteManager.favoriteStates[detail.id] == nil {
-                favoriteManager.setFavoriteState(vehicleId: detail.id, isFavorite: detail.favorite ?? false)
-            }
-            // 찜하기 카운트도 설정
-            if let favoriteCount = detail.favoriteCount {
-                favoriteManager.setFavoriteCount(vehicleId: detail.id, count: favoriteCount)
-            }
+    }
+    
+    // MARK: - Setup
+    private func setupInitialState() {
+        // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
+        if favoriteManager.favoriteStates[detail.id] == nil {
+            favoriteManager.setFavoriteState(vehicleId: detail.id, isFavorite: detail.favorite ?? false)
         }
-        .sheet(isPresented: $showMarkSoldSheet) {
-//            MarkSoldSheet(buyers: detail.potentialBuyers ?? []) { buyerId in
-//                // TODO: API call with buyerId
-////                soldCompleted = true
-//                showMarkSoldSheet = false
-//            }
-//            .presentationDetents([.medium, .large])
-//            .presentationDragIndicator(.hidden)
-        }
-        .sheet(isPresented: $showBidSheet) {
-            let currentPrice = vm.liveAuction?.currentBidPrice ?? vm.liveAuction?.startPrice ?? detail.price ?? 0
-            let startPrice = vm.liveAuction?.startPrice ?? detail.price ?? 0
-            
-            AuctionBidSheet(
-                currentPriceWon: currentPrice,
-                startPriceWon: startPrice,
-                onConfirm: { incrementMan, newPriceWon in
-                    Task {
-                        await submitBid(bidPrice: newPriceWon)
-                    }
-                    showBidSheet = false
-                }
-            )
-            .presentationDetents([.fraction(0.3)])
-            .presentationDragIndicator(.hidden)
+        // 찜하기 카운트도 설정
+        if let favoriteCount = detail.favoriteCount {
+            favoriteManager.setFavoriteCount(vehicleId: detail.id, count: favoriteCount)
         }
     }
 
@@ -317,7 +395,7 @@ struct CarDetailView: View {
                 .foregroundStyle(.primary)
                 .padding(16)
                 .frame(maxWidth: .infinity)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.purple50))
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.purple100.opacity(0.5)))
         }
         .padding(.horizontal, 16)
     }
@@ -360,7 +438,7 @@ struct CarDetailView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemGroupedBackground))
+        .background(Color.secondaryBackground)
     }
 
     // MARK: - 판매자 정보 섹션
@@ -422,23 +500,37 @@ struct CarDetailView: View {
     // MARK: - 하단 액션 바 섹션
     private var bottomActionBar: some View {
         HStack(spacing: 12) {
-            if detail.isAuction == "Y" {   // 경매 매물인 경우
+            // 내 게시물인 경우
+            if detail.isSeller == true {
+                if detail.isAuction == "Y" {
+                    // 내 게시물 + 경매: 상위입찰 버튼 비활성화
+                    auctionSellerView
+                } else {
+                    // 내 게시물 + 일반 매물: 판매완료 버튼
+                    generalSellerView
+                }
+            } else {
+                // 내 게시물이 아닌 경우: 기존 UI
+                if detail.isAuction == "Y" {   // 경매 매물인 경우
                 VStack(alignment: .center, spacing: 12) {
                     HStack(spacing: 8) {
                         VStack(spacing: 0) {
                             Text("상위 입찰자")
                                 .font(.caption2)
-                                .foregroundStyle(Color.grey300)
+                                .foregroundStyle(Color.primaryText.opacity(0.3))
                             HStack {
-                                Circle().fill(Color.grey100).frame(width: 25, height: 25)
+                                Circle().fill(Color.primaryText.opacity(0.5)).frame(width: 25, height: 25)
                                     .overlay(Image(systemName: "person").foregroundStyle(.secondary))
                                 Text(vm.liveAuction?.currentBidUserName ?? "입찰자 없음")
                                     .font(.subheadline)
+                                    .foregroundStyle(Color.primaryText.opacity(0.5))
                             }
                         }
                         Spacer()
                         HStack(spacing: 4) {
                             Image("gavel")
+                                .renderingMode(.template)
+                                .foregroundStyle(Color.primaryText)
                             if let status = vm.liveAuction?.status {
                                 switch status {
                                 case "UPCOMING":
@@ -472,9 +564,11 @@ struct CarDetailView: View {
                                 default:
                                     // 종료된 상태들: 상태 텍스트 표시
                                     Text(getAuctionStatusText()).font(.title2)
+                                        .foregroundStyle(Color.primaryText.opacity(0.5))
                                 }
                             } else {
                                 Text("상태 불명").font(.title2)
+                                    .foregroundStyle(Color.primaryText.opacity(0.5))
                             }
                         }
                         .foregroundStyle(
@@ -497,7 +591,7 @@ struct CarDetailView: View {
                                     .font(.title2).bold()
                                 if let sp = vm.liveAuction?.startPrice ?? detail.price, sp > 0 {
                                     Text("시작가 \(Formatters.priceText(won: sp))")
-                                        .foregroundStyle(Color.grey300)
+                                        .foregroundStyle(Color.primaryText.opacity(0.3))
                                         .font(.subheadline).bold()
                                 }
                             } else {
@@ -505,7 +599,7 @@ struct CarDetailView: View {
                                     .foregroundStyle(Color.priceGreen)
                                     .font(.title2).bold()
                                 Text("문의 후 협의")
-                                    .foregroundStyle(Color.grey300)
+                                    .foregroundStyle(Color.primaryText.opacity(0.5))
                                     .font(.subheadline).bold()
                             }
                         }
@@ -536,7 +630,7 @@ struct CarDetailView: View {
                 // 일반 매물의 경우 간단한 버튼들만 표시
                 CustomButton(
                     title: "문의하기",
-                    action: {},
+                    action: { showContactActionSheet = true },
                     fontSize: 16,
                     fontWeight: .semibold,
                     cornerRadius: 12,
@@ -547,23 +641,40 @@ struct CarDetailView: View {
                     borderColor: brand,
                     shadowColor: nil
                 )
-                CustomButton(
-                    title: "구매하기",
-                    action: {},
-                    fontSize: 16,
-                    fontWeight: .semibold,
-                    cornerRadius: 12,
-                    horizontalPadding: 0,
-                    foregroundColor: .white,
-                    backgroundColor: brand,
-                    pressedBackgroundColor: brand.opacity(0.85),
-                    shadowColor: Color.black.opacity(0.1)
-                )
+                if detail.vehicleStatus == "판매완료" {
+                    CustomButton(
+                        title: "판매완료",
+                        action: { },
+                        fontSize: 16,
+                        fontWeight: .semibold,
+                        cornerRadius: 12,
+                        horizontalPadding: 0,
+                        foregroundColor: .white,
+                        backgroundColor: Color.gray,
+                        pressedBackgroundColor: Color.gray,
+                        shadowColor: Color.black.opacity(0.1)
+                    )
+                    .disabled(true)
+                } else {
+                    CustomButton(
+                        title: "구매하기",
+                        action: { showPurchaseConfirmAlert = true },
+                        fontSize: 16,
+                        fontWeight: .semibold,
+                        cornerRadius: 12,
+                        horizontalPadding: 0,
+                        foregroundColor: .white,
+                        backgroundColor: brand,
+                        pressedBackgroundColor: brand.opacity(0.85),
+                        shadowColor: Color.black.opacity(0.1)
+                    )
+                }
+                }
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color.secondaryBackground)
         .background(
             Color.white
                 .shadow(
@@ -573,6 +684,179 @@ struct CarDetailView: View {
                     y: -2
                 )
         )
+    }
+    
+    // MARK: - 판매자 전용 뷰들
+    
+    // 내 게시물 + 일반 매물: 판매완료 버튼
+    private var generalSellerView: some View {
+        if detail.vehicleStatus == "판매완료" {
+            Button(action: {} ) {
+                HStack {
+                    if isLoadingPurchaseRequests {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple400))
+                    }
+                    Text("판매완료")
+                        .font(.headline)
+                        .foregroundColor(.purple400)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.secondaryBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.purple400, lineWidth: 1)
+                )
+                .cornerRadius(12)
+            }
+            .disabled(true)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        } else {
+            Button(action: {
+                Task {
+                    await fetchPurchaseRequests()
+                }
+            }) {
+                HStack {
+                    if isLoadingPurchaseRequests {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple400))
+                    }
+                    Text(isLoadingPurchaseRequests ? "구매자 목록 불러오는 중..." : "판매완료로 변경하기")
+                        .font(.headline)
+                        .foregroundColor(.purple400)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.purple400, lineWidth: 1)
+                )
+                .cornerRadius(12)
+            }
+            .disabled(isLoadingPurchaseRequests)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        
+    }
+    
+    // 내 게시물 + 경매: 상위입찰 버튼 비활성화
+    private var auctionSellerView: some View {
+        VStack(alignment: .center, spacing: 12) {
+            HStack(spacing: 8) {
+                VStack(spacing: 0) {
+                    Text("상위 입찰자")
+                        .font(.caption2)
+                        .foregroundStyle(Color.grey300)
+                    HStack {
+                        Circle().fill(Color.grey100).frame(width: 25, height: 25)
+                            .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+                        Text(vm.liveAuction?.currentBidUserName ?? "입찰자 없음")
+                            .font(.subheadline)
+                    }
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    Image("gavel")
+                    if let status = vm.liveAuction?.status {
+                        switch status {
+                        case "UPCOMING":
+                            // 시작 대기: 시작 시간까지 카운트다운
+                            if let start = resolvedStartDate() {
+                                //                                        print("UPCOMING - 시작 시간 파싱 성공: \(start)")
+                                HStack(spacing: 4) {
+                                    Text("경매 시작까지")
+                                        .font(.subheadline)
+                                        .foregroundStyle(Color.blue.opacity(0.8))
+                                    CountdownText(endDate: start)
+                                        .font(.title2)
+                                }
+                            } else {
+                                //                                        print("UPCOMING - 시작 시간 파싱 실패")
+                                Text("시작 대기").font(.title2)
+                            }
+                        case "ACTIVE":
+                            // 경매 진행 중: 종료 시간까지 카운트다운
+                            if let end = resolvedEndDate() {
+                                HStack(spacing: 4) {
+                                    Text("경매 종료까지")
+                                        .font(.subheadline)
+                                        .foregroundStyle(Color.likeRed.opacity(0.8))
+                                    CountdownText(endDate: normalizedAuctionEnd(end))
+                                        .font(.title2)
+                                }
+                            } else {
+                                Text("진행 중").font(.title2)
+                            }
+                        default:
+                            // 종료된 상태들: 상태 텍스트 표시
+                            Text(getAuctionStatusText()).font(.title2)
+                        }
+                    } else {
+                        Text("상태 불명").font(.title2)
+                    }
+                }
+                .foregroundStyle(
+                    isAuctionEnded() ? Color.grey300 :
+                        vm.liveAuction?.status == "ACTIVE" ? Color.likeRed : Color.blue
+                )
+                .font(.subheadline)
+            }
+            .padding(.vertical, 4)
+            .padding(.horizontal, 12)
+            .background(Capsule().fill(Color.likeRed).opacity(0.07))
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    let livePrice = vm.liveAuction?.currentBidPrice ?? vm.liveAuction?.startPrice
+                    let priceToShow = livePrice ?? detail.price
+                    if let price = priceToShow, price > 0 {
+                        Text(Formatters.priceText(won: price))
+                            .foregroundStyle(Color.priceGreen)
+                            .font(.title2).bold()
+                        if let sp = vm.liveAuction?.startPrice ?? detail.price, sp > 0 {
+                            Text("시작가 \(Formatters.priceText(won: sp))")
+                                .foregroundStyle(Color.grey300)
+                                .font(.subheadline).bold()
+                        }
+                    } else {
+                        Text("가격 문의")
+                            .foregroundStyle(Color.priceGreen)
+                            .font(.title2).bold()
+                        Text("문의 후 협의")
+                            .foregroundStyle(Color.grey300)
+                            .font(.subheadline).bold()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                CustomButton(
+                    title: getAuctionButtonText(),
+                    action: {
+                        if isAuctionStarted() && !isAuctionEnded() {
+                            showBidSheet = true
+                        }
+                    },
+                    fontSize: 16,
+                    fontWeight: .semibold,
+                    cornerRadius: 12,
+                    horizontalPadding: 0,
+                    foregroundColor: .white,
+                    backgroundColor: isAuctionEnded() ? Color.grey300 :
+                        isAuctionStarted() ? brand : Color.grey300,
+                    pressedBackgroundColor: isAuctionEnded() ? Color.grey300.opacity(0.85) :
+                        isAuctionStarted() ? brand.opacity(0.85) : Color.grey300.opacity(0.85),
+                    shadowColor: Color.black.opacity(0.1)
+                )
+                .disabled(true)
+                .frame(maxWidth: .infinity)
+            }
+        }
     }
 
     private func resolvedStartDate() -> Date? {
@@ -743,17 +1027,20 @@ struct CarDetailView: View {
         print("   - AuctionId: \(auctionId)")
         print("   - BidPrice: \(bidPrice)")
         
-        let success = await NetworkManager.shared.submitBid(
+        let result = await NetworkManager.shared.submitBid(
             auctionId: auctionId,
             bidPrice: bidPrice
         )
         
-        if success {
-            print("✅ 경매 입찰 성공")
-            // TODO: 성공 알림 표시
-        } else {
-            print("❌ 경매 입찰 실패")
-            // TODO: 실패 알림 표시
+        await MainActor.run {
+            if result.success {
+                print("✅ 경매 입찰 성공")
+                showBidSuccessAlert = true
+            } else {
+                print("❌ 경매 입찰 실패: \(result.message ?? "알 수 없는 오류")")
+                bidErrorMessage = result.message ?? "입찰에 실패했습니다."
+                showBidErrorAlert = true
+            }
         }
     }
     
@@ -774,7 +1061,113 @@ struct CarDetailView: View {
             }
         }
     }
+    
+    // MARK: - 전화번호 관련 함수들
+    
+    /// 전화번호를 정규화하여 URL 형식으로 변환
+    private func normalizePhoneNumber(_ phoneNumber: String) -> String {
+        // 하이픈과 공백 제거
+        let cleaned = phoneNumber.replacingOccurrences(of: "-", with: "")
+                                 .replacingOccurrences(of: " ", with: "")
+        
+        // 한국 휴대폰 번호 형식 확인 (010, 011, 016, 017, 018, 019)
+        if cleaned.hasPrefix("010") || cleaned.hasPrefix("011") || 
+           cleaned.hasPrefix("016") || cleaned.hasPrefix("017") || 
+           cleaned.hasPrefix("018") || cleaned.hasPrefix("019") {
+            return cleaned
+        }
+        
+        // 다른 형식이면 그대로 반환
+        return cleaned
+    }
+    
+    /// 전화걸기
+    private func callSeller() {
+        guard let phoneNumber = detail.sellerPhone else { return }
+        let normalizedNumber = normalizePhoneNumber(phoneNumber)
+        
+        if let url = URL(string: "tel:\(normalizedNumber)") {
+            #if canImport(UIKit)
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            }
+            #endif
+        }
+    }
+    
+    /// 문자보내기
+    private func sendMessageToSeller() {
+        guard let phoneNumber = detail.sellerPhone else { return }
+        let normalizedNumber = normalizePhoneNumber(phoneNumber)
+        
+        if let url = URL(string: "sms:\(normalizedNumber)") {
+            #if canImport(UIKit)
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            }
+            #endif
+        }
+    }
+    
+    /// 전화번호 복사
+    private func copyPhoneNumber() {
+        guard let phoneNumber = detail.sellerPhone else { return }
+        #if canImport(UIKit)
+        UIPasteboard.general.string = phoneNumber
+        
+        // 복사 완료 알림 (선택사항)
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
+        #endif
+    }
+    
+    // MARK: - 구매 신청
+    
+    private func applyPurchase() async {
+        print("💰 구매 신청 시작")
+        print("   - VehicleId: \(detail.id)")
+        
+        let result = await NetworkManager.shared.applyPurchase(vehicleId: detail.id)
+        
+        await MainActor.run {
+            if result.success {
+                print("✅ 구매 신청 성공")
+                showPurchaseSuccessAlert = true
+            } else {
+                print("❌ 구매 신청 실패: \(result.message ?? "알 수 없는 오류")")
+                purchaseErrorMessage = result.message ?? "구매 신청에 실패했습니다."
+                showPurchaseErrorAlert = true
+            }
+        }
+    }
+    
+    // MARK: - 구매 신청자 목록 조회
+    
+    private func fetchPurchaseRequests() async {
+        print("💰 구매 신청자 목록 조회 시작")
+        print("   - VehicleId: \(detail.id)")
+        
+        await MainActor.run {
+            isLoadingPurchaseRequests = true
+        }
+        
+        let requests = await NetworkManager.shared.fetchPurchaseRequests(vehicleId: detail.id)
+        
+        await MainActor.run {
+            isLoadingPurchaseRequests = false
+            
+            if let requests = requests {
+                purchaseRequests = requests
+                showMarkSoldSheet = true
+                print("✅ 구매 신청자 목록 로드 완료: \(requests.count)명")
+            } else {
+                print("❌ 구매 신청자 목록 조회 실패")
+                // 에러 처리 (선택사항)
+            }
+        }
+    }
 }
+
 
 #Preview {
     NavigationStack { CarDetailScreen(vehicleId: 1) }

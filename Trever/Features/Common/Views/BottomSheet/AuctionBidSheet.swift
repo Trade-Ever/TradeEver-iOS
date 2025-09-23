@@ -6,10 +6,37 @@ struct AuctionBidSheet: View {
     var onConfirm: ((Int, Int) -> Void)? = nil // (incrementMan, newPriceWon)
 
     private let brand = Color.purple400
-    @State private var incrementMan: Int = 1 // 만원 단위
+    @State private var incrementMan: Int // 만원 단위
     @FocusState private var focused: Bool
 
-    private var newPriceWon: Int { currentPriceWon + (incrementMan * 10_000) }
+    // 현재 입찰가가 시작가와 같으면 시작가부터 입찰 가능, 아니면 최소 1만원 이상
+    private var isFirstBid: Bool {
+        guard let startPrice = startPriceWon else { return false }
+        return currentPriceWon == startPrice
+    }
+    
+    private var newPriceWon: Int {
+        if isFirstBid {
+            return startPriceWon! + (incrementMan * 10_000)
+        } else {
+            return currentPriceWon + (incrementMan * 10_000)
+        }
+    }
+    
+    private var buttonTitle: String {
+        isFirstBid ? "입찰하기" : "상위 입찰"
+    }
+    
+    // 초기화
+    init(currentPriceWon: Int, startPriceWon: Int?, onConfirm: ((Int, Int) -> Void)? = nil) {
+        self.currentPriceWon = currentPriceWon
+        self.startPriceWon = startPriceWon
+        self.onConfirm = onConfirm
+        
+        // 첫 입찰인 경우 0, 아니면 1로 초기화
+        let isFirst = startPriceWon != nil && currentPriceWon == startPriceWon
+        self._incrementMan = State(initialValue: isFirst ? 0 : 1)
+    }
 
     var body: some View {
         Spacer()
@@ -40,7 +67,7 @@ struct AuctionBidSheet: View {
                         .multilineTextAlignment(.center)
                         .padding(.vertical, 10)
                         .onChange(of: incrementMan) { _, newValue in
-                            if newValue < 1 { incrementMan = 1 }
+                            if newValue < 0 { incrementMan = 0 }
                             if newValue > 1000000 { incrementMan = 1000000 }
                         }
                     Text("만원").foregroundStyle(.secondary)
@@ -54,7 +81,9 @@ struct AuctionBidSheet: View {
 
                 Spacer(minLength: 8)
 
-                Button { if incrementMan > 1 { incrementMan -= 1 } } label: {
+                Button { 
+                    if incrementMan > 0 { incrementMan -= 1 } 
+                } label: {
                     Circle().fill(Color.grey50)
                         .overlay(Image(systemName: "minus").foregroundStyle(.secondary))
                         .frame(width: 36, height: 36)
@@ -68,7 +97,7 @@ struct AuctionBidSheet: View {
 
             // Confirm button
             CustomButton(
-                title: "상위 입찰",
+                title: buttonTitle,
                 action: { onConfirm?(incrementMan, newPriceWon) },
                 fontSize: 16,
                 fontWeight: .semibold,

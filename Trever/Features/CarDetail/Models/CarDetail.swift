@@ -33,7 +33,10 @@ struct CarDetailData: Codable {
     let updatedAt: String?
     let sellerId: Int?
     let sellerName: String?
+    let sellerPhone: String?
+    let sellerLocationCity: String?
     let sellerProfileImageUrl: String?
+    let isSeller: Bool?
     let photos: [VehiclePhoto]?
     let vehicleTypeName: String?
     let options: [String]?
@@ -46,7 +49,7 @@ struct CarDetailData: Codable {
         case engineCc = "engineCc"
         case horsepower, color, price, isAuction, vehicleStatus, auctionId
         case favoriteCount = "favoriteCount"
-        case createdAt, updatedAt, sellerId, sellerName, sellerProfileImageUrl, photos, vehicleTypeName, options, favorite
+        case createdAt, updatedAt, sellerId, sellerName, sellerPhone, sellerLocationCity, sellerProfileImageUrl, isSeller, photos, vehicleTypeName, options, favorite
     }
 }
 

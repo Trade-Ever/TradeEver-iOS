@@ -148,7 +148,7 @@ private extension CarListItemView {
             HStack(alignment: .center) {
                 Text(model.title)
                     .font(.headline)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.primaryText)
                 Spacer()
                 if model.isAuction, let endDate = model.auctionEndsAt {
                     HStack(spacing: 4) {
@@ -161,7 +161,7 @@ private extension CarListItemView {
             }
 
             Text("\(Formatters.yearText(model.year)) · \(Formatters.mileageText(km: model.mileageKilometers))")
-                .foregroundStyle(.black.opacity(0.7))
+                .foregroundStyle(Color.primaryText.opacity(0.7))
                 .font(.subheadline)
 
             HStack {
@@ -177,7 +177,7 @@ private extension CarListItemView {
             ForEach(model.tags, id: \.self) { tag in
                 Text(tag)
                     .font(.caption2)
-                    .foregroundStyle(.black.opacity(0.7))
+                    .foregroundStyle(Color.secondaryText.opacity(0.7))
                     .padding(.vertical, 4)
                     .padding(.horizontal, 6)
                     .background(
