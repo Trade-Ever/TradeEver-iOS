@@ -14,13 +14,16 @@ struct RecentViewItem: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topLeading) {
-                thumbnail
-                    .frame(height: 180)
-                    .clipped()
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    thumbnail
+                        .frame(width: geometry.size.width, height: 180)
+                        .clipped()
 
-                statusBadge
+                    statusBadge
+                }
             }
+            .frame(height: 180)
 
             infoSection
                 .padding(12)

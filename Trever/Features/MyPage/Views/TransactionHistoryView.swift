@@ -7,15 +7,16 @@
 
 import SwiftUI
 
+struct ContractIDBox: Identifiable { let id: Int }
+
 struct TransactionHistoryView: View {
     let isSalesHistory: Bool // true: 판매내역, false: 구매내역
     @State private var transactions: [TransactionHistoryData] = []
     @State private var isLoading = true
     @State private var errorMessage: String? = nil
-    @State private var showTransactionComplete = false
-    @State private var selectedTransaction: TransactionHistoryData? = nil
     @State private var selectedVehicleId: Int? = nil
     @State private var showCarDetail = false
+    @State private var selectedContract: ContractIDBox? = nil
     
     var title: String {
         isSalesHistory ? "판매내역" : "구매내역"
@@ -94,9 +95,8 @@ struct TransactionHistoryView: View {
                                     showCarDetail = true
                                 },
                                 onPDFTap: {
-                                    if let contractId = transaction.contractId {
-                                        selectedTransaction = transaction
-                                        showTransactionComplete = true
+                                    if let id = transaction.contractId {
+                                        selectedContract = ContractIDBox(id: id)
                                     }
                                 }
                             )
@@ -112,16 +112,11 @@ struct TransactionHistoryView: View {
                 await loadTransactions()
             }
         }
-        .sheet(isPresented: $showTransactionComplete) {
-            if let transaction = selectedTransaction,
-               let contractId = transaction.contractId {
-                TransactionCompleteView(
-                    contractId: contractId,
-                    onComplete: nil
-                )
-            } else {
-                Text("데이터를 불러올 수 없습니다.")
-            }
+        .sheet(item: $selectedContract) { box in
+            TransactionCompleteView(
+                contractId: box.id,
+                onComplete: nil
+            )
         }
         .navigationDestination(isPresented: $showCarDetail) {
             if let vehicleId = selectedVehicleId {

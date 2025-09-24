@@ -24,17 +24,20 @@ struct CarListItemView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topLeading) {
-                thumbnail
-                    .frame(height: 180)
-                    .clipped()
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    thumbnail
+                        .frame(width: geometry.size.width, height: 180)
+                        .clipped()
 
-                if model.isAuction { auctionBadge }
+                    if model.isAuction { auctionBadge }
 
-                HStack { Spacer(); likeButton }
-                    .buttonStyle(.plain)
-                    .padding(4)
+                    HStack { Spacer(); likeButton }
+                        .buttonStyle(.plain)
+                        .padding(4)
+                }
             }
+            .frame(height: 180)
 
             infoSection
                 .padding(12)
@@ -68,7 +71,9 @@ private extension CarListItemView {
                 case .empty:
                     ZStack { Color.secondary.opacity(0.08); ProgressView() }
                 case .success(let image):
-                    image.resizable().scaledToFill()
+                    image
+                        .resizable()
+                        .scaledToFill()
                 case .failure:
                     placeholder
                 @unknown default:

@@ -24,14 +24,14 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
     func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
         // 재시도 횟수 초과 시 무한 반복 방지
         if retryCount >= maxRetryCount {
-            print("⚠️ 최대 재시도 횟수 초과 - 무한 반복 방지")
+            print("최대 재시도 횟수 초과 - 무한 반복 방지")
             completion(.doNotRetry)
             return
         }
         
         // 이미 재시도 중이면 무한 반복 방지
         if isRetrying {
-            print("⚠️ 이미 토큰 재발급 시도 중 - 무한 반복 방지")
+            print("이미 토큰 재발급 시도 중 - 무한 반복 방지")
             completion(.doNotRetry)
             return
         }
@@ -40,7 +40,7 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
         if let response = request.task?.response as? HTTPURLResponse,
            response.statusCode == 401 {
             
-            print("🔄 401 에러 감지 - 토큰 재발급 시도 (재시도 횟수: \(retryCount + 1)/\(maxRetryCount))")
+            print("401 에러 감지 - 토큰 재발급 시도 (재시도 횟수: \(retryCount + 1)/\(maxRetryCount))")
             isRetrying = true
             retryCount += 1
             
@@ -51,10 +51,10 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
                     isRetrying = false
                     
                     if success {
-                        print("✅ 토큰 재발급 성공 - 요청 재시도")
+                        print("토큰 재발급 성공 - 요청 재시도")
                         completion(.retry)
                     } else {
-                        print("❌ 토큰 재발급 실패 - 로그아웃 처리")
+                        print("토큰 재발급 실패 - 로그아웃 처리")
                         // 재시도 횟수 리셋
                         retryCount = 0
                         Task {
@@ -298,7 +298,7 @@ final class NetworkManager {
     /// Google 로그인 API 호출
     func authenticateWithGoogle(idToken: String) async -> GoogleLoginResponse? {
         let url = "\(baseURL)/v1/users/auth/google/login"
-        print("🌐 API 호출 시작")
+        print("API 호출 시작")
         print("   - URL: \(url)")
         print("   - Method: POST")
         print("   - ID Token: \(idToken.prefix(50))...")
@@ -321,7 +321,7 @@ final class NetworkManager {
                 .serializingDecodable(GoogleLoginResponse.self)
                 .value
             
-            print("✅ Google 로그인 API 호출 성공")
+            print("Google 로그인 API 호출 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -334,7 +334,7 @@ final class NetworkManager {
             
             return response
         } catch {
-            print("❌ Google 로그인 API 호출 실패")
+            print("Google 로그인 API 호출 실패")
             print("   - Error: \(error)")
             print("   - Error Type: \(type(of: error))")
             
@@ -362,7 +362,7 @@ final class NetworkManager {
     /// 로그아웃 API 호출
     func logout() async -> Bool {
         let url = "\(baseURL)/v1/users/logout"
-        print("🚪 로그아웃 API 호출 시작")
+        print("로그아웃 API 호출 시작")
         print("   - URL: \(url)")
         
         do {
@@ -374,11 +374,11 @@ final class NetworkManager {
                 .serializingString()
                 .value
             
-            print("✅ 로그아웃 API 호출 성공")
+            print("로그아웃 API 호출 성공")
             print("   - Response: \(response)")
             return true
         } catch {
-            print("❌ 로그아웃 API 호출 실패")
+            print("로그아웃 API 호출 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -387,7 +387,7 @@ final class NetworkManager {
     /// 프로필 완성 API 호출
     func completeProfile(name: String, phone: String, birthDate: String, locationCity: String) async -> Bool {
         let url = "\(baseURL)/v1/users/me/complete"
-        print("📝 프로필 완성 API 호출 시작")
+        print("프로필 완성 API 호출 시작")
         print("   - URL: \(url)")
         
         let request = ProfileCompletionRequest(
@@ -410,14 +410,14 @@ final class NetworkManager {
                 .serializingDecodable(ProfileCompletionResponse.self)
                 .value
             
-            print("✅ 프로필 완성 API 호출 성공")
+            print("프로필 완성 API 호출 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
             
             return response.success
         } catch {
-            print("❌ 프로필 완성 API 호출 실패")
+            print("프로필 완성 API 호출 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -426,7 +426,7 @@ final class NetworkManager {
     /// 지갑 잔액 조회
     func fetchWalletBalance() async -> Int? {
         let url = "\(baseURL)/v1/wallets"
-        print("💰 지갑 잔액 조회 API 호출")
+        print("지갑 잔액 조회 API 호출")
         print("   - URL: \(url)")
         
         do {
@@ -438,7 +438,7 @@ final class NetworkManager {
                 .serializingDecodable(WalletResponse.self)
                 .value
             
-            print("✅ 지갑 잔액 조회 성공")
+            print("지갑 잔액 조회 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -446,7 +446,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 지갑 잔액 조회 실패")
+            print("지갑 잔액 조회 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -455,7 +455,7 @@ final class NetworkManager {
     /// 프로필 수정
     func updateProfile(name: String, phone: String, locationCity: String, birthDate: String, profileImage: Data?) async -> Bool {
         let url = "\(baseURL)/v1/users/profile"
-        print("📝 프로필 수정 API 호출")
+        print("프로필 수정 API 호출")
         print("   - URL: \(url)")
         print("   - Name: \(name)")
         print("   - Phone: \(phone)")
@@ -496,14 +496,14 @@ final class NetworkManager {
                 .serializingDecodable(ProfileUpdateResponse.self)
                 .value
             
-            print("✅ 프로필 수정 성공")
+            print("프로필 수정 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
             
             return response.success
         } catch {
-            print("❌ 프로필 수정 실패")
+            print("프로필 수정 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -512,7 +512,7 @@ final class NetworkManager {
     /// 사용자 프로필 정보 조회
     func fetchUserProfile() async -> UserProfileData? {
         let url = "\(baseURL)/v1/users/me"
-        print("👤 사용자 프로필 조회 API 호출")
+        print("사용자 프로필 조회 API 호출")
         print("   - URL: \(url)")
         
         do {
@@ -524,7 +524,7 @@ final class NetworkManager {
                 .serializingDecodable(UserProfileResponse.self)
                 .value
             
-            print("✅ 사용자 프로필 조회 성공")
+            print("사용자 프로필 조회 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -539,7 +539,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 사용자 프로필 조회 실패")
+            print("사용자 프로필 조회 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -548,7 +548,7 @@ final class NetworkManager {
     /// 토큰 유효성 검증
     func validateToken() async -> Bool {
         let url = "\(baseURL)/v1/users/me"
-        print("🔍 토큰 유효성 검증 API 호출")
+        print("토큰 유효성 검증 API 호출")
         print("   - URL: \(url)")
         
         do {
@@ -560,7 +560,7 @@ final class NetworkManager {
                 .serializingDecodable(UserProfileResponse.self)
                 .value
             
-            print("✅ 토큰 유효성 검증 성공")
+            print("토큰 유효성 검증 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -573,7 +573,7 @@ final class NetworkManager {
             
             return response.success
         } catch {
-            print("❌ 토큰 유효성 검증 실패")
+            print("토큰 유효성 검증 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -582,12 +582,12 @@ final class NetworkManager {
     /// 토큰 재발급
     func reissueToken() async -> Bool {
         guard let refreshToken = TokenManager.shared.refreshToken else {
-            print("❌ RefreshToken이 없습니다")
+            print("RefreshToken이 없습니다")
             return false
         }
         
         let url = "\(baseURL)/v1/users/reissue"
-        print("🔄 토큰 재발급 API 호출")
+        print("토큰 재발급 API 호출")
         print("   - URL: \(url)")
         
         let request = TokenReissueRequest(refreshToken: refreshToken)
@@ -603,7 +603,7 @@ final class NetworkManager {
                 .serializingDecodable(TokenReissueResponse.self)
                 .value
             
-            print("✅ 토큰 재발급 성공")
+            print("토큰 재발급 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -620,11 +620,11 @@ final class NetworkManager {
             
             return response.success
         } catch {
-            print("❌ 토큰 재발급 실패")
+            print("토큰 재발급 실패")
             print("   - Error: \(error)")
             
             // 재발급 실패 시 토큰 삭제하여 무한 반복 방지
-            print("🗑️ 재발급 실패로 인한 토큰 삭제")
+            print("재발급 실패로 인한 토큰 삭제")
             TokenManager.shared.clearTokens()
             
             return false
@@ -636,7 +636,7 @@ final class NetworkManager {
     /// 지갑 충전
     func depositWallet(amount: Int) async -> Bool {
         let url = "\(baseURL)/v1/wallets/deposit"
-        print("💰 지갑 충전 API 호출")
+        print("지갑 충전 API 호출")
         print("   - URL: \(url)")
         print("   - Amount: \(amount)")
         
@@ -650,11 +650,11 @@ final class NetworkManager {
             .serializingString()
             .value
             
-            print("✅ 지갑 충전 성공")
+            print("지갑 충전 성공")
             print("   - Response: \(response)")
             return true
         } catch {
-            print("❌ 지갑 충전 실패")
+            print("지갑 충전 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -663,7 +663,7 @@ final class NetworkManager {
     /// 지갑 출금
     func withdrawWallet(amount: Int) async -> Bool {
         let url = "\(baseURL)/v1/wallets/withdraw"
-        print("💰 지갑 출금 API 호출")
+        print("지갑 출금 API 호출")
         print("   - URL: \(url)")
         print("   - Amount: \(amount)")
         
@@ -677,11 +677,11 @@ final class NetworkManager {
             .serializingString()
             .value
             
-            print("✅ 지갑 출금 성공")
+            print("지갑 출금 성공")
             print("   - Response: \(response)")
             return true
         } catch {
-            print("❌ 지갑 출금 실패")
+            print("지갑 출금 실패")
             print("   - Error: \(error)")
             return false
         }
@@ -690,7 +690,7 @@ final class NetworkManager {
     // MARK: - Auction Bid API
     func submitBid(auctionId: Int, bidPrice: Int) async -> (success: Bool, message: String?) {
         let url = "\(baseURL)/auctions/bids"
-        print("💰 경매 입찰 API 호출")
+        print("경매 입찰 API 호출")
         print("   - URL: \(url)")
         print("   - AuctionId: \(auctionId)")
         print("   - BidPrice: \(bidPrice)")
@@ -711,7 +711,7 @@ final class NetworkManager {
             .serializingData()
             .response
             
-            print("✅ 경매 입찰 API 응답 수신")
+            print("경매 입찰 API 응답 수신")
             print("   - Status Code: \(dataResponse.response?.statusCode ?? -1)")
             
             // 400 에러인 경우 서버 메시지 추출
@@ -742,7 +742,7 @@ final class NetworkManager {
             return (success: false, message: "입찰에 실패했습니다.")
             
         } catch {
-            print("❌ 경매 입찰 실패")
+            print("경매 입찰 실패")
             print("   - Error: \(error)")
             return (success: false, message: "입찰에 실패했습니다.")
         }
@@ -751,7 +751,7 @@ final class NetworkManager {
     // MARK: - Purchase API
     func applyPurchase(vehicleId: Int) async -> (success: Bool, message: String?) {
         let url = "\(baseURL)/v1/transactions/apply/\(vehicleId)"
-        print("💰 구매 신청 API 호출")
+        print("구매 신청 API 호출")
         print("   - URL: \(url)")
         print("   - VehicleId: \(vehicleId)")
         
@@ -764,7 +764,7 @@ final class NetworkManager {
             .serializingDecodable(PurchaseResponse.self)
             .value
             
-            print("✅ 구매 신청 API 응답 수신")
+            print("구매 신청 API 응답 수신")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -778,7 +778,7 @@ final class NetworkManager {
             
             return (success: response.success, message: response.message)
         } catch {
-            print("❌ 구매 신청 실패")
+            print("구매 신청 실패")
             print("   - Error: \(error)")
             return (success: false, message: "구매 신청에 실패했습니다.")
         }
@@ -787,7 +787,7 @@ final class NetworkManager {
     // MARK: - Purchase Requests API
     func fetchPurchaseRequests(vehicleId: Int) async -> [PurchaseRequestData]? {
         let url = "\(baseURL)/v1/transactions/requests/\(vehicleId)"
-        print("💰 구매 신청자 목록 조회 API 호출")
+        print("구매 신청자 목록 조회 API 호출")
         print("   - URL: \(url)")
         print("   - VehicleId: \(vehicleId)")
         
@@ -800,7 +800,7 @@ final class NetworkManager {
             .serializingDecodable(PurchaseRequestsResponse.self)
             .value
             
-            print("✅ 구매 신청자 목록 조회 성공")
+            print("구매 신청자 목록 조회 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -812,7 +812,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 구매 신청자 목록 조회 실패")
+            print("구매 신청자 목록 조회 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -821,7 +821,7 @@ final class NetworkManager {
     /// 구매자 선택 (거래 완료)
     func selectBuyer(vehicleId: Int, buyerId: Int) async -> (success: Bool, data: TransactionCompleteData?, message: String?) {
         let url = "\(baseURL)/v1/transactions/select/\(vehicleId)"
-        print("🤝 구매자 선택 API 호출")
+        print("구매자 선택 API 호출")
         print("   - URL: \(url)")
         print("   - VehicleId: \(vehicleId)")
         print("   - BuyerId: \(buyerId)")
@@ -837,7 +837,7 @@ final class NetworkManager {
             .serializingDecodable(TransactionCompleteResponse.self)
             .value
             
-            print("✅ 구매자 선택 성공")
+            print("구매자 선택 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -853,7 +853,7 @@ final class NetworkManager {
             
             return (success: response.success, data: response.data, message: response.message)
         } catch {
-            print("❌ 구매자 선택 실패")
+            print("구매자 선택 실패")
             print("   - Error: \(error)")
             return (success: false, data: nil, message: "구매자 선택에 실패했습니다.")
         }
@@ -862,7 +862,7 @@ final class NetworkManager {
     // MARK: - Favorite API
     func toggleFavorite(vehicleId: Int) async -> Bool? {
         let url = "\(baseURL)/v1/favorites/\(vehicleId)/toggle"
-        print("❤️ 찜 토글 API 호출")
+        print("찜 토글 API 호출")
         print("   - URL: \(url)")
         print("   - VehicleId: \(vehicleId)")
         
@@ -875,7 +875,7 @@ final class NetworkManager {
             .serializingDecodable(FavoriteToggleResponse.self)
             .value
             
-            print("✅ 찜 토글 성공")
+            print("찜 토글 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -883,7 +883,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 찜 토글 실패")
+            print("찜 토글 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -893,7 +893,7 @@ final class NetworkManager {
     /// 계약서 정보 조회
     func fetchContract(contractId: Int) async -> ContractData? {
         let url = "\(baseURL)/v1/contracts/\(contractId)"
-        print("📄 계약서 정보 조회 API 호출")
+        print("계약서 정보 조회 API 호출")
         print("   - URL: \(url)")
         print("   - ContractId: \(contractId)")
         
@@ -906,7 +906,7 @@ final class NetworkManager {
             .serializingData()
             .response
             
-            print("✅ 계약서 정보 조회 API 응답 수신")
+            print("계약서 정보 조회 API 응답 수신")
             print("   - Status Code: \(dataResponse.response?.statusCode ?? -1)")
             
             if let responseData = dataResponse.data,
@@ -918,7 +918,7 @@ final class NetworkManager {
             if let statusCode = dataResponse.response?.statusCode, statusCode == 200 {
                 if let responseData = dataResponse.data {
                     let response = try JSONDecoder().decode(ContractResponse.self, from: responseData)
-                    print("✅ 계약서 정보 조회 성공")
+                    print("계약서 정보 조회 성공")
                     print("   - Status: \(response.status)")
                     print("   - Success: \(response.success)")
                     print("   - Message: \(response.message)")
@@ -939,7 +939,7 @@ final class NetworkManager {
             
             return nil
         } catch {
-            print("❌ 계약서 정보 조회 실패")
+            print("계약서 정보 조회 실패")
             print("   - Error: \(error)")
             print("   - Error Type: \(type(of: error))")
             
@@ -968,7 +968,7 @@ final class NetworkManager {
     /// 계약서 PDF 다운로드
     func fetchContractPDF(contractId: Int) async -> Data? {
         let url = "\(baseURL)/v1/contracts/\(contractId)/pdf"
-        print("📄 계약서 PDF 다운로드 API 호출")
+        print("계약서 PDF 다운로드 API 호출")
         print("   - URL: \(url)")
         print("   - ContractId: \(contractId)")
         
@@ -981,12 +981,12 @@ final class NetworkManager {
             .serializingData()
             .value
             
-            print("✅ 계약서 PDF 다운로드 성공")
+            print("계약서 PDF 다운로드 성공")
             print("   - PDF Size: \(response.count) bytes")
             
             return response
         } catch {
-            print("❌ 계약서 PDF 다운로드 실패")
+            print("계약서 PDF 다운로드 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -996,7 +996,7 @@ final class NetworkManager {
     /// 판매내역 조회
     func fetchSalesHistory() async -> [TransactionHistoryData]? {
         let url = "\(baseURL)/v1/transactions/my/sales"
-        print("💰 판매내역 조회 API 호출")
+        print("판매내역 조회 API 호출")
         print("   - URL: \(url)")
         
         do {
@@ -1008,7 +1008,7 @@ final class NetworkManager {
             .serializingDecodable(TransactionHistoryResponse.self)
             .value
             
-            print("✅ 판매내역 조회 성공")
+            print("판매내역 조회 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -1020,7 +1020,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 판매내역 조회 실패")
+            print("판매내역 조회 실패")
             print("   - Error: \(error)")
             return nil
         }
@@ -1029,7 +1029,7 @@ final class NetworkManager {
     /// 구매내역 조회
     func fetchPurchaseHistory() async -> [TransactionHistoryData]? {
         let url = "\(baseURL)/v1/transactions/my/purchases"
-        print("💰 구매내역 조회 API 호출")
+        print("구매내역 조회 API 호출")
         print("   - URL: \(url)")
         
         do {
@@ -1041,7 +1041,7 @@ final class NetworkManager {
             .serializingDecodable(TransactionHistoryResponse.self)
             .value
             
-            print("✅ 구매내역 조회 성공")
+            print("구매내역 조회 성공")
             print("   - Status: \(response.status)")
             print("   - Success: \(response.success)")
             print("   - Message: \(response.message)")
@@ -1053,7 +1053,7 @@ final class NetworkManager {
             
             return response.data
         } catch {
-            print("❌ 구매내역 조회 실패")
+            print("구매내역 조회 실패")
             print("   - Error: \(error)")
             return nil
         }
