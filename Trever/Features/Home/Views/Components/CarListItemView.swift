@@ -41,7 +41,7 @@ struct CarListItemView: View {
 
             infoSection
                 .padding(12)
-                .background(Color.secondaryBackground)
+                .background(Color.groupedBackground)
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(

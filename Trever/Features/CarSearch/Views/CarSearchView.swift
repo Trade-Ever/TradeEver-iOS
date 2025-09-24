@@ -5,7 +5,7 @@ struct CarSearchView: View {
     @Environment(\.dismiss) private var dismiss
     
     // CarSearch 객체로 통합 관리
-    @State private var carSearch = CarSearchModel()
+    @State private var searchModel = CarSearchModel()
     @StateObject private var carFilter = CarFilterModel()
     
     // UI 상태들
@@ -83,6 +83,17 @@ struct CarSearchView: View {
                                 .padding(.horizontal, 20)
                             
                             FilterRowView(
+                                title: "차종",
+                                value: searchModel.vehicleType ?? "",
+                                action: {
+                                    showCarTypeSheet = true
+                                }
+                            )
+                            
+                            Divider()
+                                .padding(.horizontal, 20)
+                            
+                            FilterRowView(
                                 title: "주행거리",
                                 value: formatMileageText(),
                                 action: {
@@ -98,17 +109,6 @@ struct CarSearchView: View {
                                 value: formatPriceText(),
                                 action: {
                                     showPriceFilterSheet = true
-                                }
-                            )
-                            
-                            Divider()
-                                .padding(.horizontal, 20)
-                            
-                            FilterRowView(
-                                title: "차종",
-                                value: carSearch.vehicleType ?? "",
-                                action: {
-                                    showCarTypeSheet = true
                                 }
                             )
                         }
@@ -134,7 +134,7 @@ struct CarSearchView: View {
             }
             .fullScreenCover(isPresented: $showSearchResults) {
                 if let searchModel = searchResultModel {
-                    CarSearchResultsView(searchModel: searchModel)
+                    CarSearchResultsView(searchModel: $searchModel)
                 }
                 
             }
@@ -196,13 +196,13 @@ struct CarSearchView: View {
     private func formatManufacturerText() -> String {
         var components: [String] = []
         
-        if let manufacturer = carSearch.manufacturer {
+        if let manufacturer = searchModel.manufacturer {
             components.append(manufacturer)
         }
-        if let carName = carSearch.carName {
+        if let carName = searchModel.carName {
             components.append(carName)
         }
-        if let carModel = carSearch.carModel {
+        if let carModel = searchModel.carModel {
             components.append(carModel)
         }
         
@@ -210,79 +210,89 @@ struct CarSearchView: View {
     }
     
     private func formatYearText() -> String {
-        guard let yearStart = carSearch.yearStart,
-              let yearEnd = carSearch.yearEnd else {
+        guard let yearStart = searchModel.yearStart,
+              let yearEnd = searchModel.yearEnd else {
             return ""
         }
         return "\(yearStart)년 ~ \(yearEnd)년"
     }
     
     private func formatMileageText() -> String {
-        guard let mileageStart = carSearch.mileageStart,
-              let mileageEnd = carSearch.mileageEnd else {
+        guard let mileageStart = searchModel.mileageStart,
+              let mileageEnd = searchModel.mileageEnd else {
             return ""
         }
         return "\(mileageStart)만km ~ \(mileageEnd)만km"
     }
     
     private func formatPriceText() -> String {
-        guard let priceStart = carSearch.priceStart,
-              let priceEnd = carSearch.priceEnd else {
+        guard let priceStart = searchModel.priceStart,
+              let priceEnd = searchModel.priceEnd else {
             return ""
         }
         return "\(Formatters.priceToEokFormat(Double(priceStart))) ~ \(Formatters.priceToEokFormat(Double(priceEnd)))"
     }
     
     // MARK: - 업데이트 함수들
-    private func handleCarFilterComplete(_ filter: CarFilterModel) {
+    func handleCarFilterComplete(_ filter: CarFilterModel) {
         showCarFilterFlowSheet = false
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            carSearch.manufacturer = filter.manufacturer
-            carSearch.carName = filter.carName
-            carSearch.carModel = filter.modelName
+            searchModel.manufacturer = filter.manufacturer
+            searchModel.carName = filter.carName
+            searchModel.carModel = filter.modelName
         }
     }
     
-    private func updateYearFilter() {
-        carSearch.yearStart = Int(yearRange.lowerBound)
-        carSearch.yearEnd = Int(yearRange.upperBound)
+    func updateYearFilter() {
+        searchModel.yearStart = Int(yearRange.lowerBound)
+        searchModel.yearEnd = Int(yearRange.upperBound)
     }
     
-    private func updateMileageFilter() {
-        carSearch.mileageStart = Int(mileageRange.lowerBound)
-        carSearch.mileageEnd = Int(mileageRange.upperBound)
+    func updateMileageFilter() {
+        searchModel.mileageStart = Int(mileageRange.lowerBound)
+        searchModel.mileageEnd = Int(mileageRange.upperBound)
     }
     
-    private func updatePriceFilter() {
-        carSearch.priceStart = Int(priceRange.lowerBound)
-        carSearch.priceEnd = Int(priceRange.upperBound)
+    func updatePriceFilter() {
+        searchModel.priceStart = Int(priceRange.lowerBound)
+        searchModel.priceEnd = Int(priceRange.upperBound)
     }
     
-    private func updateCarTypeFilter() {
-        carSearch.vehicleType = selectedCarType
+    func updateCarTypeFilter() {
+        searchModel.vehicleType = selectedCarType
     }
     
     // MARK: - 액션 함수들
     private func performSearch() {
         // 키워드도 포함
-        carSearch.keyword = viewModel.searchText.isEmpty ? nil : viewModel.searchText
-        
-        // 검색 모델을 복사해서 결과 페이지로 전달
-        searchResultModel = carSearch
+        searchModel.keyword = viewModel.searchText.isEmpty ? nil : viewModel.searchText
         
         // 실제 검색 API 호출
         Task {
-            await viewModel.fetchFilteredCars(with: carSearch)
-            // Argument passed to call that takes no arguments
+            let modelToSend = prepareRequestModel(from: searchModel)
+            await viewModel.fetchFilteredCars(with: modelToSend)
+            
             DispatchQueue.main.async {
+                // 검색 모델을 복사해서 결과 페이지로 전달
+                searchResultModel = searchModel
                 showSearchResults = true
             }
         }
     }
     
+    private func prepareRequestModel(from carSearch: CarSearchModel) -> CarSearchModel {
+        var model = carSearch
+        model.vehicleType = Formatters.mapVehicleType(carSearch.vehicleType)
+        model.mileageStart = Formatters.toTenThousand(from: carSearch.mileageStart)
+        model.mileageEnd = Formatters.toTenThousand(from: carSearch.mileageEnd)
+        model.priceStart = Formatters.toTenMillion(from: carSearch.priceStart)
+        model.priceEnd = Formatters.toTenMillion(from: carSearch.priceEnd)
+        return model
+    }
+    
     private func resetFilters() {
-        carSearch = CarSearchModel()
+        searchModel = CarSearchModel()
         selectedCarType = nil
         yearRange = 1998...2025
         mileageRange = 0...30

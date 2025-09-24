@@ -35,18 +35,6 @@ struct SellCarRequest: Codable {
     var endAt: String?                  // 경매 종료날짜
     var price: Int?                     // 가격(일반거래)
     var startPrice: Int?                // 가격(경매)
-
-    // 한글 → 영문 매핑을 static으로 변경하고 더 포괄적으로 만들기
-    private static let vehicleTypeMapping: [String: String] = [
-        "대형": "LARGE",
-        "중형": "MID_SIZE",
-        "준중형": "SEMI_MID_SIZE",
-        "소형": "SMALL",
-        "스포츠": "SPORTS",
-        "SUV": "SUV",
-        "승합차": "VAN",
-        "경차": "COMPACT",
-    ]
     
     init(from sellCarModel: SellCarModel) {
         // 옵션 배열 처리
@@ -60,7 +48,7 @@ struct SellCarRequest: Codable {
         
         // 차량 타입 매핑 - 공백 제거 및 디버깅 추가
         let originalVehicleType = sellCarModel.vehicleType.trimmingCharacters(in: .whitespacesAndNewlines)
-        let mappedVehicleType = Self.vehicleTypeMapping[originalVehicleType] ?? originalVehicleType
+        let mappedVehicleType = Formatters.mapVehicleType(originalVehicleType) ?? originalVehicleType
         
         // 디버깅용 출력 (필요시 주석 해제)
         //print("Original vehicleType: '\(sellCarModel.vehicleType)'")
@@ -93,7 +81,7 @@ struct SellCarRequest: Codable {
         // 거래 방식에 따라 isAuction, start/end, price 처리
         if sellCarModel.tradeMethod == "경매" {
             self.isAuction = true
-            self.startPrice = (Int(sellCarModel.price) ?? 0) * 10000 // 만원 단위
+            self.startPrice = Formatters.toTenThousand(from: Int(sellCarModel.price)) ?? 0 // 만원 단위
             self.startAt = sellCarModel.startDate != nil ? dateFormatter.string(from: sellCarModel.startDate!) : nil
             self.endAt = sellCarModel.endDate != nil ? dateFormatter.string(from: sellCarModel.endDate!) : nil
             self.price = nil

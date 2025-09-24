@@ -81,7 +81,7 @@ struct AuctionView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemBackground))
+                .background(Color(.systemGroupedBackground))
             }
         }
         .navigationTitle("경매")

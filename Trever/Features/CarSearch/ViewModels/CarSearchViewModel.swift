@@ -26,7 +26,7 @@
         private let pageSize = 20
 
         // MARK: - 필터 조건으로 검색 API 호출
-        func fetchFilteredCars(with carSearch: CarSearchModel, isLoadMore: Bool = false) async {
+        func fetchFilteredCars(with carSearch: CarSearchModel, isLoadMore: Bool = false) async {     
             if !isLoadMore {
                 currentPage = 1
                 vehicles = []
@@ -55,7 +55,7 @@
                 
                 let parameters = requestModel.toDictionary()
                 
-                // ✅ 요청 파라미터 로그
+                // 요청 파라미터 로그
                 if let jsonData = try? JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted),
                    let jsonString = String(data: jsonData, encoding: .utf8) {
                     print("📤 [차량검색 요청] page=\(requestModel.page), size=\(pageSize)")
@@ -245,7 +245,6 @@
             )
         }
     }
-
     extension CarSearchRequest {
         func toDictionary() -> [String: Any] {
             var dict: [String: Any] = [:]
