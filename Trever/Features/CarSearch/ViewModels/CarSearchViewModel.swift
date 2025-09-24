@@ -168,8 +168,8 @@
                     
                     await fetchRecentSearches()
                 } else {
-                    errorMessage = response.message ?? "검색에 실패했습니다."
-                    print("❌ 차량 검색 실패: \(response.message ?? "Unknown error")")
+                    errorMessage = response.message
+                    print("❌ 차량 검색 실패: \(response.message)")
                 }
                 
             } catch {
@@ -212,7 +212,7 @@
                     responseType: ApiResponse<String>.self
                 )
                 
-                print("📥 [최근검색 삭제 응답] success=\(response.success), message=\(response.message ?? "nil")")
+                print("📥 [최근검색 삭제 응답] success=\(response.success), message=\(response.message)")
                 
                 if response.success {
                     recentSearches.removeAll { $0 == keyword }

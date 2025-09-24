@@ -280,3 +280,30 @@ extension CarListItemView {
     )
     return CarListItemView(apiModel: preview).padding()
 }
+extension CarListItemView {    
+    // Vehicle 타입을 위한 새로운 초기화 메서드 추가
+    init(vehicle: Vehicle) {
+        let isAuction = vehicle.isAuction.uppercased() == "Y"
+        let tags = Array(vehicle.mainOptions.prefix(3))
+        let displayTitle = {
+            if !vehicle.manufacturer.isEmpty && !vehicle.model.isEmpty {
+                return "\(vehicle.manufacturer) \(vehicle.model)"
+            }
+            return vehicle.carName.isEmpty ? "차량" : vehicle.carName
+        }()
+        
+        let vm = ViewModel(
+            title: displayTitle,
+            year: vehicle.yearValue,
+            mileageKilometers: vehicle.mileage,
+            thumbnailURLString: vehicle.representativePhotoUrl,
+            tags: tags,
+            priceWon: vehicle.price ?? 0,
+            isAuction: isAuction,
+            auctionEndsAt: nil, // Vehicle 모델에 경매 종료 시간이 없는 경우
+            vehicleId: Int64(vehicle.id),
+            isFavorite: vehicle.isFavorite
+        )
+        self.init(model: vm)
+    }
+}
