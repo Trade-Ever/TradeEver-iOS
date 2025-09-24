@@ -284,28 +284,21 @@ struct TransactionCompleteView: View {
             pdfData = nil
         }
         
-        do {
-            let contract = await NetworkManager.shared.fetchContract(contractId: contractId)
-            let pdf = await NetworkManager.shared.fetchContractPDF(contractId: contractId)
+        let contract = await NetworkManager.shared.fetchContract(contractId: contractId)
+        let pdf = await NetworkManager.shared.fetchContractPDF(contractId: contractId)
+        
+        await MainActor.run {
+            if let contract = contract {
+                self.contractData = contract
+            } else {
+                self.errorMessage = "계약서 정보를 불러올 수 없습니다."
+            }
             
-            await MainActor.run {
-                if let contract = contract {
-                    self.contractData = contract
-                } else {
-                    self.errorMessage = "계약서 정보를 불러올 수 없습니다."
-                }
-                
-                if let pdf = pdf {
-                    self.pdfData = pdf
-                }
-                
-                self.isLoading = false
+            if let pdf = pdf {
+                self.pdfData = pdf
             }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = "계약서를 불러오는 중 오류가 발생했습니다."
-                self.isLoading = false
-            }
+            
+            self.isLoading = false
         }
     }
     

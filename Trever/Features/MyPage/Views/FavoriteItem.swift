@@ -11,16 +11,25 @@ struct FavoriteItem: View {
     let vehicle: FavoriteData
     @State private var selectedVehicleId: Int? = nil
     @State private var showCarDetail = false
+    @StateObject private var favoriteManager = FavoriteManager.shared
+    @State private var isToggling = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topLeading) {
-                thumbnail
-                    .frame(height: 180)
-                    .clipped()
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    thumbnail
+                        .frame(width: geometry.size.width, height: 180)
+                        .clipped()
 
-                statusBadge
+                    statusBadge
+
+                    HStack { Spacer(); likeButton }
+                        .buttonStyle(.plain)
+                        .padding(4)
+                }
             }
+            .frame(height: 180)
 
             infoSection
                 .padding(12)
@@ -39,6 +48,13 @@ struct FavoriteItem: View {
         .navigationDestination(isPresented: $showCarDetail) {
             if let vehicleId = selectedVehicleId {
                 CarDetailScreen(vehicleId: vehicleId)
+            }
+        }
+        .onAppear {
+            // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
+            let vehicleId = Int(vehicle.id)
+            if favoriteManager.favoriteStates[vehicleId] == nil {
+                favoriteManager.setFavoriteState(vehicleId: vehicleId, isFavorite: vehicle.isFavorite ?? true)
             }
         }
     }
@@ -127,6 +143,43 @@ private extension FavoriteItem {
             Text("\(vehicle.fuelType) • \(vehicle.transmission)")
                 .foregroundStyle(.secondary)
                 .font(.subheadline)
+        }
+    }
+
+    var likeButton: some View {
+        Button {
+            toggleFavorite()
+        } label: {
+            if isToggling {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .foregroundStyle(.secondary)
+            } else {
+                let isLiked = favoriteManager.isFavorite(vehicleId: Int(vehicle.id))
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .foregroundStyle(isLiked ? Color.likeRed : .secondary)
+                    .font(.system(size: 20, weight: .semibold))
+            }
+        }
+        .padding(8)
+        .disabled(isToggling)
+    }
+    
+    private func toggleFavorite() {
+        guard !isToggling else { return }
+        
+        isToggling = true
+        
+        Task {
+            let result = await NetworkManager.shared.toggleFavorite(vehicleId: Int(vehicle.id))
+            
+            await MainActor.run {
+                isToggling = false
+                if let newFavoriteState = result {
+                    // 전역 상태 업데이트
+                    favoriteManager.toggleFavorite(vehicleId: Int(vehicle.id), newState: newFavoriteState)
+                }
+            }
         }
     }
 }

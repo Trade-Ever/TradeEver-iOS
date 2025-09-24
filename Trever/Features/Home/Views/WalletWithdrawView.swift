@@ -112,7 +112,7 @@ struct WalletWithdrawView: View {
                             placeholder: "금액을 입력하세요",
                             text: $customAmount
                         )
-                        .onChange(of: customAmount) { newValue in
+                        .onChange(of: customAmount) { _, newValue in
                             if !newValue.isEmpty {
                                 selectedAmount = nil
                             }
