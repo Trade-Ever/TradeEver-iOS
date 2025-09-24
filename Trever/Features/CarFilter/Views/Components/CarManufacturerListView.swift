@@ -58,7 +58,7 @@ struct CarManufacturerListView: View {
                         
                         CarFilterSection(
                             title: "국산차",
-                            data: viewModel.domesticCars.map { (nil, $0.manufacturer, $0.count, false) },
+                            data: viewModel.domesticCars.map { ($0.manufacturer, $0.manufacturer, $0.count, false) },
                             showDivider: true,
                             onRowTap: { selectedManufacturer in
                                 filter.category = "국산"
@@ -69,7 +69,7 @@ struct CarManufacturerListView: View {
                         
                         CarFilterSection(
                             title: "수입차",
-                            data: viewModel.importedCars.map { (nil, $0.manufacturer, $0.count, false) },
+                            data: viewModel.importedCars.map { ($0.manufacturer, $0.manufacturer, $0.count, false) },
                             onRowTap: { selectedManufacturer in
                                 filter.category = "수입"
                                 filter.manufacturer = selectedManufacturer
