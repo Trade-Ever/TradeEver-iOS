@@ -28,7 +28,7 @@ struct AuctionCarListItemView: View {
 
             infoSection
                 .padding(12)
-                .background(Color.secondaryBackground)
+                .background(Color("cardBackground"))
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(

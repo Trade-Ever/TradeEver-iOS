@@ -75,6 +75,19 @@ struct TokenReissueResponse: Codable {
     let success: Bool
     let message: String
     let data: TokenReissueData?
+    
+    // data 필드가 없는 경우를 위한 초기화
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        status = try container.decode(Int.self, forKey: .status)
+        success = try container.decode(Bool.self, forKey: .success)
+        message = try container.decode(String.self, forKey: .message)
+        data = try container.decodeIfPresent(TokenReissueData.self, forKey: .data)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case status, success, message, data
+    }
 }
 
 struct TokenReissueData: Codable {
@@ -227,7 +240,11 @@ struct RecentViewsResponse: Codable {
     let status: Int
     let success: Bool
     let message: String
-    let data: [RecentViewData]
+    let data: RecentViewsData
+}
+
+struct RecentViewsData: Codable {
+    let vehicles: [RecentViewData]
 }
 
 struct RecentViewData: Codable, Identifiable {
@@ -263,7 +280,11 @@ struct FavoritesResponse: Codable {
     let status: Int
     let success: Bool
     let message: String
-    let data: [FavoriteData]
+    let data: FavoritesData
+}
+
+struct FavoritesData: Codable {
+    let vehicles: [FavoriteData]
 }
 
 struct FavoriteData: Codable, Identifiable {

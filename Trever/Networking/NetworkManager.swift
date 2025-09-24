@@ -11,8 +11,9 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var request = urlRequest
         
-        // Google login API는 Authorization 헤더 추가하지 않음
-        if !(request.url?.absoluteString.contains("/users/auth/google/login") ?? false) {
+        // Google login API와 로그아웃 API는 Authorization 헤더 추가하지 않음
+        let urlString = request.url?.absoluteString ?? ""
+        if !urlString.contains("/users/auth/google/login") && !urlString.contains("/users/logout") {
             if let authHeader = TokenManager.shared.authorizationHeader.first {
                 request.setValue(authHeader.value, forHTTPHeaderField: authHeader.key)
             }
@@ -36,9 +37,16 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
             return
         }
         
-        // 401 에러인 경우 토큰 재발급 시도
+        // 401 에러인 경우 토큰 재발급 시도 (로그아웃 API 제외)
         if let response = request.task?.response as? HTTPURLResponse,
            response.statusCode == 401 {
+            
+            let urlString = request.task?.originalRequest?.url?.absoluteString ?? ""
+            if urlString.contains("/users/logout") {
+                print("로그아웃 API 401 에러 - 토큰 재발급 시도하지 않음")
+                completion(.doNotRetry)
+                return
+            }
             
             print("401 에러 감지 - 토큰 재발급 시도 (재시도 횟수: \(retryCount + 1)/\(maxRetryCount))")
             isRetrying = true
@@ -47,15 +55,19 @@ final class TokenInterceptor: RequestInterceptor, @unchecked Sendable {
             Task {
                 let success = await NetworkManager.shared.reissueToken()
                 
-                await MainActor.run {
+                _ = await MainActor.run {
                     isRetrying = false
                     
                     if success {
                         print("토큰 재발급 성공 - 요청 재시도")
+                        // 재시도 횟수 리셋 (성공 시)
+                        retryCount = 0
                         completion(.retry)
                     } else {
-                        print("토큰 재발급 실패 - 로그아웃 처리")
-                        // 재시도 횟수 리셋
+                        print("토큰 재발급 실패 - 재시도 횟수: \(retryCount)/\(maxRetryCount)")
+                        
+                        // 토큰 재발급 실패 시 로그아웃 처리 (RefreshToken 만료로 간주)
+                        print("토큰 재발급 실패 - RefreshToken 만료로 간주하여 로그아웃")
                         retryCount = 0
                         Task {
                             await AuthViewModel.shared.signOut()
@@ -521,7 +533,13 @@ final class NetworkManager {
     /// 토큰 재발급
     func reissueToken() async -> Bool {
         guard let refreshToken = TokenManager.shared.refreshToken else {
-            print("RefreshToken이 없습니다")
+            print("RefreshToken이 없습니다 - 로그아웃 필요")
+            // RefreshToken이 없으면 로그아웃 처리
+            _ = await MainActor.run {
+                Task {
+                    await AuthViewModel.shared.signOut()
+                }
+            }
             return false
         }
         
@@ -555,16 +573,43 @@ final class NetworkManager {
                     profileComplete: data.profileComplete
                 )
                 print("   - 새로운 토큰 저장 완료")
+                return true
+            } else {
+                print("   - 토큰 데이터가 없음 - 재발급 실패")
+                // 토큰 데이터가 없으면 RefreshToken도 만료된 것으로 간주하여 로그아웃
+                print("RefreshToken 만료로 인한 로그아웃 처리")
+                _ = await MainActor.run {
+                    Task {
+                        await AuthViewModel.shared.signOut()
+                    }
+                }
+                return false
             }
-            
-            return response.success
         } catch {
             print("토큰 재발급 실패")
             print("   - Error: \(error)")
             
-            // 재발급 실패 시 토큰 삭제하여 무한 반복 방지
-            print("재발급 실패로 인한 토큰 삭제")
-            TokenManager.shared.clearTokens()
+            // 디코딩 에러인 경우 원본 응답 확인
+            if let afError = error as? AFError,
+               case .responseSerializationFailed(let reason) = afError,
+               case .decodingFailed(let decodingError) = reason {
+                print("   - 디코딩 에러 상세: \(decodingError)")
+            }
+            
+            // 401 에러인 경우 RefreshToken도 만료된 것으로 간주
+            if let afError = error as? AFError,
+               case .responseValidationFailed(let reason) = afError,
+               case .unacceptableStatusCode(let code) = reason,
+               code == 401 {
+                print("RefreshToken 만료로 인한 로그아웃 처리")
+                _ = await MainActor.run {
+                    Task {
+                        await AuthViewModel.shared.signOut()
+                    }
+                }
+            } else {
+                print("토큰 재발급 실패 - 네트워크 오류로 추정")
+            }
             
             return false
         }
@@ -1008,7 +1053,7 @@ final class NetworkManager {
                 .serializingDecodable(RecentViewsResponse.self)
                 .value
             
-            return response.data
+            return response.data.vehicles
         } catch {
             print("Recent views fetch failed: \(error)")
             return nil
@@ -1025,7 +1070,7 @@ final class NetworkManager {
                 .serializingDecodable(FavoritesResponse.self)
                 .value
             
-            return response.data
+            return response.data.vehicles
         } catch {
             print("Favorites fetch failed: \(error)")
             return nil

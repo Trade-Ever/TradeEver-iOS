@@ -10,7 +10,7 @@ enum Formatters {
             let rounded = (man * 10).rounded() / 10
             return "\(rounded)만km"
         }
-        return "\(km)km"
+        return "\(decimal(km))km"
     }
     
     // Decimal comma formatter: 1234567 -> "1,234,567"
