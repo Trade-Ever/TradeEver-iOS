@@ -36,7 +36,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity, minHeight: height)
                 .background(
                     isOutline ?
-                        Color.white :
+                        Color(UIColor.systemBackground) :
                         (isPressed ? Color.purple700 : Color.purple400)
                 )
                 .overlay(

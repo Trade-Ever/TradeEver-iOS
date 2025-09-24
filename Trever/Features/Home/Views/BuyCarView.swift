@@ -28,7 +28,7 @@ struct BuyCarView: View {
             .padding(.top, 8)
             .padding(.bottom, 8)
             
-            Divider() // 상단바 구분선
+//            Divider() // 상단바 구분선
             
             // 차량 리스트 / 상태 뷰
             Group {

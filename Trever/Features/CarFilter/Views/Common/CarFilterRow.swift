@@ -51,9 +51,10 @@ struct CarFilterRow: View {
         .frame(maxWidth: .infinity, minHeight: 48)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isPressed ? Color.grey200.opacity(0.3) : Color.white) // 버튼 눌릴 때 색상 변경
+                .fill(isPressed ? Color.grey200.opacity(0.3) : Color(UIColor.systemBackground)) // 버튼 눌릴 때 색상 변경
         )
         .cornerRadius(8)
+        .contentShape(Rectangle()) // 전체 영역을 터치 가능하게 설정
         .onTapGesture {
             // 눌린 상태로 변경
             withAnimation(.easeIn(duration: 0.05)) {

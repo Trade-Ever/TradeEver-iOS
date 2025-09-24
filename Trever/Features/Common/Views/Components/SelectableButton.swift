@@ -18,7 +18,7 @@ struct SelectableButton: View {
                 .font(.system(size: 16, weight: .bold))
                 .padding(.vertical, 14)
                 .frame(maxWidth: .infinity)
-                .background(isSelected ? Color.purple300 : Color.white)
+                .background(isSelected ? Color.purple300 : Color(UIColor.systemBackground))
                 .foregroundColor(isSelected ? .white : .grey200)
                 .cornerRadius(50)
                 .overlay(

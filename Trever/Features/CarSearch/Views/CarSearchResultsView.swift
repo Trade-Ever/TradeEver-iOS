@@ -124,7 +124,6 @@ struct CarSearchResultsView: View {
                 Text("검색결과")
                     .font(.system(size: 24, weight: .bold))
                     .padding(.leading, 12)
-                    .foregroundStyle(Color.black)
                 
                 Spacer()
             }
@@ -155,11 +154,46 @@ struct CarSearchResultsView: View {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(Array(viewModel.vehicles.enumerated()), id: \.element.id) { index, vehicle in
-                        CarListItemView(vehicle: vehicle)
-                            .onTapGesture {
-                                selectedVehicleId = Int(vehicle.id)
-                                print("차량 선택됨: \(vehicle.id)")
-                            }
+                        // 경매 아이템인지 확인하여 적절한 뷰 사용
+                        if vehicle.isAuction == "Y" {
+                            // Vehicle을 VehicleAPIItem으로 변환
+                            let vehicleAPIItem = VehicleAPIItem(
+                                id: Int64(vehicle.id),
+                                carName: vehicle.carName,
+                                carNumber: vehicle.carNumber,
+                                manufacturer: vehicle.manufacturer,
+                                model: vehicle.model,
+                                year_value: vehicle.yearValue,
+                                mileage: vehicle.mileage,
+                                transmission: vehicle.transmission,
+                                vehicleStatus: vehicle.vehicleStatus,
+                                fuelType: vehicle.fuelType,
+                                price: vehicle.price,
+                                isAuction: vehicle.isAuction,
+                                representativePhotoUrl: vehicle.representativePhotoUrl,
+                                locationAddress: nil, // Vehicle에는 없음
+                                favoriteCount: vehicle.favoriteCount,
+                                createdAt: vehicle.createdAt,
+                                vehicleTypeName: vehicle.vehicleTypeName,
+                                mainOptions: vehicle.mainOptions,
+                                totalOptionsCount: vehicle.totalOptionsCount,
+                                auctionId: vehicle.auctionId != nil ? Int64(vehicle.auctionId!) : nil,
+                                startPrice: nil, // Vehicle에는 없음
+                                currentPrice: nil, // Vehicle에는 없음
+                                startAt: nil, // Vehicle에는 없음
+                                endAt: nil, // Vehicle에는 없음
+                                auctionStatus: nil, // Vehicle에는 없음
+                                bidCount: nil, // Vehicle에는 없음
+                                isFavorite: vehicle.isFavorite
+                            )
+                            
+                            AuctionCarListItemViewWithFirebase(
+                                vehicle: vehicleAPIItem,
+                                onTap: {
+                                    selectedVehicleId = Int(vehicle.id)
+                                    print("경매 차량 선택됨: \(vehicle.id)")
+                                }
+                            )
                             .onAppear {
                                 // 무한 스크롤 - index 기반으로 수정
                                 if index == viewModel.vehicles.count - 1 && viewModel.hasMoreData {
@@ -169,6 +203,22 @@ struct CarSearchResultsView: View {
                                     }
                                 }
                             }
+                        } else {
+                            CarListItemView(vehicle: vehicle)
+                                .onTapGesture {
+                                    selectedVehicleId = Int(vehicle.id)
+                                    print("일반 차량 선택됨: \(vehicle.id)")
+                                }
+                                .onAppear {
+                                    // 무한 스크롤 - index 기반으로 수정
+                                    if index == viewModel.vehicles.count - 1 && viewModel.hasMoreData {
+                                        Task {
+                                            let modelToSend = prepareRequestModel(from: searchModel)
+                                            await viewModel.fetchFilteredCars(with: modelToSend, isLoadMore: true)
+                                        }
+                                    }
+                                }
+                        }
                     }
                     
                     // 더 많은 데이터 로딩 인디케이터
@@ -348,6 +398,49 @@ struct CarSearchResultsView: View {
         model.priceStart = Formatters.toTenMillion(from: carSearch.priceStart)
         model.priceEnd = Formatters.toTenMillion(from: carSearch.priceEnd)
         return model
+    }
+}
+
+// MARK: - Firebase 연동 경매 아이템 뷰
+struct AuctionCarListItemViewWithFirebase: View {
+    let vehicle: VehicleAPIItem
+    let onTap: () -> Void
+    
+    @State private var liveAuction: AuctionLive? = nil
+    @State private var auctionHandle: UInt? = nil
+    
+    var body: some View {
+        AuctionCarListItemView(vehicle: vehicle, live: liveAuction)
+            .onTapGesture {
+                onTap()
+            }
+            .onAppear {
+                subscribeToAuction()
+            }
+            .onDisappear {
+                unsubscribeFromAuction()
+            }
+    }
+    
+    // MARK: - Firebase Methods
+    private func subscribeToAuction() {
+        guard vehicle.isAuction == "Y" else { return }
+        
+        // vehicleId로 Firebase에서 경매 데이터 구독
+        let handle = FirebaseAuctionService.shared.observeAuctionByVehicleIdContinuous(vehicleId: Int(vehicle.id)) { live in
+            Task { @MainActor in
+                self.liveAuction = live
+            }
+        }
+        auctionHandle = handle
+    }
+    
+    private func unsubscribeFromAuction() {
+        guard let handle = auctionHandle else { return }
+        
+        // Firebase 구독 해제
+        FirebaseAuctionService.shared.removeObserver(auctionId: Int(vehicle.id), handle: handle)
+        auctionHandle = nil
     }
 }
 

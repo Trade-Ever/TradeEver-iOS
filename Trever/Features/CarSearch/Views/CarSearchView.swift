@@ -54,6 +54,8 @@ struct CarSearchView: View {
                         )
                         .padding(.bottom, 12)
                         
+                        Spacer()
+                        
                         // 구분선
                         Divider()
                             .background(Color(UIColor.separator))
@@ -113,9 +115,11 @@ struct CarSearchView: View {
                             )
                         }
                     }
-                    
-                    Spacer()
-                    
+                    .padding(.bottom, 40) // 하단 버튼 공간 확보
+                }
+                
+                // 하단 고정 버튼 영역
+                VStack(spacing: 0) {
                     BottomSheetButtons(
                         title: "매물보기",
                         onConfirm: {
@@ -125,6 +129,7 @@ struct CarSearchView: View {
                             resetFilters()
                         }
                     )
+                    .background(Color(UIColor.systemBackground))
                 }
             }
             .navigationBarHidden(true)
