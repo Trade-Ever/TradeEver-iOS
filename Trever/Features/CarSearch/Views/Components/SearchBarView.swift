@@ -38,7 +38,7 @@ struct SearchBarView: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 22)
-                    .fill(Color.white)
+                    .fill(Color("cardBackground"))
                     .shadow(
                         color: Color.black.opacity(0.12),
                         radius: 4,
@@ -59,7 +59,7 @@ struct SearchBarView: View {
                 Button("취소") {
                     onClose()
                 }
-                .foregroundColor(.purple400)
+                .foregroundColor(.purple300)
                 .font(.body)
             }
         }
@@ -69,11 +69,11 @@ struct SearchBarView: View {
     
     // MARK: - 색상 상태
     private var iconColor: Color {
-        isFocused || !searchText.isEmpty ? .purple400 : .gray.opacity(0.6)
+        isFocused || !searchText.isEmpty ? .purple300 : .gray.opacity(0.6)
     }
     
     private var textColor: Color {
-        isFocused || !searchText.isEmpty ? .purple400 : .gray.opacity(0.6)
+        isFocused || !searchText.isEmpty ? .purple300 : .gray.opacity(0.6)
     }
     
     private var borderColor: Color {

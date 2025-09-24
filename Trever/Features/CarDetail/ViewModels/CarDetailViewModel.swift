@@ -29,6 +29,7 @@ final class CarDetailViewModel: ObservableObject {
     private var bidsHandle: UInt?
 
     func load() async {
+        print("CarDetailViewModel.load() 호출 - vehicleId: \(vehicleId)")
         isLoading = true
         defer { isLoading = false }
         

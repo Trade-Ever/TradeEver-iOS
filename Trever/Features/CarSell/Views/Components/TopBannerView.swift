@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TopBannerView: View {
     @State private var offsetX: CGFloat = 0
+    @State private var showSellCarView = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -56,6 +57,12 @@ struct TopBannerView: View {
             }
             .frame(width: 210, height: 50)
             .offset(y: -15) // 버튼을 이미지 중앙보다 살짝 위로 올림
+            .onTapGesture {
+                showSellCarView = true
+            }
+        }
+        .navigationDestination(isPresented: $showSellCarView) {
+            SellCarRegisterView()
         }
     }
 }

@@ -50,7 +50,7 @@ public struct StepActionBar: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .background(.white)
+        .background(Color(UIColor.systemBackground))
     }
 }
 
