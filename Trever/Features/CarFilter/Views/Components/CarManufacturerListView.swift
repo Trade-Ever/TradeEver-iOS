@@ -47,8 +47,6 @@ struct CarManufacturerListView: View {
 
                     if viewModel.isLoading {
                         ProgressView().padding()
-                    } else if let error = viewModel.errorMessage {
-                        Text("오류: \(error)").foregroundColor(.errorRed)
                     } else {
                         Text("제조사")
                             .font(.title3)

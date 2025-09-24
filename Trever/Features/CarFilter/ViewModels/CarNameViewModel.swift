@@ -52,7 +52,10 @@ class CarNameViewModel: ObservableObject {
                 }
             }
         } catch {
-            errorMessage = error.localizedDescription
+            // 요청이 취소된 경우(사용자가 뒤로가기 등)에는 에러 메시지를 표시하지 않음
+            if !error.localizedDescription.contains("Request explicitly canceled") {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }
