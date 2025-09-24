@@ -11,17 +11,20 @@ struct AuctionCarListItemView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topLeading) {
-                thumbnail
-                    .frame(height: 180)
-                    .clipped()
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    thumbnail
+                        .frame(width: geometry.size.width, height: 180)
+                        .clipped()
 
-                auctionBadge
+                    auctionBadge
 
-                HStack { Spacer(); likeButton }
-                    .buttonStyle(.plain)
-                    .padding(4)
+                    HStack { Spacer(); likeButton }
+                        .buttonStyle(.plain)
+                        .padding(4)
+                }
             }
+            .frame(height: 180)
 
             infoSection
                 .padding(12)

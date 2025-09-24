@@ -56,7 +56,7 @@ final class AuthViewModel: ObservableObject {
     
     func signInWithGoogle() async {
         // 기존 토큰 완전 삭제 (다른 계정 로그인 시 충돌 방지)
-        print("🔄 기존 토큰 삭제 중...")
+        print("기존 토큰 삭제 중...")
         TokenManager.shared.clearTokens()
         GIDSignIn.sharedInstance.signOut()
         
@@ -126,7 +126,7 @@ final class AuthViewModel: ObservableObject {
     
     // 토큰 유효성 검증
     func validateToken() async {
-        print("🔍 토큰 유효성 검증 시작")
+        print("토큰 유효성 검증 시작")
         
         let isValid = await NetworkManager.shared.validateToken()
         
@@ -190,7 +190,7 @@ final class AuthViewModel: ObservableObject {
     
     // 로그아웃
     func signOut() async {
-        print("🚪 로그아웃 시작")
+        print("로그아웃 시작")
         
         // 서버에 로그아웃 API 호출
         let serverLogoutSuccess = await NetworkManager.shared.logout()

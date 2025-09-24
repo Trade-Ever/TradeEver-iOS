@@ -33,7 +33,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            print("📱 ContentView 나타남")
+            print("ContentView 나타남")
             print("   - 로그인 상태: \(authViewModel.isSignedIn)")
             print("   - 프로필 완성: \(authViewModel.profileComplete)")
             print("   - 새로 로그인: \(authViewModel.isNewLogin)")
