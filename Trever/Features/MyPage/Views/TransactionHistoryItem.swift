@@ -10,7 +10,7 @@ struct TransactionHistoryItem: View {
         VStack(alignment: .leading, spacing: 0) {
             infoSection
                 .padding(12)
-                .background(Color(.systemBackground))
+                .background(Color("cardBackground"))
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(

@@ -66,7 +66,7 @@ struct ContentView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+                .background(Color("background"))
                 HStack {
                     CustomTabBar(selection: $selection)
                 }
