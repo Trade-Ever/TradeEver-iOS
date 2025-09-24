@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Vehicle Search Response
-struct CarSearchResponse: Codable {
+struct VehicleResponse: Codable {
     let vehicles: [Vehicle]
     let totalCount: Int
     let pageNumber: Int

@@ -62,12 +62,12 @@
                     print(jsonString)
                 }
                 
-                let response: ApiResponse<CarSearchResponse> = try await NetworkManager.shared.request(
+                let response: ApiResponse<VehicleResponse> = try await NetworkManager.shared.request(
                     to: .vehicleSearch,
                     method: .post,
                     parameters: parameters,
                     encoding: JSONEncoding.default,
-                    responseType: ApiResponse<CarSearchResponse>.self
+                    responseType: ApiResponse<VehicleResponse>.self
                 )
       
                 // ✅ 상세한 요청 로그

@@ -85,7 +85,7 @@ enum APIEndpoint {
     case vehicleNames(manufacturer: String)
     case vehicleModels(manufacturer: String, carName: String)
     case vehicleCheckCarNumber(carNumber: String)
-    case myVehicles
+    case myVehicles(currentPage: Int, pageSize: Int)
     
     var url: String {
         switch self{
@@ -112,9 +112,9 @@ enum APIEndpoint {
         case .vehicleModels(let manufacturer, let carName):
             return "\(APIEndpoint.baseURL)/vehicles/manufacturers/\(manufacturer)/car-names/\(carName)/car-models" // 제조사별 차명별 차량 수 조회
         case .vehicleCheckCarNumber(let carNumber):
-            return "\(APIEndpoint.baseURL)/vehicles/check-car-number?carNumber=\(carNumber)"
-        case .myVehicles:
-            return "\(APIEndpoint.baseURL)/vehicles/my-vehicles"
+            return "\(APIEndpoint.baseURL)/vehicles/check-car-number?carNumber=\(carNumber)" // 차량 번호판 중복 검사
+        case .myVehicles(let currentPage, let pageSize):
+            return "\(APIEndpoint.baseURL)/vehicles/my-vehicles?page=\(currentPage)&size=\(pageSize)&sortBy=createdAt" // 내가 등록한 차량 목록
         }
     }
 }
@@ -133,21 +133,21 @@ final class NetworkManager {
         return Session(configuration: configuration, interceptor: interceptor)
     }()
     
-    func searchVehicles(request: CarSearchRequest) async -> CarSearchResponse? {
+    func searchVehicles(request: CarSearchRequest) async -> VehicleResponse? {
         let url = "\(baseURL)/vehicles/search"
         print("🔍 차량 검색 API 호출")
         print("   - URL: \(url)")
         print("   - Request: \(request)")
         
         do {
-            let response: ApiResponse<CarSearchResponse> = try await session.request(
+            let response: ApiResponse<VehicleResponse> = try await session.request(
                 url,
                 method: .post,
                 parameters: request,
                 encoder: JSONParameterEncoder.default
             )
                 .validate()
-                .serializingDecodable(ApiResponse<CarSearchResponse>.self)
+                .serializingDecodable(ApiResponse<VehicleResponse>.self)
                 .value
             
             print("✅ 차량 검색 성공")

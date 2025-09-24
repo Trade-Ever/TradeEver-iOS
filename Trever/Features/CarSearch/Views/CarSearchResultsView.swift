@@ -121,7 +121,6 @@ struct CarSearchResultsView: View {
                         } label: {
                             CarListItemView(vehicle: vehicle)
                         }
-                        .buttonStyle(.plain)
                         .onAppear {
                             // 무한 스크롤 - index 기반으로 수정
                             if index == viewModel.vehicles.count - 1 && viewModel.hasMoreData {
