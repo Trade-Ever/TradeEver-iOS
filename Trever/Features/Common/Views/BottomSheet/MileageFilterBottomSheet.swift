@@ -10,6 +10,7 @@ import SwiftUI
 struct MileageFilterBottomSheet: View {
     @Binding var isPresented: Bool
     @Binding var selectedMileageRange: ClosedRange<Double>
+    let action: () -> Void
 
     private let minMileage: Double = 0
     private let maxMileage: Double = 30 // km 단위
@@ -33,7 +34,7 @@ struct MileageFilterBottomSheet: View {
             
             // 선택된 값 표시
             HStack {
-                Text("\(Int(selectedMileageRange.lowerBound))년")
+                Text("\(Int(selectedMileageRange.lowerBound))만 km")
                     .font(.system(size: 32))
                     .foregroundColor(.purple300)
                     .fontWeight(.heavy)
@@ -44,7 +45,7 @@ struct MileageFilterBottomSheet: View {
                     .foregroundColor(.purple200)
                     .bold()
                 
-                Text("\(Int(selectedMileageRange.upperBound))년")
+                Text("\(Int(selectedMileageRange.upperBound))만 km")
                     .font(.system(size: 32))
                     .foregroundColor(.purple300)
                     .fontWeight(.heavy)
@@ -80,6 +81,7 @@ struct MileageFilterBottomSheet: View {
             BottomSheetButtons(
                 title: "적용",
                 onConfirm: {
+                    action()
                     isPresented = false
                 },
                 onReset: {

@@ -11,29 +11,45 @@ import Alamofire
 
 @MainActor
 class CarNameViewModel: ObservableObject {
-    @Published var carNames: [String] = []
+    @Published var carNames: [CarNameInfo] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
-    
-    func fetchCarNames(category: String, manufacturer: String) async {
-        guard !isLoading else { return }   // 이미 실행 중이면 무시
+
+    func fetchCarNames(category: String, manufacturer: String, includeYear: Bool) async {
+        guard !isLoading else { return } // 이미 실행중이면 무시
         isLoading = true
-        defer { isLoading = false } 
-                
+        defer { isLoading = false }
+
         do {
-            let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
-                to: .carNames,
-                parameters: [
-                    "category": category,
-                    "manufacturer": manufacturer
-                ],
-                responseType: ApiResponse<[String]>.self
-            )
-        
-            if response.success, let names = response.data {
-                carNames = names
+            if includeYear {
+                // ApiResponse<[String]>
+                let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
+                    to: .carNames,
+                    parameters: [
+                        "category": category,
+                        "manufacturer": manufacturer,
+                    ],
+                    responseType: ApiResponse<[String]>.self
+                )
+                
+                if response.success, let names = response.data {
+                    carNames = names.map{ CarNameInfo(carName: $0, count: 0) }
+                } else {
+                    errorMessage = response.message
+                }
             } else {
-                errorMessage = response.message
+                // ApiResponse<[CarNameInfo]>
+                let response: ApiResponse<[CarNameInfo]> = try await NetworkManager.shared.request(
+                    to: .vehicleNames(manufacturer: manufacturer),
+                    parameters: ["category": category],
+                    responseType: ApiResponse<[CarNameInfo]>.self
+                )
+                
+                if response.success, let names = response.data {
+                    carNames = names
+                } else {
+                    errorMessage = response.message
+                }
             }
         } catch {
             errorMessage = error.localizedDescription

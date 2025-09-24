@@ -31,7 +31,7 @@ struct VehicleInfoView: View {
             if step >= 0 {
                 InputSection(title: "차량 모델을 선택해주세요") {
                     CustomInputBox(
-                        placeholder: "현대 아반떼 SN7",
+                        placeholder: "현대 아반떼",
                         showSheet: true, // 시트 표시 아이콘
                         text: .constant(displayVehicleModel) // UI 출력용
                     )
@@ -128,8 +128,7 @@ struct VehicleInfoView: View {
             CarTypeBottomSheet(
                 isPresented: $showCarTypeSheet,
                 selectedCarType: $selectedCarType // 단일 선택
-            )
-            .onDisappear {
+            ) {
                 // 선택된 값이 있으면 vehicleType에 반영
                 if let code = selectedCarType {
                     vehicleType = code
@@ -139,7 +138,7 @@ struct VehicleInfoView: View {
                     }
                 }
             }
-            .presentationDetents([.fraction(0.4)])
+            .presentationDetents([.fraction(0.45)])
         }
     }
     // 표시용 텍스트 계산
@@ -151,9 +150,6 @@ struct VehicleInfoView: View {
         }
         if !vehicleModel.isEmpty {
             components.append(vehicleModel)
-        }
-        if !vehicleName.isEmpty {
-            components.append(vehicleName)
         }
         
         return components.isEmpty ? "" : components.joined(separator: " ")

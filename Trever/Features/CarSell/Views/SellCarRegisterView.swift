@@ -9,10 +9,15 @@ import SwiftUI
 
 struct SellCarRegisterView: View {
     @State private var currentStep: Int = 0 // 현재 단계
+    
+    @State private var showCarNumberAlert = false // 차 번호 중복 상태
     @State private var showExitAlert = false // 화면 나가기 클릭 시 상태
     @State private var showRegisterAlert = false // 차량 등록 시 표시 상태
     @State private var showSuccessAlert = false // 등록 완료 알림 상태
     @State private var registrationSuccess = false // 등록 성공 여부
+    @State private var isValidatingVehicleNumber = false // 차량번호 검증 중 상태
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
     
     @StateObject private var viewModel = SellCarViewModel()
     @StateObject private var keyboard = KeyboardState()
@@ -67,7 +72,7 @@ struct SellCarRegisterView: View {
                                 detailedDescription: $viewModel.model.detailedDescription,
                                 step: $viewModel.vehicleOptionStep
                             )
-                        case 5: // 사고 정보 
+                        case 5: // 사고 정보
                             AccidentInfoView(
                                 accidentHistory: $viewModel.model.accidentHistory,
                                 accidentDescription: $viewModel.model.accidentDescription,
@@ -102,17 +107,7 @@ struct SellCarRegisterView: View {
                     currentStep: currentStep,
                     totalSteps: totalSteps,
                     onNext: {
-                        if currentStep == totalSteps - 1 {
-                            // 등록 버튼 클릭 시 alert 표시
-                            showRegisterAlert = true
-                        } else {
-                            DispatchQueue.main.async {
-                                currentStep = min(currentStep + 1, totalSteps - 1)
-                            }
-                            // currentStep = min(currentStep + 1, totalSteps - 1)
-                            // 뷰가 업데이트되는 동안(@State/ObservableObject 변경) 다시 상태를 바꾸려고 해서 SwiftUI가 경고를 내는 상황
-                            // SwiftUI 뷰의 body가 다시 그려지는 동안(View 업데이트 중)에 @Published나 @State 같은 상태를 동기적으로 변경했을 때 발생하는 오류.
-                        }
+                        handleNextStep()
                     },
                     onPrevious: { currentStep = max(currentStep - 1, 0) },
                     isStepCompleted: { viewModel.isStepCompleted(currentStep: $0) }
@@ -167,8 +162,55 @@ struct SellCarRegisterView: View {
             } message: {
                 Text(registrationSuccess ?
                      "차량이 성공적으로 등록되었습니다." :
-                     "차량 등록에 실패했습니다. 다시 시도해주세요.")
+                        "차량 등록에 실패했습니다. 다시 시도해주세요.")
             }
+            .alert(alertTitle, isPresented: $showCarNumberAlert) {
+                Button("확인", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
+            }
+        }
+    }
+    
+    private func showAlert(title: String = "알림", message: String) {
+        alertTitle = title
+        alertMessage = message
+        showCarNumberAlert = true
+    }
+
+    private func handleNextStep() {
+        if currentStep == 0 {
+            Task {
+                if let response = await viewModel.checkCarNumberDuplicate(carNumber: viewModel.model.vehicleNumber) {
+                    if !response.success {
+                        // API 요청 실패 메시지 alert
+                        showAlert(message: response.message)
+                    } else if let exist = response.data?.exists {
+                        if exist {
+                            // 중복 존재 -> 메시지 alert
+                            showAlert(message: "입력하신 차량 번호가 이미 존재합니다.\n다시 입력해주세요.")
+                        } else {
+                            // 중복 없음 -> 다음 단계
+                            goToNextStep()
+
+                        }
+                    }
+                } else {
+                    showAlert(message: "차량 번호 확인 중 오류 발생")
+                }
+            }
+
+        } else if currentStep == totalSteps - 1 {
+            showRegisterAlert = true
+        } else {
+            // 다른 스텝은 바로 진행
+            goToNextStep()
+        }
+    }
+    
+    private func goToNextStep() {
+        DispatchQueue.main.async {
+            currentStep = min(currentStep + 1, totalSteps - 1)
         }
     }
 }

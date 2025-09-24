@@ -1,6 +1,6 @@
 import Foundation
 
-enum Formatters {
+public enum Formatters {
     static func yearText(_ year: Int) -> String { "\(year)년식" }
     
     static func mileageText(km: Int) -> String {
@@ -81,5 +81,22 @@ enum Formatters {
         } else {
             return "\(intValue)천만원"
         }
+    }
+    
+    static func mapVehicleType(_ type: String?) -> String? {
+        guard let type = type else { return nil }
+        return vehicleTypeMapping[type] ?? type
+    }
+
+    // 만원 단위
+    static func toTenThousand(from value: Int?) -> Int? {
+        guard let value = value else { return nil }
+        return value * 10000
+    }
+    
+    // 천만원 단위
+    static func toTenMillion(from value: Int?) -> Int? {
+        guard let value = value else { return nil }
+        return value * 10_000_000
     }
 }

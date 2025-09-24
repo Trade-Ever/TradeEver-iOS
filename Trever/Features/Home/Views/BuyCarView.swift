@@ -7,7 +7,30 @@ struct BuyCarView: View {
     private let searchBarHeight: CGFloat = 48
     
     var body: some View {
-        ZStack(alignment: .top) {
+        VStack(spacing: 0) {
+            // 상단바
+            HStack {
+                Image("Trever") // 로고
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 120, height: 40)
+                    .padding(.leading, 16)
+
+                Spacer()
+                
+                SearchBarButton {
+                    showingSearchView = true
+                }
+                .padding(.trailing, 4)
+                .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
+                .frame(height: 40)
+            }
+            .padding(.top, 8)
+            .padding(.bottom, 8)
+            
+            Divider() // 상단바 구분선
+            
+            // 차량 리스트 / 상태 뷰
             Group {
                 if let vehicles = vm.vehicleItems?.vehicles {
                     if vehicles.isEmpty {
@@ -60,20 +83,12 @@ struct BuyCarView: View {
                     emptyState
                 }
             }
-
-            SearchBarButton(title: "차량 검색") {
-                showingSearchView = true
-            }
-            .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .fullScreenCover(isPresented: $showingSearchView) {
-                // 전체 화면으로 표시
-                CarSearchView()
-            }
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .fullScreenCover(isPresented: $showingSearchView) {
+            CarSearchView() // 차 검색 뷰 
+        }
         .onAppear {
             // 데이터가 없을 때만 로드
             if vm.vehicleItems == nil && !vm.isLoading {

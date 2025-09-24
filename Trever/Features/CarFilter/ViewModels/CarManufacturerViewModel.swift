@@ -11,34 +11,62 @@ import Alamofire
 
 @MainActor
 class ManufacturerViewModel: ObservableObject {
-    @Published var domesticCars: [String] = []
-    @Published var importedCars: [String] = []
+    @Published var domesticCars: [ManufacturerInfo] = []
+    @Published var importedCars: [ManufacturerInfo] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
     
-    func fetchCarManufacturers(category: String) async {
-        guard !isLoading else { return }   // 이미 실행 중이면 무시
+    func fetchCarManufacturers(includeYear: Bool) async {
+        guard !isLoading else { return }
         isLoading = true
-        defer { isLoading = false } // 함수가 종료될 때 반드시 실행되는 코드 블록
-                
+        defer { isLoading = false }
+        
         do {
-            let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
-                to: .manufacturers,
-                parameters: ["category": category],
-                responseType: ApiResponse<[String]>.self
-            )
-            
-            if response.success, let manufacturers = response.data {
-                if category == "국산" {
-                    domesticCars = manufacturers
-                } else {
-                    importedCars = manufacturers
+            if includeYear {
+                // ApiResponse<[String]>
+                let response: ApiResponse<[String]> = try await NetworkManager.shared.request(
+                    to: .manufacturers,
+                    parameters: ["category": "국산"],
+                    responseType: ApiResponse<[String]>.self
+                )
+                
+                if response.success, let manufacturers = response.data {
+                    domesticCars = manufacturers.map { ManufacturerInfo(manufacturer: $0, count: 0) }
+                }
+                
+                let response2: ApiResponse<[String]> = try await NetworkManager.shared.request(
+                    to: .manufacturers,
+                    parameters: ["category": "수입"],
+                    responseType: ApiResponse<[String]>.self
+                )
+                
+                if response2.success, let manufacturers = response2.data {
+                    importedCars = manufacturers.map { ManufacturerInfo(manufacturer: $0, count: 0) }
                 }
             } else {
-                errorMessage = response.message
+                // ApiResponse<[ManufacturerCategory]>
+                let response: ApiResponse<[ManufacturerCategory]> = try await NetworkManager.shared.request(
+                    to: .vehicleManufacturers,
+                    responseType: ApiResponse<[ManufacturerCategory]>.self
+                )
+                
+                if response.success, let categories = response.data {
+                    for category in categories {
+                        if category.category == "국산" {
+                            domesticCars = category.manufacturers.map {
+                                ManufacturerInfo(manufacturer: $0.manufacturer, count: $0.count)
+                            }
+                        } else if category.category == "수입" {
+                            importedCars = category.manufacturers.map {
+                                ManufacturerInfo(manufacturer: $0.manufacturer, count: $0.count)
+                            }
+                        }
+                    }
+                }
             }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 }
+

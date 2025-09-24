@@ -15,3 +15,23 @@ class CarFilterModel: ObservableObject {
     @Published var carYear: String? = nil        // 연식
 }
 
+struct ManufacturerCategory: Codable {
+    let category: String
+    let manufacturers: [ManufacturerInfo]
+}
+
+struct ManufacturerInfo: Codable {
+    let manufacturer: String
+    let count: Int
+}
+
+struct CarNameInfo: Codable {
+    let carName: String
+    let count: Int
+}
+
+struct CarModelInfo: Codable {
+    let carModel: String
+    let count: Int
+}
+
