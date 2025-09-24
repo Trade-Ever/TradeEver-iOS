@@ -358,7 +358,7 @@ struct CarDetailView: View {
         // 파워트레인/제원
         if let fuelType = detail.fuelType, !fuelType.isEmpty { specs.append(("연료", fuelType)) }
         if let transmission = detail.transmission, !transmission.isEmpty { specs.append(("변속기", transmission)) }
-        if let engineCc = detail.engineCc { specs.append(("배기량", "\(engineCc)cc")) }
+        if let engineCc = detail.engineCc { specs.append(("배기량(cc)", "\(engineCc)cc")) }
         if let horsepower = detail.horsepower { specs.append(("마력", "\(horsepower)hp")) }
 
         // 외관/차종
@@ -375,13 +375,13 @@ struct CarDetailView: View {
         }
 
         // 설명(상세 설명)
-        if let desc = detail.description, !desc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            specs.append(("설명", desc))
-        }
+//        if let desc = detail.description, !desc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+//            specs.append(("설명", desc))
+//        }
 
         // 옵션 목록 (샘플 payload의 `options` 또는 기존 필드 대체)
         if let options = detail.options, !options.isEmpty {
-            specs.append(("옵션", options.joined(separator: ", ")))
+            specs.append(("기타정보", options.joined(separator: ", ")))
         }
 
         return specs
@@ -389,12 +389,13 @@ struct CarDetailView: View {
 
     // MARK: - 차량 상세 설명 섹션
     private var descriptionSection: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
             Text(detail.description ?? "차량 설명이 없습니다.")
                 .font(.subheadline)
                 .foregroundStyle(.primary)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(16)
-                .frame(maxWidth: .infinity)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.purple100.opacity(0.5)))
         }
         .padding(.horizontal, 16)
@@ -473,7 +474,7 @@ struct CarDetailView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
                     row(label: "판매자", value: detail.sellerName ?? "정보 없음")
-                    row(label: "차량 상태", value: detail.vehicleStatus ?? "정보 없음")
+                    row(label: "판매자 주소", value: detail.sellerLocationCity ?? "정보 없음")
 //                    if let createdAt = detail.createdAt {
 //                        let dateFormatter = ISO8601DateFormatter()
 //                        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -519,8 +520,8 @@ struct CarDetailView: View {
                                 .font(.caption2)
                                 .foregroundStyle(Color.primaryText.opacity(0.3))
                             HStack {
-                                Circle().fill(Color.primaryText.opacity(0.5)).frame(width: 25, height: 25)
-                                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+//                                Circle().fill(Color.primaryText.opacity(0.5)).frame(width: 25, height: 25)
+//                                    .overlay(Image(systemName: "person").foregroundStyle(.secondary))
                                 Text(vm.liveAuction?.currentBidUserName ?? "입찰자 없음")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.primaryText.opacity(0.5))
@@ -636,7 +637,7 @@ struct CarDetailView: View {
                     cornerRadius: 12,
                     horizontalPadding: 0,
                     foregroundColor: brand,
-                    backgroundColor: Color(.systemBackground),
+                    backgroundColor: Color.secondaryBackground,
                     pressedBackgroundColor: Color.purple50.opacity(0.5),
                     borderColor: brand,
                     shadowColor: nil
@@ -755,8 +756,8 @@ struct CarDetailView: View {
                         .font(.caption2)
                         .foregroundStyle(Color.grey300)
                     HStack {
-                        Circle().fill(Color.grey100).frame(width: 25, height: 25)
-                            .overlay(Image(systemName: "person").foregroundStyle(.secondary))
+//                        Circle().fill(Color.grey100).frame(width: 25, height: 25)
+//                            .overlay(Image(systemName: "person").foregroundStyle(.secondary))
                         Text(vm.liveAuction?.currentBidUserName ?? "입찰자 없음")
                             .font(.subheadline)
                     }
@@ -861,50 +862,50 @@ struct CarDetailView: View {
 
     private func resolvedStartDate() -> Date? {
         guard let startAt = vm.liveAuction?.startAt else {
-            print("❌ 시작 시간이 없습니다")
+            print("시작 시간이 없습니다")
             return nil
         }
-        print("🕐 시작 시간 파싱 시도: \(startAt)")
+        print("시작 시간 파싱 시도: \(startAt)")
         if let d = parseISO8601(startAt) {
-            print("✅ 시작 시간 파싱 성공: \(d)")
+            print("시작 시간 파싱 성공: \(d)")
             return d
         }
-        print("❌ 시작 시간 파싱 실패")
+        print("시작 시간 파싱 실패")
         return nil
     }
     
     private func resolvedEndDate() -> Date? {
         guard let endAt = vm.liveAuction?.endAt else {
-            print("❌ 종료 시간이 없습니다")
+            print("종료 시간이 없습니다")
             return nil
         }
-        print("🕐 종료 시간 파싱 시도: \(endAt)")
+        print("종료 시간 파싱 시도: \(endAt)")
         if let d = parseISO8601(endAt) {
-            print("✅ 종료 시간 파싱 성공: \(d)")
+            print("종료 시간 파싱 성공: \(d)")
             return d
         }
-        print("❌ 종료 시간 파싱 실패")
+        print("종료 시간 파싱 실패")
         return nil
     }
     
     private func parseISO8601(_ s: String) -> Date? {
-        print("📅 날짜 파싱 시도: \(s)")
+        print("날짜 파싱 시도: \(s)")
         
         // 1. ISO8601 포맷터로 시도 (시간대 포함)
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let d = iso.date(from: s) { 
-            print("✅ ISO8601 (시간대 포함) 파싱 성공: \(d)")
+            print("ISO8601 (시간대 포함) 파싱 성공: \(d)")
             return d 
         }
-        print("❌ ISO8601 (시간대 포함) 파싱 실패")
+        print("ISO8601 (시간대 포함) 파싱 실패")
         
         iso.formatOptions = [.withInternetDateTime]
         if let d2 = iso.date(from: s) { 
-            print("✅ ISO8601 (시간대 없음) 파싱 성공: \(d2)")
+            print("ISO8601 (시간대 없음) 파싱 성공: \(d2)")
             return d2 
         }
-        print("❌ ISO8601 (시간대 없음) 파싱 실패")
+        print("ISO8601 (시간대 없음) 파싱 실패")
         
         // 2. Fallback: 시간대 없는 형식 (Firebase 형식)
         let df = DateFormatter()
@@ -912,40 +913,40 @@ struct CarDetailView: View {
         df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if let d3 = df.date(from: s) {
-            print("✅ Fallback (HH:mm:ss) 파싱 성공: \(d3)")
+            print("Fallback (HH:mm:ss) 파싱 성공: \(d3)")
             return d3
         }
-        print("❌ Fallback (HH:mm:ss) 파싱 실패")
+        print("Fallback (HH:mm:ss) 파싱 실패")
         
         // 2-1. 시간이 HH:mm 형식인 경우 (startAt이 00:00인 경우)
         df.dateFormat = "yyyy-MM-dd'T'HH:mm"
         if let d3_1 = df.date(from: s) {
-            print("✅ Fallback (HH:mm) 파싱 성공: \(d3_1)")
+            print("Fallback (HH:mm) 파싱 성공: \(d3_1)")
             return d3_1
         }
-        print("❌ Fallback (HH:mm) 파싱 실패")
+        print("Fallback (HH:mm) 파싱 실패")
         
         // 3. 날짜만 있는 형식
         df.dateFormat = "yyyy-MM-dd"
         if let d4 = df.date(from: s) {
-            print("✅ 날짜만 파싱 성공: \(d4)")
+            print("날짜만 파싱 성공: \(d4)")
             return d4
         }
-        print("❌ 날짜만 파싱 실패")
+        print("날짜만 파싱 실패")
         
-        print("❌ 모든 파싱 시도 실패")
+        print("모든 파싱 시도 실패")
         return nil
     }
     
     private func isAuctionStarted() -> Bool {
         guard let status = vm.liveAuction?.status else {
-            print("⚠️ 경매 상태가 없습니다 - 시작된 것으로 간주")
+            print("경매 상태가 없습니다 - 시작된 것으로 간주")
             return true
         }
         
         let isStarted = status == "ACTIVE"
         
-        print("🕐 경매 상태 체크")
+        print("경매 상태 체크")
         print("   - 경매 상태: \(status)")
         print("   - 경매 시작됨: \(isStarted)")
         
@@ -954,7 +955,7 @@ struct CarDetailView: View {
     
     private func isAuctionEnded() -> Bool {
         guard let status = vm.liveAuction?.status else {
-            print("⚠️ 경매 상태가 없습니다 - 종료되지 않은 것으로 간주")
+            print("경매 상태가 없습니다 - 종료되지 않은 것으로 간주")
             return false
         }
         
@@ -963,7 +964,7 @@ struct CarDetailView: View {
                      status == "CANCELLED" || 
                      status == "EXPIRED"
         
-        print("🕐 경매 종료 상태 체크")
+        print("경매 종료 상태 체크")
         print("   - 경매 상태: \(status)")
         print("   - 경매 종료됨: \(isEnded)")
         
