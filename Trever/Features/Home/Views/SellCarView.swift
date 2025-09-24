@@ -19,15 +19,10 @@ struct SellCarView: View {
                 MySellCarView()
             }
             .frame(maxHeight: .infinity, alignment: .top)
-            .onTapGesture {
-                showSellCarView = true
-            }
             .ignoresSafeArea(.all, edges: .top) // 상단 Safe Area 무시하여 이미지가 상단에 딱 붙게
             .navigationDestination(isPresented: $showSellCarView) {
                 SellCarRegisterView()
             }
-            
-
         }
     }
 }

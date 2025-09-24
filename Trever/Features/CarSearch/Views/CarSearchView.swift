@@ -138,7 +138,7 @@ struct CarSearchView: View {
                 await viewModel.fetchRecentSearches()
             }
             .fullScreenCover(isPresented: $showSearchResults) {
-                if let searchModel = searchResultModel {
+                if searchResultModel != nil {
                     CarSearchResultsView(searchModel: $searchModel)
                 }
                 

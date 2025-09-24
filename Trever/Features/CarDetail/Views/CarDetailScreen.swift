@@ -4,6 +4,7 @@ struct CarDetailScreen: View {
     @StateObject private var vm: CarDetailViewModel
 
     init(vehicleId: Int, auctionId: Int? = nil) {
+        print("CarDetailScreen 초기화 - vehicleId: \(vehicleId), auctionId: \(auctionId ?? -1)")
         _vm = StateObject(wrappedValue: CarDetailViewModel(vehicleId: vehicleId, auctionId: auctionId))
     }
 

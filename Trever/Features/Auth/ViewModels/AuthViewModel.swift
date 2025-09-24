@@ -44,7 +44,6 @@ final class AuthViewModel: ObservableObject {
             
             self.user = user
             self.idToken = user.idToken?.tokenString
-            print(self.idToken)
         } else {
             print("로그인된 사용자 없음")
             self.isSignedIn = false

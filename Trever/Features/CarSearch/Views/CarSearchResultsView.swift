@@ -188,12 +188,12 @@ struct CarSearchResultsView: View {
                             )
                             
                             AuctionCarListItemViewWithFirebase(
-                                vehicle: vehicleAPIItem,
-                                onTap: {
-                                    selectedVehicleId = Int(vehicle.id)
-                                    print("경매 차량 선택됨: \(vehicle.id)")
-                                }
+                                vehicle: vehicleAPIItem
                             )
+                            .onTapGesture {
+                                selectedVehicleId = Int(vehicle.id)
+                                print("경매 차량 선택됨: \(vehicle.id)")
+                            }
                             .onAppear {
                                 // 무한 스크롤 - index 기반으로 수정
                                 if index == viewModel.vehicles.count - 1 && viewModel.hasMoreData {
@@ -404,16 +404,12 @@ struct CarSearchResultsView: View {
 // MARK: - Firebase 연동 경매 아이템 뷰
 struct AuctionCarListItemViewWithFirebase: View {
     let vehicle: VehicleAPIItem
-    let onTap: () -> Void
     
     @State private var liveAuction: AuctionLive? = nil
     @State private var auctionHandle: UInt? = nil
     
     var body: some View {
         AuctionCarListItemView(vehicle: vehicle, live: liveAuction)
-            .onTapGesture {
-                onTap()
-            }
             .onAppear {
                 subscribeToAuction()
             }
