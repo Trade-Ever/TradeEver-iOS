@@ -56,6 +56,11 @@ final class AuthViewModel: ObservableObject {
     }
     
     func signInWithGoogle() async {
+        // 기존 토큰 완전 삭제 (다른 계정 로그인 시 충돌 방지)
+        print("🔄 기존 토큰 삭제 중...")
+        TokenManager.shared.clearTokens()
+        GIDSignIn.sharedInstance.signOut()
+        
         // GoogleService-Info.plist에서 clientID 가져오기
         guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
               let plist = NSDictionary(contentsOfFile: path),
@@ -127,13 +132,15 @@ final class AuthViewModel: ObservableObject {
         let isValid = await NetworkManager.shared.validateToken()
         
         if isValid {
-            print("✅ 토큰 유효 - 자동 로그인 성공")
+            print("토큰 유효 - 자동 로그인 성공")
             self.isSignedIn = true
-            self.profileComplete = true // 임시로 true로 바꿔놓음, 백엔드 요청 필요
-            print("TokenManager profileComplete:", TokenManager.shared.profileComplete)
             self.isNewLogin = false
+            
+            // 자동 로그인 시에는 로컬에 저장된 profileComplete 값 사용
+            self.profileComplete = TokenManager.shared.profileComplete
+            print("   - Profile Complete (로컬): \(self.profileComplete)")
         } else {
-            print("❌ 토큰 재발급도 실패 - 로그아웃 처리")
+            print("토큰 재발급도 실패 - 로그아웃 처리")
             // 토큰 재발급도 실패했으므로 로그아웃 처리
             await signOut()
         }

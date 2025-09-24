@@ -33,9 +33,14 @@ struct CarDetailData: Codable {
     let updatedAt: String?
     let sellerId: Int?
     let sellerName: String?
+    let sellerPhone: String?
+    let sellerLocationCity: String?
+    let sellerProfileImageUrl: String?
+    let isSeller: Bool?
     let photos: [VehiclePhoto]?
     let vehicleTypeName: String?
     let options: [String]?
+    let favorite: Bool?
     
     enum CodingKeys: String, CodingKey {
         case id, carNumber, carName, description, manufacturer, model
@@ -44,7 +49,7 @@ struct CarDetailData: Codable {
         case engineCc = "engineCc"
         case horsepower, color, price, isAuction, vehicleStatus, auctionId
         case favoriteCount = "favoriteCount"
-        case createdAt, updatedAt, sellerId, sellerName, photos, vehicleTypeName, options
+        case createdAt, updatedAt, sellerId, sellerName, sellerPhone, sellerLocationCity, sellerProfileImageUrl, isSeller, photos, vehicleTypeName, options, favorite
     }
 }
 
@@ -53,6 +58,14 @@ struct VehiclePhoto: Codable {
     let photoUrl: String
     let orderIndex: Int
     let file: String?
+}
+
+// MARK: - Favorite API Response
+struct FavoriteToggleResponse: Codable {
+    let status: Int
+    let success: Bool
+    let message: String
+    let data: Bool
 }
 
 // MARK: - UI Models (using API response directly)

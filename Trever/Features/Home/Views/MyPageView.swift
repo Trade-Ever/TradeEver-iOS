@@ -11,6 +11,8 @@ struct MyPageView: View {
     @State private var isLoadingWallet = false
     @State private var showingProfileEdit = false
     @State private var isUpdatingProfile = false
+    @State private var showingDepositView = false
+    @State private var showingWithdrawView = false
     
     private let brand = Color.purple400
 
@@ -85,6 +87,20 @@ struct MyPageView: View {
                     await updateProfile(name: name, phone: phone, locationCity: locationCity, birthDate: birthDate, profileImage: profileImage)
                 }
             )
+        }
+        .sheet(isPresented: $showingDepositView) {
+            WalletDepositView()
+                .onDisappear {
+                    // 충전 완료 후 잔액 새로고침
+                    loadUserProfile()
+                }
+        }
+        .sheet(isPresented: $showingWithdrawView) {
+            WalletWithdrawView()
+                .onDisappear {
+                    // 출금 완료 후 잔액 새로고침
+                    loadUserProfile()
+                }
         }
     }
     
@@ -188,6 +204,7 @@ struct MyPageView: View {
             }
         }
         .padding(16)
+        .contentShape(Rectangle())
         .onTapGesture {
             showingProfileEdit = true
         }
@@ -210,17 +227,33 @@ struct MyPageView: View {
             Capsule()
                 .fill(Color.white.opacity(0.2))
                 .frame(width: 1, height: 16)
-            Button("충전") {}
-                .foregroundStyle(.white)
+            
+            Button(action: {
+                showingDepositView = true
+            }) {
+                Text("충전")
+                    .foregroundStyle(.white)
+                    .font(.subheadline)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
             Text("|").foregroundStyle(.white.opacity(0.6))
-            Button("출금") {}
-                .foregroundStyle(.white)
+            
+            Button(action: {
+                showingWithdrawView = true
+            }) {
+                Text("출금")
+                    .foregroundStyle(.white)
+                    .font(.subheadline)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .font(.subheadline)
         .padding(.horizontal, 16)
         .padding(.vertical, 20)
         .listRowInsets(EdgeInsets())
         .background(Color.purple400)
+        .contentShape(Rectangle())
     }
 }
 

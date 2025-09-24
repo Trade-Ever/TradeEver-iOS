@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct CarListItemView: View {
     // ViewModel representing a car to display
@@ -11,12 +12,15 @@ struct CarListItemView: View {
         let priceWon: Int
         let isAuction: Bool
         let auctionEndsAt: Date?
+        let vehicleId: Int64
+        let isFavorite: Bool
     }
 
     private let model: ViewModel
 
     // State
-    @State private var isLiked = false
+    @StateObject private var favoriteManager = FavoriteManager.shared
+    @State private var isToggling = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,13 +38,21 @@ struct CarListItemView: View {
 
             infoSection
                 .padding(12)
-                .background(Color.white)
+                .background(Color.secondaryBackground)
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
         )
+        .contentShape(Rectangle())
+        .onAppear {
+            // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
+            let vehicleId = Int(model.vehicleId)
+            if favoriteManager.favoriteStates[vehicleId] == nil {
+                favoriteManager.setFavoriteState(vehicleId: vehicleId, isFavorite: model.isFavorite)
+            }
+        }
     }
 }
 
@@ -96,12 +108,38 @@ private extension CarListItemView {
 
     var likeButton: some View {
         Button {
-            isLiked.toggle()
+            toggleFavorite()
         } label: {
-            Image(systemName: isLiked ? "heart.fill" : "heart")
-                .foregroundStyle(isLiked ? Color.likeRed : .secondary)
-                .font(.system(size: 20, weight: .semibold))
-                .padding(8)
+            if isToggling {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .foregroundStyle(.secondary)
+            } else {
+                let isLiked = favoriteManager.isFavorite(vehicleId: Int(model.vehicleId))
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .foregroundStyle(isLiked ? Color.likeRed : .secondary)
+                    .font(.system(size: 20, weight: .semibold))
+            }
+        }
+        .padding(8)
+        .disabled(isToggling)
+    }
+    
+    private func toggleFavorite() {
+        guard !isToggling else { return }
+        
+        isToggling = true
+        
+        Task {
+            let result = await NetworkManager.shared.toggleFavorite(vehicleId: Int(model.vehicleId))
+            
+            await MainActor.run {
+                isToggling = false
+                if let newFavoriteState = result {
+                    // 전역 상태 업데이트
+                    favoriteManager.toggleFavorite(vehicleId: Int(model.vehicleId), newState: newFavoriteState)
+                }
+            }
         }
     }
 
@@ -110,7 +148,7 @@ private extension CarListItemView {
             HStack(alignment: .center) {
                 Text(model.title)
                     .font(.headline)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.primaryText)
                 Spacer()
                 if model.isAuction, let endDate = model.auctionEndsAt {
                     HStack(spacing: 4) {
@@ -123,7 +161,7 @@ private extension CarListItemView {
             }
 
             Text("\(Formatters.yearText(model.year)) · \(Formatters.mileageText(km: model.mileageKilometers))")
-                .foregroundStyle(.black.opacity(0.7))
+                .foregroundStyle(Color.primaryText.opacity(0.7))
                 .font(.subheadline)
 
             HStack {
@@ -139,7 +177,7 @@ private extension CarListItemView {
             ForEach(model.tags, id: \.self) { tag in
                 Text(tag)
                     .font(.caption2)
-                    .foregroundStyle(.black.opacity(0.7))
+                    .foregroundStyle(Color.secondaryText.opacity(0.7))
                     .padding(.vertical, 4)
                     .padding(.horizontal, 6)
                     .background(
@@ -177,7 +215,9 @@ extension CarListItemView {
             tags: model.tags,
             priceWon: model.priceWon,
             isAuction: model.isAuction,
-            auctionEndsAt: model.auctionEndsAt
+            auctionEndsAt: model.auctionEndsAt,
+            vehicleId: Int64(model.backendId ?? 0),
+            isFavorite: false
         )
         self.init(model: vm)
     }
@@ -195,7 +235,9 @@ extension CarListItemView {
             tags: tags,
             priceWon: price,
             isAuction: isAuction,
-            auctionEndsAt: nil
+            auctionEndsAt: nil,
+            vehicleId: v.id,
+            isFavorite: v.isFavorite ?? false
         )
         self.init(model: vm)
     }
@@ -228,7 +270,8 @@ extension CarListItemView {
         startAt: nil,
         endAt: nil,
         auctionStatus: nil,
-        bidCount: nil
+        bidCount: nil,
+        isFavorite: false
     )
     return CarListItemView(apiModel: preview).padding()
 }

@@ -37,7 +37,7 @@ struct CarSearchResultsView: View {
                 .padding(.leading, 8)
                 .foregroundStyle(Color.black)
                 .padding(.leading)
-
+            
             Spacer()
             
             Button(action: {
@@ -49,7 +49,7 @@ struct CarSearchResultsView: View {
             .padding(.trailing)
         }
         .frame(height: 44)
-        .background(Color(UIColor.systemBackground))
+        //.background(Color(UIColor.systemBackground))
     }
     
     // MARK: - 필터 버튼들
@@ -92,7 +92,7 @@ struct CarSearchResultsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color(UIColor.systemBackground))
+        //.background(Color(UIColor.systemBackground))
     }
     
     // MARK: - 차량 리스트
@@ -114,7 +114,7 @@ struct CarSearchResultsView: View {
                 // 검색 결과 없음
                 emptyResultsView
             } else {
-                // 검색 결과 리스트 - 🔧 수정된 부분
+                // 검색 결과 리스트 - 수정된 부분
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(Array(viewModel.vehicles.enumerated()), id: \.element.id) { index, vehicle in
@@ -150,6 +150,7 @@ struct CarSearchResultsView: View {
                 .refreshable {
                     await viewModel.fetchFilteredCars(with: searchModel)
                 }
+                //.background(Color(UIColor.systemGroupedBackground))
             }
         }
     }
@@ -224,7 +225,6 @@ struct CarSearchResultsView: View {
             
             Spacer()
         }
-        .background(Color(UIColor.systemBackground))
         .presentationDetents([.height(300)])
     }
 }
@@ -257,110 +257,208 @@ struct FilterChipButton: View {
 // MARK: - 검색 결과 차량 카드
 struct SearchResultCarCard: View {
     let vehicle: Vehicle
-    @State private var isFavorite: Bool = false
-
+    
+    // State
+    @StateObject private var favoriteManager = FavoriteManager.shared
+    @State private var isToggling = false
+    
     var body: some View {
-        VStack(spacing: 0) {
-            // 차량 이미지
-            ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: vehicle.representativePhotoUrl ?? "")) { phase in
-                    switch phase {
-                    case .empty:
-                        // 로딩 중 placeholder
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.2))
-                            .aspectRatio(16/10, contentMode: .fill)
-                            .overlay(
-                                Image(systemName: "car.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
-                            )
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(16/10, contentMode: .fill)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    case .failure(_):
-                        // 실패 시 fallback
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.2))
-                            .aspectRatio(16/10, contentMode: .fill)
-                            .overlay(
-                                Image(systemName: "car.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
-                            )
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topLeading) {
+                thumbnail
+                    .frame(height: 180)
+                    .clipped()
                 
-                // 찜하기 버튼 (그대로 유지)
-                Button(action: {
-                    isFavorite.toggle()
-                }) {
-                    Image(systemName: isFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 20))
-                        .foregroundColor(isFavorite ? .red : .white)
-                        .background(
-                            Circle()
-                                .fill(Color.black.opacity(0.3))
-                                .frame(width: 36, height: 36)
-                        )
-                }
-                .padding(.top, 12)
-                .padding(.trailing, 12)
+                if isAuction { auctionBadge }
+                
+                HStack { Spacer(); likeButton }
+                    .buttonStyle(.plain)
+                    .padding(4)
             }
-            // 차량 정보
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(vehicle.model ?? "차량명")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                }
-                
-                HStack(spacing: 4) {
-                    Text("\(vehicle.yearValue ?? 2024)년식")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    Text("•")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(Int(vehicle.mileage ?? 0).formattedWithCommas())km")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    Text("•")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                    
-                    Text(vehicle.fuelType ?? "연료타입")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-                
-                HStack {
-                    Text("\(Formatters.priceText(won: vehicle.price ?? 0))")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
+            
+            infoSection
+                .padding(12)
+                .background(Color.white)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.systemBackground))
-                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
         )
+        .contentShape(Rectangle())
+        .onAppear {
+            // 전역 상태에 초기 값 설정 (아직 설정되지 않은 경우에만)
+            if favoriteManager.favoriteStates[vehicle.id] == nil {
+                favoriteManager.setFavoriteState(vehicleId: vehicle.id, isFavorite: vehicle.isFavorite)
+            }
+        }
+    }
+}
+
+// MARK: - Computed Properties
+private extension SearchResultCarCard {
+    var isAuction: Bool {
+        vehicle.isAuction.uppercased() == "Y"
+    }
+    
+    var displayPrice: Int {
+        vehicle.price ?? 0
+    }
+    
+    var displayTitle: String {
+        if !vehicle.manufacturer.isEmpty && !vehicle.model.isEmpty {
+            return "\(vehicle.manufacturer) \(vehicle.model)"
+        }
+        return vehicle.carName.isEmpty ? "차량" : vehicle.carName
+    }
+    
+    var displayTags: [String] {
+        Array(vehicle.mainOptions.prefix(3))
+    }
+}
+
+// MARK: - Subviews
+private extension SearchResultCarCard {
+    @ViewBuilder
+    var thumbnail: some View {
+        if let urlString = vehicle.representativePhotoUrl,
+           !urlString.isEmpty,
+           let url = URL(string: urlString),
+           url.scheme?.hasPrefix("http") == true {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ZStack { Color.secondary.opacity(0.08); ProgressView() }
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                case .failure:
+                    placeholder
+                @unknown default:
+                    placeholder
+                }
+            }
+        } else {
+            placeholder
+        }
+    }
+    
+    var placeholder: some View {
+        Rectangle()
+            .fill(Color.secondary.opacity(0.15))
+            .overlay(
+                Image(systemName: "car.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.secondary)
+            )
+    }
+    
+    var auctionBadge: some View {
+        Text("경매")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(.white)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .background(
+                Capsule().fill(Color(red: 1.0, green: 0.54, blue: 0.54))
+            )
+            .padding(8)
+    }
+    
+    var likeButton: some View {
+        Button {
+            toggleFavorite()
+        } label: {
+            if isToggling {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .foregroundStyle(.secondary)
+            } else {
+                let isLiked = favoriteManager.isFavorite(vehicleId: vehicle.id)
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .foregroundStyle(isLiked ? Color.likeRed : .secondary)
+                    .font(.system(size: 20, weight: .semibold))
+            }
+        }
+        .padding(8)
+        .disabled(isToggling)
+    }
+    
+    var infoSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // 타이틀과 경매 시간 (필요시)
+            HStack(alignment: .center) {
+                Text(displayTitle)
+                    .font(.headline)
+                    .foregroundStyle(Color.primaryText)
+                Spacer()
+                // 경매 종료 시간은 Vehicle 모델에 없어서 제외
+                // 필요하다면 auctionEndTime 프로퍼티 추가 필요
+            }
+            
+            // 연식과 주행거리
+            Text("\(Formatters.yearText(vehicle.yearValue)) · \(Formatters.mileageText(km: vehicle.mileage))")
+                .foregroundStyle(Color.primaryText.opacity(0.7))
+                .font(.subheadline)
+            
+            // 태그와 가격
+            HStack {
+                if !displayTags.isEmpty { tagsView }
+                Spacer()
+                priceRow
+            }
+        }
+    }
+    
+    var tagsView: some View {
+        HStack(spacing: 5) {
+            ForEach(displayTags, id: \.self) { tag in
+                Text(tag)
+                    .font(.caption2)
+                    .foregroundStyle(Color.secondaryText.opacity(0.7))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(Color.gray.opacity(0.2))
+                    )
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var priceRow: some View {
+        HStack {
+            Spacer()
+            if isAuction {
+                Text("최고 입찰가 ")
+                    .foregroundStyle(.black)
+                    .font(.subheadline)
+            }
+            Text(Formatters.priceText(won: displayPrice))
+                .foregroundStyle(Color.priceGreen)
+                .font(.title2).bold()
+        }
+    }
+}
+
+// MARK: - Actions
+private extension SearchResultCarCard {
+    func toggleFavorite() {
+        guard !isToggling else { return }
+        
+        isToggling = true
+        
+        Task {
+            let result = await NetworkManager.shared.toggleFavorite(vehicleId: vehicle.id)
+            
+            await MainActor.run {
+                isToggling = false
+                if let newFavoriteState = result {
+                    // 전역 상태 업데이트
+                    favoriteManager.toggleFavorite(vehicleId: vehicle.id, newState: newFavoriteState)
+                }
+            }
+        }
     }
 }
 

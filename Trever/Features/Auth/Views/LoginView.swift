@@ -41,13 +41,13 @@ struct LoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            .stroke(Color(.separator), lineWidth: 1)
                     )
                     .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .shadow(color: Color.primary.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .disabled(authViewModel.isLoading)
                 .padding(.horizontal, 32)
