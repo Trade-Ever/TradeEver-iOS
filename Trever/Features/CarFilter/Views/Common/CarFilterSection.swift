@@ -38,7 +38,7 @@ struct CarFilterSection: View {
             // 제조사 리스트
             ForEach(data, id: \.1) { data in
                 CarFilterRow(
-                    image: "logo",
+                    image: data.0 ?? "",
                     name: data.1,
                     count: data.2,
                     isSelected: data.3,
