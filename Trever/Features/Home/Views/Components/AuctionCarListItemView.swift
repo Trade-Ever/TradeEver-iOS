@@ -198,7 +198,9 @@ private extension AuctionCarListItemView {
 
     @ViewBuilder
     var auctionTimeDisplay: some View {
-        if let status = getAuctionStatus() {
+        let status = getAuctionStatus()
+        
+        if let status = status {
             switch status {
             case "UPCOMING":
                 // 시작 대기: 시작 시간까지 카운트다운
@@ -333,6 +335,12 @@ private extension AuctionCarListItemView {
         if let d4 = df.date(from: s) { return d4 }
         
         return nil
+    }
+    
+    private func normalizedAuctionEnd(_ end: Date) -> Date {
+        // 최소 1분 후로 설정하여 카운트다운이 계속 작동하도록 함
+        let now = Date()
+        return max(end, now.addingTimeInterval(60))
     }
 }
 
