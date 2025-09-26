@@ -1,7 +1,8 @@
 import Foundation
 
-enum Formatters {
+public enum Formatters {
     static func yearText(_ year: Int) -> String { "\(year)년식" }
+    
     static func mileageText(km: Int) -> String {
         // 1만 km 단위 반올림 표기
         if km >= 10_000 {
@@ -9,18 +10,37 @@ enum Formatters {
             let rounded = (man * 10).rounded() / 10
             return "\(rounded)만km"
         }
-        return "\(km)km"
+        return "\(decimal(km))km"
     }
+    
+    // Decimal comma formatter: 1234567 -> "1,234,567"
+    private static let decimalNumberFormatter: NumberFormatter = {
+        let nf = NumberFormatter()
+        nf.numberStyle = .decimal
+        nf.locale = Locale(identifier: "ko_KR")
+        return nf
+    }()
+
+    static func decimal(_ number: Int) -> String {
+        decimalNumberFormatter.string(from: NSNumber(value: number)) ?? "\(number)"
+    }
+
+    // Backward-compatible API used across views: show as 만원/억원 with commas
     static func priceText(won: Int) -> String {
-        // 억/만 단위 한국형 포맷 간단 버전
-        let eok = won / 100_000_000
-        let man = (won % 100_000_000) / 10_000
-        if eok > 0 {
-            if man > 0 { return "\(eok)억 \(man)만원" }
-            return "\(eok)억원"
+        if won >= 100_000_000 { // 1억 이상
+            let eok = won / 100_000_000
+            let man = (won % 100_000_000) / 10_000
+            if man > 0 {
+                return "\(decimal(eok))억 \(decimal(man))만원"
+            } else {
+                return "\(decimal(eok))억원"
+            }
+        } else {
+            let man = won / 10_000
+            return "\(decimal(man))만원"
         }
-        return "\(man)만원"
     }
+    
     static func timerText(until endsAt: Date) -> String {
         let remain = Int(endsAt.timeIntervalSinceNow)
         if remain <= 0 { return "종료" }
@@ -29,16 +49,54 @@ enum Formatters {
         if h > 0 { return "\(h)시간 \(m)분" }
         return "\(m)분"
     }
+    
     static func dateText(_ date: Date) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
         f.dateFormat = "yyyy.MM.dd"
         return f.string(from: date)
     }
+    
     static func dateTimeText(_ date: Date) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
         f.dateFormat = "yyyy-MM-dd HH:mm"
         return f.string(from: date)
+    }
+    
+    static func priceToEokFormat(_ value: Double) -> String {
+        let intValue = Int(value)
+        
+        if intValue >= 10 {
+            let eok = intValue / 10       // 억 단위
+            let thousand = intValue % 10  // 천만원 단위 나머지
+            
+            if thousand == 0 {
+                return "\(eok)억원"
+            } else {
+                return "\(eok)억 \(thousand)천만원"
+            }
+        } else if intValue <= 0 {
+            return "0원"
+        } else {
+            return "\(intValue)천만원"
+        }
+    }
+    
+    static func mapVehicleType(_ type: String?) -> String? {
+        guard let type = type else { return nil }
+        return vehicleTypeMapping[type] ?? type
+    }
+
+    // 만원 단위
+    static func toTenThousand(from value: Int?) -> Int? {
+        guard let value = value else { return nil }
+        return value * 10000
+    }
+    
+    // 천만원 단위
+    static func toTenMillion(from value: Int?) -> Int? {
+        guard let value = value else { return nil }
+        return value * 10_000_000
     }
 }

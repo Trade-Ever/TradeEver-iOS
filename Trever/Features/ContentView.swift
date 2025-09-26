@@ -12,71 +12,68 @@ enum MainTab: Hashable {
 }
 
 struct ContentView: View {
+    @ObservedObject private var authViewModel = AuthViewModel.shared
     @State private var selection: MainTab = .buy
-    @State private var tabBarHidden: Bool = false
-    private let tabBarPadding: CGFloat = 0 // space for custom tab bar when visible
-
-    private let tabBarHeight: CGFloat = 66 // CustomTabBar 실제 높이
-    @StateObject private var keyboard = KeyboardState()
-
-    @State private var buyPath = NavigationPath()
-    @State private var sellPath = NavigationPath()
-    @State private var auctionPath = NavigationPath()
-    @State private var myPagePath = NavigationPath()
+    @State private var selectedTab: Int = 0
+    
+    //@State private var searchModel = CarSearchModel() // 검색 조건 모델
     
     var body: some View {
-        activeContent
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // Reserve space for the bar, independently of keyboard
-            .safeAreaInset(edge: .bottom) {
-                if showTabBar {
-                    // Spacer only; prevents content being obscured
-                    Color.clear.frame(height: tabBarHeight)
-                }
-            }
-            // Render the bar pinned to bottom; it won't ride with keyboard
-            .overlay(alignment: .bottom) {
-                if showTabBar {
-                    CustomTabBar(selection: $selection)
-                        .ignoresSafeArea(.keyboard, edges: .bottom)
-                }
-            }
-    }
-
-    @ViewBuilder
-    private var activeContent: some View {
         Group {
-            switch selection {
-            case .buy:
-                NavigationStack(path: $buyPath) {
-                    BuyCarView()
-                        .tabBarHidden(false)
+            if authViewModel.isSignedIn {
+                // 로그인 후에만 프로필 완성 여부 확인
+                if authViewModel.isNewLogin && !authViewModel.profileComplete {
+                    // 새로 로그인했고 프로필 미완성 - 추가 정보 입력 화면
+                    ProfileSetupView()
+                } else {
+                    // 자동 로그인이거나 프로필 완성 - 메인 화면
+                    mainContentView
                 }
-            case .sell:
-                NavigationStack(path: $sellPath) {
-                    SellCarView()
-                        .tabBarHidden(false)
-                }
-            case .auction:
-                NavigationStack(path: $auctionPath) {
-                    AuctionView()
-                        .tabBarHidden(false)
-                }
-            case .mypage:
-                NavigationStack(path: $myPagePath) {
-                    MyPageView()
-                        .tabBarHidden(false)
-                }
+            } else {
+                // 토큰이 없으면 로그인 화면
+                LoginView()
             }
         }
-        .onPreferenceChange(TabBarHiddenKey.self) { hidden in
-            withAnimation(.easeInOut(duration: 0.2)) {
-                tabBarHidden = hidden
+        .onAppear {
+            print("ContentView 나타남")
+            print("   - 로그인 상태: \(authViewModel.isSignedIn)")
+            print("   - 프로필 완성: \(authViewModel.profileComplete)")
+            print("   - 새로 로그인: \(authViewModel.isNewLogin)")
+            
+            if authViewModel.isSignedIn {
+                if authViewModel.isNewLogin && !authViewModel.profileComplete {
+                    print("   → 새로 로그인 + 프로필 미완성 - 추가 정보 입력 화면")
+                } else {
+                    print("   → 자동 로그인이거나 프로필 완성 - 메인 화면")
+                }
+            } else {
+                print("   → 토큰 없음 - 로그인 화면으로 이동")
             }
         }
     }
+    
+    private var mainContentView: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                ZStack {
+                    switch selection {
+                    case .sell: SellCarView()
+                    case .auction: AuctionView()
+                    case .mypage: MyPageView()
+                    default: BuyCarView()
+                            //CarSearchResultsView(searchModel: searchModel)
 
-    private var showTabBar: Bool { !tabBarHidden && !keyboard.isVisible }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color("background"))
+                HStack {
+                    CustomTabBar(selection: $selection)
+                }
+            }
+        }
+    }
+    
 }
 
 #Preview {

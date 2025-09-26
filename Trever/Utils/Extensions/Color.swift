@@ -10,7 +10,7 @@ import SwiftUI
 
 extension Color {
     
-    // Purple
+    // MARK: - Brand Colors (다크모드에서도 동일)
     static let purple700 = Color(hex: "#2B1073")
     static let purple600 = Color(hex: "#39189A") 
     static let purple500 = Color(hex: "#4B1ECF")
@@ -20,21 +20,29 @@ extension Color {
     static let purple100 = Color(hex: "#EDE4FF")
     static let purple50  = Color(hex: "#F7F3FF")
 
-    // Red
+    // MARK: - Status Colors (다크모드에서도 동일)
     static let likeRed   = Color(hex: "#EA3323")
     static let errorRed  = Color(hex: "#FF6C6C")
-
-    // Grey
-    static let grey400   = Color(hex: "#444444")
-    static let grey300   = Color(hex: "#7C7C7C")
-    static let grey200   = Color(hex: "#CCCCCC")
-    static let grey100   = Color(hex: "#E9EAEC")
-    static let grey50    = Color(hex: "#F5F5F5")
-
-    // White
-    static let pureWhite  = Color(hex: "#FFFFFF")
-    static let boxBgWhite = Color(hex: "#40FFFFFF") // 투명도 포함
-
-    // Green
     static let priceGreen = Color(hex: "#00C364")
+    
+    // MARK: - Adaptive Colors (다크모드 지원)
+    static let grey400 = Color.primary.opacity(0.8)
+    static let grey300 = Color.primary.opacity(0.6)
+    static let grey200 = Color.primary.opacity(0.4)
+    static let grey100 = Color.primary.opacity(0.2)
+    static let grey50  = Color.primary.opacity(0.1)
+    
+    // MARK: - Background Colors
+//    static let cardBackground = Color(.systemBackground);l
+    static let secondaryBackground = Color(.secondarySystemBackground)
+    static let groupedBackground = Color(.systemGroupedBackground)
+    
+    // MARK: - Text Colors
+    static let primaryText = Color.primary
+    static let secondaryText = Color.secondary
+    static let tertiaryText = Color(.tertiaryLabel)
+    
+    // MARK: - Legacy Colors (호환성을 위해 유지)
+    static let pureWhite = Color.white
+    static let boxBgWhite = Color.white.opacity(0.25)
 }

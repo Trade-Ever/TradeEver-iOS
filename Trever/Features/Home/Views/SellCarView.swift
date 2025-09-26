@@ -8,21 +8,20 @@
 import SwiftUI
 
 struct SellCarView: View {
+    @State private var offsetX: CGFloat = 0
+    @State private var animationCount = 0
     @State private var showSellCarView = false
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Text("메인 페이지")
-                    .font(.largeTitle)
-                
-                Button("차량 판매 등록 시작") {
-                    showSellCarView = true
-                }
+            VStack(spacing: 0) {
+                // 상단에 이미지와 번호판                
+                MySellCarView()
             }
+            .frame(maxHeight: .infinity, alignment: .top)
+            .ignoresSafeArea(.all, edges: .top) // 상단 Safe Area 무시하여 이미지가 상단에 딱 붙게
             .navigationDestination(isPresented: $showSellCarView) {
                 SellCarRegisterView()
-                    .tabBarHidden(true)
             }
         }
     }

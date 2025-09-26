@@ -14,7 +14,6 @@ import SwiftUI
 
 struct PrimaryButton: View {
     var title: String
-    var action: () -> Void
     
     // 커스텀 가능한 속성
     var fontSize: CGFloat = 20
@@ -22,8 +21,9 @@ struct PrimaryButton: View {
     var cornerRadius: CGFloat = 12
     var height: CGFloat = 54
     var horizontalPadding: CGFloat = 16
+    var isOutline: Bool = false // 바깥 선 UI
     
-    var isOutline: Bool = false // 새로운 옵션 추가
+    var action: () -> Void
     
     // 버튼 눌림 상태
     @State private var isPressed: Bool = false
@@ -36,7 +36,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity, minHeight: height)
                 .background(
                     isOutline ?
-                        Color.white :
+                        Color(UIColor.systemBackground) :
                         (isPressed ? Color.purple700 : Color.purple400)
                 )
                 .overlay(
@@ -69,9 +69,10 @@ struct PrimaryButton_Previews: PreviewProvider {
             }
             PrimaryButton(
                 title: "취소",
-                action: { print("취소 클릭") },
                 isOutline: true
-            )
+            ) {
+                print("취소 클릭")
+            }
         }
     }
 }

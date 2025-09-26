@@ -22,14 +22,29 @@ xcuserdata/
 *.xccheckout
 *.xcscmblueprint
 
-# Swift Package Manager (user workspace state)
+# Swift Package Manager
+.build/
+Package.resolved
 .swiftpm/xcode/package.xcworkspace/xcuserdata/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Firebase config
+GoogleService-Info.plist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Logs
+*.log
 
 # IDE/editor junk
 .idea/
 .vscode/
-
-# Carthage/Pods (uncomment if you don't commit them)
-# Carthage/Build/
-# Pods/
-

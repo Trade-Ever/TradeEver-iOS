@@ -59,3 +59,4 @@ struct BidDTO: Codable, Identifiable {
     let bidder_id: Int64
     let auction_id: Int64
 }
+

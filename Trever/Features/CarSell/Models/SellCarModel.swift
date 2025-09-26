@@ -13,8 +13,11 @@ class SellCarModel: ObservableObject {
     @Published var vehicleNumber: String = ""
 
     // Step1: 차량 정보
+    @Published var vehicleManufacturer: String = ""
     @Published var vehicleModel: String = ""
+    @Published var vehicleName: String = ""
     @Published var vehicleYear: String = ""
+    
     @Published var vehicleType: String = ""
     @Published var vehicleMileage: String = ""
     

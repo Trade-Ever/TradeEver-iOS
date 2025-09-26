@@ -1,53 +1,81 @@
 import Foundation
 
-struct Seller: Hashable {
-    let name: String
-    let address: String
-    let createdAt: Date
-    let updatedAt: Date
+// MARK: - API Response Models
+struct CarDetailResponse: Codable {
+    let status: Int
+    let success: Bool
+    let message: String
+    let data: CarDetailData
 }
+
+struct CarDetailData: Codable {
+    let id: Int
+    let carNumber: String?
+    let carName: String?
+    let description: String?
+    let manufacturer: String?
+    let model: String?
+    let yearValue: Int?
+    let mileage: Int?
+    let fuelType: String?
+    let transmission: String?
+    let accidentHistory: String?
+    let accidentDescription: String?
+    let engineCc: Int?
+    let horsepower: Int?
+    let color: String?
+    let price: Int?
+    let isAuction: String?
+    let vehicleStatus: String?
+    let auctionId: Int?
+    let favoriteCount: Int?
+    let createdAt: String?
+    let updatedAt: String?
+    let sellerId: Int?
+    let sellerName: String?
+    let sellerPhone: String?
+    let sellerLocationCity: String?
+    let sellerProfileImageUrl: String?
+    let isSeller: Bool?
+    let photos: [VehiclePhoto]?
+    let vehicleTypeName: String?
+    let options: [String]?
+    let favorite: Bool?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, carNumber, carName, description, manufacturer, model
+        case yearValue = "year_value"
+        case mileage, fuelType, transmission, accidentHistory, accidentDescription
+        case engineCc = "engineCc"
+        case horsepower, color, price, isAuction, vehicleStatus, auctionId
+        case favoriteCount = "favoriteCount"
+        case createdAt, updatedAt, sellerId, sellerName, sellerPhone, sellerLocationCity, sellerProfileImageUrl, isSeller, photos, vehicleTypeName, options, favorite
+    }
+}
+
+struct VehiclePhoto: Codable {
+    let id: Int
+    let photoUrl: String
+    let orderIndex: Int
+    let file: String?
+}
+
+// MARK: - Favorite API Response
+struct FavoriteToggleResponse: Codable {
+    let status: Int
+    let success: Bool
+    let message: String
+    let data: Bool
+}
+
+// MARK: - UI Models (using API response directly)
+typealias CarDetail = CarDetailData
 
 struct BidEntry: Identifiable, Hashable {
     let id = UUID()
     let bidderName: String
     let priceWon: Int
     let placedAt: Date
-}
-
-struct CarDetail: Identifiable, Hashable {
-    let id: UUID
-    let backendId: Int64?
-    let title: String
-    let subTitle: String?
-    // ERD 기반 명칭
-    let manufacturer: String?
-    let modelName: String?
-    let optionName: String?
-    let year: Int
-    let mileageKm: Int
-    let imageNames: [String] // placeholder for URLs later
-    let tags: [String]
-    let priceWon: Int
-    let startPrice: Int
-    let likes: Int
-
-    // Specs and description
-    let specs: [String: String]
-    let description: String
-
-    // Seller
-    let seller: Seller
-
-    // Auction
-    let isAuction: Bool
-    let auctionEndsAt: Date?
-    let bids: [BidEntry]
-
-    // Ownership
-    let isMine: Bool
-
-    // Potential buyers for direct sale completion (non-auction)
-    let potentialBuyers: [PotentialBuyer]?
 }
 
 struct PotentialBuyer: Identifiable, Hashable {
